@@ -24,7 +24,8 @@ Player.networkVars =
         thirdPerson                 = "boolean",
         activity                    = "predicted integer (1 to 3)",
         activityEnd                 = "predicted float",
-        score                       = "integer"
+        score                       = "integer",
+        health						= "integer",
     }
     
 Player.modelName = "models/marine/male/male.model" 
@@ -67,8 +68,9 @@ function Player:OnInit()
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
     
-    self.score                      = 0
-    
+    self.health						= 100
+    self.score                      = self.health
+        
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
     self.moveGroupMask              = 0xFFFFFFFD
@@ -503,6 +505,7 @@ function Player:PrimaryAttack()
                 // The weapon can't fire anymore (out of bullets, etc.)
                 if (self.activity == Player.Activity.Shooting) then    
                     self:StopPrimaryAttack()
+                    weapon:Reload()
                 end
                 self:Idle()
             end
@@ -646,6 +649,34 @@ if (Server) then
         self.activeWeaponId = weapon:GetId()
         self:DrawWeapon()
         
+    end
+    
+    function Player:TakeDamage(attacker, damage, doer, point, direction)
+    	self.health = self.health - damage*10
+    	self.score = self.health
+    	
+    	if (self.health <= 0) then
+    	    local extents = Player.extents
+    		local offset  = Vector(0, extents.y + 0.01, 0)
+    	
+    	    repeat
+		        spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
+		    until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
+		
+		    local spawnPos = Vector(0, 0, 0)
+		
+		    if (spawnPoint ~= nil) then
+		        spawnPos = Vector(spawnPoint:GetOrigin())
+		        // Move the spawn position up a little bit so the player won't start
+		        // embedded in the ground if the spawn point is positioned on the floor
+		        spawnPos.y = spawnPos.y + 0.01
+		    end
+		    
+		    self:SetOrigin(spawnPos)
+		    self.health = 100
+		    self.score = self.health
+		end
+		
     end
 
 end
