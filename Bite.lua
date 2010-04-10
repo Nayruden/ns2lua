@@ -16,14 +16,11 @@ Bite.muzzleFlashCinematic  = "cinematics/marine/rifle/muzzle_flash.cinematic"
 Bite.shellCinematic        = "cinematics/marine/rifle/shell.cinematic"
 Bite.hitCinematic          = "cinematics/marine/hit.cinematic"
 
-Bite.bulletsToShoot        = 1
-Bite.spread                = 0
-Bite.range                 = 1
+Bite.range                 = 3
 Bite.penetration           = 0
-Bite.fireDelay             = 0.1   // Time between shots
+Bite.fireDelay             = 1   // Time between shots
 Bite.reloadTime            = 3     // Time it takes to reload
 Bite.drawTime              = 1.3   // Time it takes to draw the weapon
-Bite.clipSize              = 30    // Number of bullets the clip holds
 Bite.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(Bite.viewModelName)
