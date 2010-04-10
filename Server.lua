@@ -72,6 +72,17 @@ function OnConsoleThirdPerson(player)
     player:SetIsThirdPerson( not player:GetIsThirdPerson() )
 end
 
+//function OnConsoleChangeClass(
+function OnConsoleInvertMouse(player)
+	if (player.invert_mouse == 1) then
+		player.invert_mouse = 0
+		Shared.Message("Disabled mouse inversion.")
+	else
+		player.invert_mouse = 1		
+		Shared.Message("Enabled mouse inversion.")
+	end
+end
+
 function OnConsoleBuildBot(player)
 	player:ChangeClass(Player.Classes.BuildBot)
 end
@@ -117,6 +128,10 @@ Event.Hook("ClientDisconnect",      OnClientDisconnect)
 Event.Hook("MapPostLoad",           OnMapPostLoad)
 
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
+
+Event.Hook("Console_invertmouse",	OnConsoleInvertMouse)
+//Event.Hook("Console_changeclass",	OnConsoleChangeClass)
+
 Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
 Event.Hook("Console_skulk", 		OnConsoleSkulk)
 Event.Hook("Console_marine",		OnConsoleMarine)

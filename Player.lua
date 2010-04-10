@@ -8,6 +8,7 @@
 //=============================================================================
 
 Script.Load("lua/Utility.lua")
+Script.Load("lua/BuildBot.lua")
 
 class 'Player' (Actor)
 
@@ -29,7 +30,8 @@ Player.networkVars =
 		canJump						= "integer (0 to 1)",
 		kills						= "integer",
         deaths						= "integer",
-        class						= "interger (0 to 3)"
+        class						= "integer (0 to 3)",
+		invert_mouse				= "integer (0 to 1)"
     }
     
 Player.modelName = "models/marine/male/male.model" 
@@ -52,12 +54,11 @@ Shared.PrecacheModel("models/alien/skulk/skulk.model")
 Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
 
 function Player:OnInit()
-    
+	
     Actor.OnInit(self)
 
     self:SetModel(Player.modelName)
 
-	self.canJump					= 1	    
 	self.viewPitch                  = 0
     self.viewRoll                   = 0
 
@@ -79,7 +80,11 @@ function Player:OnInit()
     self.kills 						= 0
     self.deaths						= 0
     self.class 						= Player.Classes.Marine
-    self.gravity					= -9.81
+    
+	self.invert_mouse				= 0
+	self.canJump					= 1	    
+		
+	self.gravity					= -9.81
         
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -225,7 +230,7 @@ end
  * Called to handle user input for the player.
  */
 function Player:OnProcessMove(input)
-
+	
     if (Client) then
     
         self:UpdateWeaponSwing(input)
@@ -243,12 +248,18 @@ function Player:OnProcessMove(input)
     
     local canMove = self:GetCanMove()
 
-    // Update the view angles based on the input.
-    local angles = Angles(input.pitch, input.yaw, 0.0)   
+    // Update the view angles based on the input.	
+    local angles
+	if (self.invert_mouse == 1) then
+		angles = Angles(-1 * input.pitch, input.yaw, 0.0)   
+	else
+		angles = Angles(input.pitch, input.yaw, 0.0)   
+	end
     self:SetViewAngles(angles)
     
     local viewCoords = angles:GetCoords()
 
+	
     local ground, groundNormal = self:GetIsOnGround()
     
     local fowardAxis = nil
