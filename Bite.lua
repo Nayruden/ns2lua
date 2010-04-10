@@ -18,7 +18,7 @@ Bite.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Bite.bulletsToShoot        = 1
 Bite.spread                = 0
-Bite.range                 = 50
+Bite.range                 = 1
 Bite.penetration           = 0
 Bite.fireDelay             = 0.1   // Time between shots
 Bite.reloadTime            = 3     // Time it takes to reload
@@ -97,11 +97,6 @@ function Bite:StopPrimaryAttack(player)
 
         self:Idle(player)
 
-        if (self.firingState > 1) then
-            player:StopSound(self.fireLoopSound)
-            player:PlaySound(self.fireEndSound)
-        end
-
         self.firingState = 0
 
     end
@@ -136,24 +131,22 @@ function Bite:FireBullets(player)
     // player using it.
     local filter = EntityFilterTwo(player, self)
 
-    for bullet = 1, self.bulletsToShoot do
 
-        local spreadDirection = viewCoords.zAxis
 
-        local endPoint = startPoint + spreadDirection * self.range
-        local trace = Shared.TraceRay(startPoint, endPoint, filter)
+    local spreadDirection = viewCoords.zAxis
 
-        if (trace.fraction < 1) then
+    local endPoint = startPoint + spreadDirection * self.range
+    local trace = Shared.TraceRay(startPoint, endPoint, filter)
 
-            self:CreateHitEffect(player, trace)
+    if (trace.fraction < 1) then
 
-            local target = trace.entity
+        self:CreateHitEffect(player, trace)
 
-            if (target ~= nil and target.TakeDamage ~= nil) then
-                local direction = (trace.endPoint - startPoint):GetUnit()
-                target:TakeDamage(player, 1, self, trace.endPoint, direction)
-            end
+        local target = trace.entity
 
+        if (target ~= nil and target.TakeDamage ~= nil) then
+            local direction = (trace.endPoint - startPoint):GetUnit()
+            target:TakeDamage(player, 1, self, trace.endPoint, direction)
         end
 
     end
