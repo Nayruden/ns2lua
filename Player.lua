@@ -498,9 +498,9 @@ function Player:PrimaryAttack()
         if (time > self.activityEnd) then
 
             if (self:GetWeaponClip() == 0) then
-				self:StopPrimaryAttack()
-				self:Reload()
-			elseif (weapon:FireBullets(self)) then
+                self:StopPrimaryAttack()
+                self:Reload()
+            elseif (weapon:FireBullets(self)) then
                 self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_fire" )
                 self.activityEnd = time + weapon:GetFireDelay()
                 self.activity    = Player.Activity.Shooting
@@ -508,7 +508,6 @@ function Player:PrimaryAttack()
                 // The weapon can't fire anymore (out of bullets, etc.)
                 if (self.activity == Player.Activity.Shooting) then    
                     self:StopPrimaryAttack()
-                    weapon:Reload()
                 end
                 self:Idle()
             end
