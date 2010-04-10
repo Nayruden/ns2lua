@@ -751,7 +751,7 @@ if (Client) then
     end
 
     function Player:GetRenderFov()
-        return Math.Radians(90.0)
+        return (math.atan(math.tan(math.pi / 4.0) * (GetAspectRatio() / (4.0 / 3.0))) * 2)
     end
 
     function Player:UpdateClientEffects(deltaTime)
