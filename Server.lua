@@ -73,25 +73,15 @@ function OnConsoleThirdPerson(player)
 end
 
 function OnConsoleBuildBot(player)
-	player:SetModel("models/marine/build_bot/build_bot.model")
-	player.viewOffset = Vector(0, 0.6, 0)
-	player.moveSpeed = 7
+	player:ChangeClass(Player.Classes.BuildBot)
 end
 
 function OnConsoleSkulk(player)
-	player:SetModel("models/alien/skulk/skulk.model")
-	player:SetViewModel("models/alien/skulk/skulk_view.model")
-	player:GiveWeapon("weapon_bite")
-	player.viewOffset = Vector(0, 0.6, 0)
-	player.moveSpeed = 14
+	player:ChangeClass(Player.Classes.Skulk)
 end
 
 function OnConsoleMarine(player)
-	player:SetModel("models/marine/male/male.model")
-	player:SetViewModel("models/marine/rifle/rifle_view.model")
-	player:GiveWeapon("weapon_rifle")
-	player.viewOffset = Vector(0, 1.6256, 0)
-	player.moveSpeed = 7
+	player:ChangeClass(Player.Classes.Marine)
 end
 
 function OnConsoleStuck(player)
