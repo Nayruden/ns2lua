@@ -18,9 +18,10 @@ Shared.PrecacheModel(Target.modelName)
 Shared.PrecacheSound(Target.spawnSound)
 Shared.PrecacheSound(Target.dieSound)
 
-Target.State = enum { 'Unpopped', 'Popped', 'Killed' }
+Target.State = enum { 'Unpopped', 'Popped', 'Killed', 'Respawned' }
 
 Target.thinkInterval = 0.25
+Target.respawnInterval = 1
 Target.networkVars = 
     {
         impulsePosition  = "vector",
@@ -29,6 +30,7 @@ Target.networkVars =
 
 function Target:OnInit()
 
+	self.NextRespawn = 0
     Actor.OnInit(self)
     
     self.impulsePosition  = Vector(0, 0, 0)
@@ -99,6 +101,7 @@ if (Server) then
             // Inform the game that a target was destroyed so that points
             // can be awarded, etc.
             Game.instance:DestroyTarget(attacker, self)
+			self.NextRespawn = Game.instance:GetGameTime() + 5
             
             // Create a rag doll.
             self:SetPhysicsActor()
@@ -107,6 +110,12 @@ if (Server) then
             // fly around a bit.
             self.impulsePosition  = point
             self.impulseDirection = direction
+            
+            self:SetNextThink(Target.respawnInterval)
+            
+            //local target = Server.CreateEntity( "target",  self:GetOrigin() )
+            target:SetAngles( self:GetAngles() )
+            target:Popup()
         
         end
         
@@ -134,6 +143,14 @@ if (Server) then
             end
             
         end
+        
+        if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn ) then
+            local target = Server.CreateEntity( "target",  self:GetOrigin() )
+            target:SetAngles( self:GetAngles() )
+            target:Popup()
+            
+            self.state = Target.State.Respawned
+      	end        	
         
         self:SetNextThink(Target.thinkInterval)
 
