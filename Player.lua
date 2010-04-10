@@ -79,6 +79,7 @@ function Player:OnInit()
     self.kills 						= 0
     self.deaths						= 0
     self.class 						= Player.Classes.Marine
+    self.gravity					= -9.81
         
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -118,7 +119,8 @@ function Player:ChangeClass(newClass)
 		self.viewOffset = Vector(0, 1.6256, 0)
 		self.moveSpeed = 7
 		self.defaultHealth = 100
-		self.extents   = Vector(0.4064, 0.7874, 0.4064)
+		self.extents = Vector(0.4064, 0.7874, 0.4064)
+		self.gravity = -9.81
 		
 	elseif newClass == Player.Classes.Skulk then
 		self:SetModel("models/alien/skulk/skulk.model")
@@ -127,7 +129,8 @@ function Player:ChangeClass(newClass)
 		self.viewOffset = Vector(0, 0.6, 0)
 		self.moveSpeed = 14	
 		self.defaultHealth = 75
-		self.extents   = Vector(0.4064, 0.4064, 0.4064)
+		self.extents = Vector(0.4064, 0.4064, 0.4064)
+		self.gravity = -9.81
 		
 	elseif newClass == Player.Classes.BuildBot then
 		self:SetModel("models/marine/build_bot/build_bot.model")
@@ -136,8 +139,8 @@ function Player:ChangeClass(newClass)
 		self.viewOffset = Vector(0, 0.6, 0)
 		self.moveSpeed = 7	
 		self.defaultHealth = 100
-		self.extents   = Vector(0.4064, 0.7874, 0.4064)
-		
+		self.extents = Vector(0.4064, 0.7874, 0.4064)
+		self.gravity = -4.40
 	end
 	self.class = newClass
 end
@@ -260,7 +263,7 @@ function Player:OnProcessMove(input)
 			
 			// Compute the initial velocity to give us the desired jump			
 			// height under the force of gravity.			
-			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 			
+			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity) 			
 			ground = false
 		end 
 	end
@@ -270,7 +273,7 @@ function Player:OnProcessMove(input)
        	self.velocity.y = 0    
     else
         // Apply the gravitational acceleration.
-        self.velocity.y = self.velocity.y + Player.gravity * input.time
+        self.velocity.y = self.velocity.y + self.gravity * input.time
     end
 
     // Compute the forward and side axis aligned with the world xz plane.
