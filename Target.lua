@@ -145,7 +145,6 @@ if (Server) then
         end
         
         if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn ) then
-			Shared.Message(string.format("%f, %f",self.NextRespawn, Game.instance:GetGameTime()))
             local target = Server.CreateEntity( "target",  self:GetOrigin() )
             target:SetAngles( self:GetAngles() )
             target:Popup()
