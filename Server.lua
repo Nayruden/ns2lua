@@ -78,6 +78,12 @@ end
 
 function OnConsoleSkulk(player)
 	player:SetModel("models/alien/skulk/skulk.model")
+	player:SetViewModel("models/alien/skulk/skulk_view.model")
+end
+
+function OnConsoleMarine(player)
+	player:SetModel("models/marine/male/male.model")
+	player:SetViewModel("models/marine/rifle/rifle_view.model")
 end
 
 // Hook the game methods.
@@ -88,3 +94,4 @@ Event.Hook("MapPostLoad",           OnMapPostLoad)
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
 Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
 Event.Hook("Console_skulk", 		OnConsoleSkulk)
+Event.Hook("Console_marine",		OnConsoleMarine)

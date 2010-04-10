@@ -43,6 +43,7 @@ Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' 
 Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
 Shared.PrecacheModel("models/alien/skulk/skulk.model")
+Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
 
 function Player:OnInit()
     
