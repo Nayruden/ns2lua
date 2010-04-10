@@ -86,6 +86,27 @@ function OnConsoleMarine(player)
 	player:SetViewModel("models/marine/rifle/rifle_view.model")
 end
 
+function OnConsoleStuck(player)
+    local extents = Player.extents
+	local offset  = Vector(0, extents.y + 0.01, 0)
+
+    repeat
+        spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
+    until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
+
+    local spawnPos = Vector(0, 0, 0)
+
+    if (spawnPoint ~= nil) then
+        spawnPos = Vector(spawnPoint:GetOrigin())
+        // Move the spawn position up a little bit so the player won't start
+        // embedded in the ground if the spawn point is positioned on the floor
+        spawnPos.y = spawnPos.y + 0.01
+    end
+    
+    player:SetOrigin(spawnPos)
+end
+
+
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
@@ -95,3 +116,4 @@ Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
 Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
 Event.Hook("Console_skulk", 		OnConsoleSkulk)
 Event.Hook("Console_marine",		OnConsoleMarine)
+Event.Hook("Console_stuck",			OnConsoleStuck)
