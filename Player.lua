@@ -26,7 +26,8 @@ Player.networkVars =
         activityEnd                 = "predicted float",
         score                       = "integer",
         health						= "integer",
-		canJump						= "integer (0 to 1)"        kills						= "integer",
+		canJump						= "integer (0 to 1)",
+		kills						= "integer",
         deaths						= "integer"
     }
     
@@ -219,11 +220,12 @@ function Player:OnProcessMove(input)
 			self.canJump = 1
 		elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
 			self.canJump = 0
-			
+		end
 			// Compute the initial velocity to give us the desired jump			// height under the force of gravity.			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 			ground = false		end	end   
-       if (ground) then
-        // Since we're standing on the ground, remove any downward velocity.
-        self.velocity.y = 0
+		if (ground) then
+			// Since we're standing on the ground, remove any downward velocity.
+        	self.velocity.y = 0
+        end
     else
         // Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + Player.gravity * input.time
