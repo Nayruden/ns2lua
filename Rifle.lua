@@ -225,6 +225,17 @@ function Rifle:Reload(player)
         viewModel:SetAnimation( "reload" )
         player:PlaySound( self.reloadSound )
 
+        return true
+
+    end
+
+    return false
+
+end
+
+function Rifle:ReloadFinish(player)
+
+    if (self.numBulletsInReserve > 0 and self.numBulletsInClip ~= self.clipSize) then
         self.numBulletsInClip = math.min(self.numBulletsInReserve, self.clipSize)
         self.numBulletsInReserve = self.numBulletsInReserve - self.numBulletsInClip
 

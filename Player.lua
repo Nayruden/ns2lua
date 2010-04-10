@@ -26,7 +26,7 @@ Player.networkVars =
         activityEnd                 = "predicted float",
         score                       = "integer",
         health						= "integer",
-        kills						= "integer",
+		canJump						= "integer (0 to 1)"        kills						= "integer",
         deaths						= "integer"
     }
     
@@ -54,7 +54,7 @@ function Player:OnInit()
 
     self:SetModel(Player.modelName)
 
-    self.viewPitch                  = 0
+	self.canJump					= 1	    self.viewPitch                  = 0
     self.viewRoll                   = 0
 
     self.velocity                   = Vector(0, 0, 0)
@@ -214,14 +214,14 @@ function Player:OnProcessMove(input)
     local sideAxis   = nil
     
     // Handle jumpping
-    if (canMove and ground and bit.band(input.commands, Move.Jump) ~= 0) then
-        // Compute the initial velocity to give us the desired jump
-        // height under the force of gravity.
-        self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 
-        ground = false
-    end
-   
-    if (ground) then
+	if (canMove and ground) then	
+		if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
+			self.canJump = 1
+		elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
+			self.canJump = 0
+			
+			// Compute the initial velocity to give us the desired jump			// height under the force of gravity.			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 			ground = false		end	end   
+       if (ground) then
         // Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
     else
@@ -300,7 +300,7 @@ function Player:OnProcessMove(input)
     
     local time = Shared.GetTime()
     
-    if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
+	if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then        local weapon = self:GetActiveWeapon()		if (weapon ~= nil) then			weapon:ReloadFinish()		end	end	    if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
         self:Idle()
     end
     
@@ -501,10 +501,7 @@ function Player:PrimaryAttack()
     
         if (time > self.activityEnd) then
 
-            if (self:GetWeaponClip() == 0) then
-                self:StopPrimaryAttack()
-                self:Reload()
-            elseif (weapon:FireBullets(self)) then
+           if (weapon:FireBullets(self)) then
                 self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_fire" )
                 self.activityEnd = time + weapon:GetFireDelay()
                 self.activity    = Player.Activity.Shooting
@@ -512,10 +509,10 @@ function Player:PrimaryAttack()
                 // The weapon can't fire anymore (out of bullets, etc.)
                 if (self.activity == Player.Activity.Shooting) then    
                     self:StopPrimaryAttack()
-                end
-                self:Idle()
-            end
-        end
+                end	
+				if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
+					self:Reload()								else					self:Idle()				end            end
+		end
         
     end
 
@@ -659,7 +656,7 @@ if (Server) then
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)
     	self.health = self.health - damage*10
-    	
+    	self.score = self.health    	
     	if (self.health <= 0) then
     	    local extents = Player.extents
     		local offset  = Vector(0, extents.y + 0.01, 0)
