@@ -65,6 +65,7 @@ function OnMapPostLoad()
     // Create the game object. This is a networked object that manages the game
     // state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
+    Server.CreateEntity("chat", Vector(0, 0, 0))
 
 end
 
@@ -72,16 +73,27 @@ function OnConsoleThirdPerson(player)
     player:SetIsThirdPerson( not player:GetIsThirdPerson() )
 end
 
-function OnConsoleBuildBot(player)
-	player:ChangeClass(Player.Classes.BuildBot)
+function OnConsoleChangeClass(player,type) 
+	if (type == "buildbot") then
+		player:ChangeClass(Player.Classes.BuildBot)
+		Shared.Message("You have become a BuildBot!");
+	elseif (type == "skulk") then
+		player:ChangeClass(Player.Classes.Skulk)
+		Shared.Message("You have become a Skulk!");
+	else
+		player:ChangeClass(Player.Classes.Marine)
+		Shared.Message("You have become a Marine!");
+	end
 end
 
-function OnConsoleSkulk(player)
-	player:ChangeClass(Player.Classes.Skulk)
-end
-
-function OnConsoleMarine(player)
-	player:ChangeClass(Player.Classes.Marine)
+function OnConsoleInvertMouse(player)
+	if (player.invert_mouse == 1) then
+		player.invert_mouse = 0
+		Shared.Message("Disabled mouse inversion.")
+	else
+		player.invert_mouse = 1		
+		Shared.Message("Enabled mouse inversion.")
+	end
 end
 
 function OnConsoleStuck(player)
@@ -104,6 +116,10 @@ function OnConsoleStuck(player)
     player:SetOrigin(spawnPos)
 end
 
+function OnConsoleSay(player, message)
+    Chat.instance:SetMessage(message)
+end
+
 function OnConsoleTurret(player)
     local turret = Server.CreateEntity( "turret",  player:GetOrigin() )
     player:SetAngles( player:GetAngles() )
@@ -117,9 +133,12 @@ Event.Hook("ClientDisconnect",      OnClientDisconnect)
 Event.Hook("MapPostLoad",           OnMapPostLoad)
 
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
-Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
-Event.Hook("Console_skulk", 		OnConsoleSkulk)
-Event.Hook("Console_marine",		OnConsoleMarine)
+
+Event.Hook("Console_invertmouse",	OnConsoleInvertMouse)
+Event.Hook("Console_changeclass",	OnConsoleChangeClass)
+
 Event.Hook("Console_stuck",			OnConsoleStuck)
+
+Event.Hook("Console_say",			OnConsoleSay)
 
 Event.Hook("Console_turret",		OnConsoleTurret)
