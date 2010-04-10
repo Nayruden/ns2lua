@@ -118,6 +118,7 @@ function Player:ChangeClass(newClass)
 		self.viewOffset = Vector(0, 1.6256, 0)
 		self.moveSpeed = 7
 		self.defaultHealth = 100
+		self.extents   = Vector(0.4064, 0.7874, 0.4064)
 		
 	elseif newClass == Player.Classes.Skulk then
 		self:SetModel("models/alien/skulk/skulk.model")
@@ -126,14 +127,16 @@ function Player:ChangeClass(newClass)
 		self.viewOffset = Vector(0, 0.6, 0)
 		self.moveSpeed = 14	
 		self.defaultHealth = 75
+		self.extents   = Vector(0.4064, 0.4064, 0.4064)
 		
 	elseif newClass == Player.Classes.BuildBot then
 		self:SetModel("models/marine/build_bot/build_bot.model")
-		self:SetViewModel("models/marine/rifle/rifle_view.model")
 		self:GiveWeapon("weapon_rifle")
+		self:SetViewModel("models/marine/rifle/rifle_view_shell.model")
 		self.viewOffset = Vector(0, 0.6, 0)
 		self.moveSpeed = 7	
 		self.defaultHealth = 100
+		self.extents   = Vector(0.4064, 0.7874, 0.4064)
 		
 	end
 	self.class = newClass
