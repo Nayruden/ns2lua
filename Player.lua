@@ -26,6 +26,8 @@ Player.networkVars =
         activityEnd                 = "predicted float",
         score                       = "integer",
         health						= "integer",
+        kills						= "integer",
+        deaths						= "integer"
     }
     
 Player.modelName = "models/marine/male/male.model" 
@@ -69,7 +71,9 @@ function Player:OnInit()
     self.overlayAnimationStart      = 0
     
     self.health						= 100
-    self.score                      = self.health
+    self.score                      = 0
+    self.kills 						= 0
+    self.deaths						= 0
         
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -653,7 +657,6 @@ if (Server) then
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)
     	self.health = self.health - damage*10
-    	self.score = self.health
     	
     	if (self.health <= 0) then
     	    local extents = Player.extents
@@ -674,7 +677,8 @@ if (Server) then
 		    
 		    self:SetOrigin(spawnPos)
 		    self.health = 100
-		    self.score = self.health
+		    self.deaths = self.deaths + 1
+		    attacker.kills = attacker.kills + 1
 		end
 		
     end

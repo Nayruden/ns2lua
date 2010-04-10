@@ -35,7 +35,7 @@ end
 function PlayerUI_GetScore()
 
     local player = Client.GetLocalPlayer()
-    return player.score
+    return "K/D: " .. player.kills .. "/".. player.deaths .. "\rHP: " .. player.health
     
 end
 
