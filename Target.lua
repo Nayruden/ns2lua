@@ -18,9 +18,10 @@ Shared.PrecacheModel(Target.modelName)
 Shared.PrecacheSound(Target.spawnSound)
 Shared.PrecacheSound(Target.dieSound)
 
-Target.State = enum { 'Unpopped', 'Popped', 'Killed' }
+Target.State = enum { 'Unpopped', 'Popped', 'Killed', 'Respawned' }
 
 Target.thinkInterval = 0.25
+Target.respawnInterval = 1
 Target.networkVars = 
     {
         impulsePosition  = "vector",
@@ -107,6 +108,12 @@ if (Server) then
             // fly around a bit.
             self.impulsePosition  = point
             self.impulseDirection = direction
+            
+            self:SetNextThink(Target.respawnInterval)
+            
+            local target = Server.CreateEntity( "target",  self:GetOrigin() )
+            target:SetAngles( self:GetAngles() )
+            target:Popup()
         
         end
         
@@ -134,6 +141,14 @@ if (Server) then
             end
             
         end
+        
+        if (self.state == Target.State.Killed) then
+            local target = Server.CreateEntity( "target",  self:GetOrigin() )
+            target:SetAngles( self:GetAngles() )
+            target:Popup()
+            
+            self.state = Target.State.Respawned
+      	end        	
         
         self:SetNextThink(Target.thinkInterval)
 
