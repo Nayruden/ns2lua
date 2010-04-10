@@ -30,6 +30,7 @@ Target.networkVars =
 
 function Target:OnInit()
 
+	self.NextRespawn = 0
     Actor.OnInit(self)
     
     self.impulsePosition  = Vector(0, 0, 0)
@@ -100,6 +101,7 @@ if (Server) then
             // Inform the game that a target was destroyed so that points
             // can be awarded, etc.
             Game.instance:DestroyTarget(attacker, self)
+			self.NextRespawn = Game.instance:GetGameTime() + 5
             
             // Create a rag doll.
             self:SetPhysicsActor()
@@ -111,7 +113,7 @@ if (Server) then
             
             self:SetNextThink(Target.respawnInterval)
             
-            local target = Server.CreateEntity( "target",  self:GetOrigin() )
+            //local target = Server.CreateEntity( "target",  self:GetOrigin() )
             target:SetAngles( self:GetAngles() )
             target:Popup()
         
@@ -142,7 +144,8 @@ if (Server) then
             
         end
         
-        if (self.state == Target.State.Killed) then
+        if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn ) then
+			Shared.Message(string.format("%f, %f",self.NextRespawn, Game.instance:GetGameTime()))
             local target = Server.CreateEntity( "target",  self:GetOrigin() )
             target:SetAngles( self:GetAngles() )
             target:Popup()
