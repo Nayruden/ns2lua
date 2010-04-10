@@ -134,8 +134,7 @@ function Player:ChangeClass(newClass)
 		
 	elseif newClass == Player.Classes.BuildBot then
 		self:SetModel("models/marine/build_bot/build_bot.model")
-		self:GiveWeapon("weapon_rifle")
-		self:SetViewModel("models/marine/rifle/rifle_view_shell.model")
+		self:GiveWeapon("weapon_peashooter")
 		self.viewOffset = Vector(0, 0.6, 0)
 		self.moveSpeed = 7	
 		self.defaultHealth = 100
