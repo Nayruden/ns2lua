@@ -261,7 +261,19 @@ function Player:OnProcessMove(input)
 			ground = false
 		end 
 	end
-	
+
+	// Handle crouching
+    if (bit.band(input.commands, Move.Crouch) ~= 0 and not self.crouching) then
+        //self:SetAnimation( "" ) // Needs a crouch animation
+        self.crouching = true
+        self.origSpeed = self.moveSpeed
+        self.moveSpeed = math.floor( self.moveSpeed * 0.2 )
+    elseif (self.crouching) then
+        self.crouching = nil
+        self.moveSpeed = self.origSpeed
+        self.origSpeed = nil
+    end
+
 	if (ground) then
 		// Since we're standing on the ground, remove any downward velocity.
        	self.velocity.y = 0    
@@ -283,7 +295,7 @@ function Player:OnProcessMove(input)
     
         // Compute the desired movement direction based on the input.
         local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
-        local wishSpeed = math.min(wishDirection:Normalize(), 1) * Player.moveSpeed
+        local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
          
         // Accelerate in the desired direction, ala Quake/Half-Life
         
