@@ -45,6 +45,8 @@ function OnClientConnect(client)
     Server.SetControllingPlayer(client, player)
     
     Game.instance:StartGame()
+    
+    Shared.Message("Client " .. client .. " has joined the server")
    
 end
 
