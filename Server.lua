@@ -53,7 +53,8 @@ end
 /**
  * Called when a player disconnects from the server
  */
-function OnClientDisconnect(client, player)    
+function OnClientDisconnect(client, player)   
+	Shared.Message("Client " .. client .. " has disconnected") 
 end
 
 /**
