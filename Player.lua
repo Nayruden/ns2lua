@@ -55,7 +55,8 @@ function Player:OnInit()
 
     self:SetModel(Player.modelName)
 
-	self.canJump					= 1	    self.viewPitch                  = 0
+	self.canJump					= 1	    
+	self.viewPitch                  = 0
     self.viewRoll                   = 0
 
     self.velocity                   = Vector(0, 0, 0)
@@ -220,12 +221,17 @@ function Player:OnProcessMove(input)
 			self.canJump = 1
 		elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
 			self.canJump = 0
-		end
-			// Compute the initial velocity to give us the desired jump			// height under the force of gravity.			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 			ground = false		end	end   
-		if (ground) then
-			// Since we're standing on the ground, remove any downward velocity.
-        	self.velocity.y = 0
-        end
+			
+			// Compute the initial velocity to give us the desired jump			
+			// height under the force of gravity.			
+			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 			
+			ground = false
+		end 
+	end
+	
+	if (ground) then
+		// Since we're standing on the ground, remove any downward velocity.
+       	self.velocity.y = 0    
     else
         // Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + Player.gravity * input.time
@@ -302,7 +308,14 @@ function Player:OnProcessMove(input)
     
     local time = Shared.GetTime()
     
-	if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then        local weapon = self:GetActiveWeapon()		if (weapon ~= nil) then			weapon:ReloadFinish()		end	end	    if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
+	if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then 
+		local weapon = self:GetActiveWeapon()	
+		if (weapon ~= nil) then
+			weapon:ReloadFinish()		
+		end	
+	end	    
+		
+	if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
         self:Idle()
     end
     
@@ -513,7 +526,11 @@ function Player:PrimaryAttack()
                     self:StopPrimaryAttack()
                 end	
 				if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
-					self:Reload()								else					self:Idle()				end            end
+					self:Reload()		
+				else					
+					self:Idle()				
+				end            
+			end
 		end
         
     end
