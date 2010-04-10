@@ -25,12 +25,13 @@ Player.networkVars =
         activity                    = "predicted integer (1 to 3)",
         activityEnd                 = "predicted float",
         score                       = "integer",
-        health						= "integer",
-		canJump						= "integer (0 to 1)",
-		kills						= "integer",
-        deaths						= "integer",
-        class						= "integer (0 to 3)",
+        health                      = "integer",
+        canJump                     = "integer (0 to 1)",
+        kills                       = "integer",
+        deaths                      = "integer",
+        class                       = "integer (0 to 3)",
         moveSpeed                   = "integer",
+        invert_mouse                = "integer (0 to 1)",
     }
     
 Player.modelName = "models/marine/male/male.model" 
@@ -44,7 +45,7 @@ Player.friction             =  6
 Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' }
-Player.Classes				= enum { 'Marine', 'Skulk', 'BuildBot' }
+Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
 
 Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
@@ -57,8 +58,8 @@ function Player:OnInit()
 
     self:SetModel(Player.modelName)
 
-	self.canJump					= 1	    
-	self.viewPitch                  = 0
+    self.canJump                    = 1     
+    self.viewPitch                  = 0
     self.viewRoll                   = 0
 
     self.velocity                   = Vector(0, 0, 0)
@@ -74,13 +75,14 @@ function Player:OnInit()
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
     
-    self.health						= 100
+    self.health                     = 100
     self.score                      = 0
-    self.kills 						= 0
-    self.deaths						= 0
-    self.class 						= Player.Classes.Marine
-    self.gravity					= -9.81
+    self.kills                      = 0
+    self.deaths                     = 0
+    self.class                      = Player.Classes.Marine
+    self.gravity                    = -9.81
     self.moveSpeed                  = 7
+    self.invert_mouse               = 0
         
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -113,36 +115,36 @@ function Player:OnInit()
 end
 
 function Player:ChangeClass(newClass)
-	if newClass == Player.Classes.Marine then
-		self:SetModel("models/marine/male/male.model")
-		self:SetViewModel("models/marine/rifle/rifle_view.model")
-		self:GiveWeapon("weapon_rifle")
-		self.viewOffset = Vector(0, 1.6256, 0)
-		self.moveSpeed = 7
-		self.defaultHealth = 100
-		self.extents = Vector(0.4064, 0.7874, 0.4064)
-		self.gravity = -9.81
-		
-	elseif newClass == Player.Classes.Skulk then
-		self:SetModel("models/alien/skulk/skulk.model")
-		self:SetViewModel("models/alien/skulk/skulk_view.model")
-		self:GiveWeapon("weapon_bite")
-		self.viewOffset = Vector(0, 0.6, 0)
-		self.moveSpeed = 14	
-		self.defaultHealth = 75
-		self.extents = Vector(0.4064, 0.4064, 0.4064)
-		self.gravity = -9.81
-		
-	elseif newClass == Player.Classes.BuildBot then
-		self:SetModel("models/marine/build_bot/build_bot.model")
-		self:GiveWeapon("weapon_peashooter")
-		self.viewOffset = Vector(0, 0.6, 0)
-		self.moveSpeed = 7	
-		self.defaultHealth = 100
-		self.extents = Vector(0.4064, 0.7874, 0.4064)
-		self.gravity = -4.40
-	end
-	self.class = newClass
+    if newClass == Player.Classes.Marine then
+        self:SetModel("models/marine/male/male.model")
+        self:SetViewModel("models/marine/rifle/rifle_view.model")
+        self:GiveWeapon("weapon_rifle")
+        self.viewOffset = Vector(0, 1.6256, 0)
+        self.moveSpeed = 7
+        self.defaultHealth = 100
+        self.extents = Vector(0.4064, 0.7874, 0.4064)
+        self.gravity = -9.81
+        
+    elseif newClass == Player.Classes.Skulk then
+        self:SetModel("models/alien/skulk/skulk.model")
+        self:SetViewModel("models/alien/skulk/skulk_view.model")
+        self:GiveWeapon("weapon_bite")
+        self.viewOffset = Vector(0, 0.6, 0)
+        self.moveSpeed = 14 
+        self.defaultHealth = 75
+        self.extents = Vector(0.4064, 0.4064, 0.4064)
+        self.gravity = -9.81
+        
+    elseif newClass == Player.Classes.BuildBot then
+        self:SetModel("models/marine/build_bot/build_bot.model")
+        self:GiveWeapon("weapon_peashooter")
+        self.viewOffset = Vector(0, 0.6, 0)
+        self.moveSpeed = 7  
+        self.defaultHealth = 100
+        self.extents = Vector(0.4064, 0.7874, 0.4064)
+        self.gravity = -4.40
+    end
+    self.class = newClass
 end
 
 /**
@@ -152,7 +154,7 @@ end
 function Player:SetViewAngles(viewAngles)
 
     self.viewPitch = viewAngles.pitch
-	self.viewRoll  = viewAngles.roll
+    self.viewRoll  = viewAngles.roll
 
     local angles = Angles(self:GetAngles())
     angles.yaw  = viewAngles.yaw
@@ -243,8 +245,13 @@ function Player:OnProcessMove(input)
     
     local canMove = self:GetCanMove()
 
-    // Update the view angles based on the input.
-    local angles = Angles(input.pitch, input.yaw, 0.0)   
+    // Update the view angles based on the input.  
+    local angles
+    if (self.invert_mouse == 1) then
+        angles = Angles(-1 * input.pitch, input.yaw, 0.0)   
+    else
+        angles = Angles(input.pitch, input.yaw, 0.0)   
+    end
     self:SetViewAngles(angles)
     
     local viewCoords = angles:GetCoords()
@@ -255,18 +262,18 @@ function Player:OnProcessMove(input)
     local sideAxis   = nil
     
     // Handle jumpping
-	if (canMove and ground) then	
-		if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
-			self.canJump = 1
-		elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
-			self.canJump = 0
-			
-			// Compute the initial velocity to give us the desired jump			
-			// height under the force of gravity.			
-			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity) 			
-			ground = false
-		end 
-	end
+    if (canMove and ground) then    
+        if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
+            self.canJump = 1
+        elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
+            self.canJump = 0
+            
+            // Compute the initial velocity to give us the desired jump         
+            // height under the force of gravity.           
+            self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity)          
+            ground = false
+        end 
+    end
 
     // Handle crouching
     // From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
@@ -286,9 +293,9 @@ function Player:OnProcessMove(input)
         end
     end
 
-	if (ground) then
-		// Since we're standing on the ground, remove any downward velocity.
-       	self.velocity.y = 0    
+    if (ground) then
+        // Since we're standing on the ground, remove any downward velocity.
+        self.velocity.y = 0    
     else
         // Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + self.gravity * input.time
@@ -340,26 +347,26 @@ function Player:OnProcessMove(input)
             
         // Handle the buttons.
 
-		if (self.activity ~= Player.Activity.Reloading) then
-			if (bit.band(input.commands, Move.Reload) ~= 0) then
-			
-				if (self.activity == Player.Activity.Shooting) then
-					self:StopPrimaryAttack()
-				end
-				
-				self:Reload()
-				
-			else
+        if (self.activity ~= Player.Activity.Reloading) then
+            if (bit.band(input.commands, Move.Reload) ~= 0) then
+            
+                if (self.activity == Player.Activity.Shooting) then
+                    self:StopPrimaryAttack()
+                end
+                
+                self:Reload()
+                
+            else
 
-				// Process attack
-				if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
-					self:PrimaryAttack()
-				elseif (self.activity == Player.Activity.Shooting) then
-					self:StopPrimaryAttack()
-				end
-			
-			end    
-		end
+                // Process attack
+                if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
+                    self:PrimaryAttack()
+                elseif (self.activity == Player.Activity.Shooting) then
+                    self:StopPrimaryAttack()
+                end
+            
+            end    
+        end
         
     end
     
@@ -367,14 +374,14 @@ function Player:OnProcessMove(input)
     
     local time = Shared.GetTime()
     
-	if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then 
-		local weapon = self:GetActiveWeapon()	
-		if (weapon ~= nil) then
-			weapon:ReloadFinish()		
-		end	
-	end	    
-		
-	if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
+    if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then 
+        local weapon = self:GetActiveWeapon()   
+        if (weapon ~= nil) then
+            weapon:ReloadFinish()       
+        end 
+    end     
+        
+    if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
         self:Idle()
     end
     
@@ -583,14 +590,14 @@ function Player:PrimaryAttack()
                 // The weapon can't fire anymore (out of bullets, etc.)
                 if (self.activity == Player.Activity.Shooting) then    
                     self:StopPrimaryAttack()
-                end	
-				if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
-					self:Reload()		
-				else					
-					self:Idle()				
-				end            
-			end
-		end
+                end 
+                if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
+                    self:Reload()       
+                else                    
+                    self:Idle()             
+                end            
+            end
+        end
         
     end
 
@@ -733,31 +740,31 @@ if (Server) then
     end
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)
-    	self.health = self.health - damage
-    	self.score = self.health    	
-    	if (self.health <= 0) then
-    	    local extents = Player.extents
-    		local offset  = Vector(0, extents.y + 0.01, 0)
-    	
-    	    repeat
-		        spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
-		    until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
-		
-		    local spawnPos = Vector(0, 0, 0)
-		
-		    if (spawnPoint ~= nil) then
-		        spawnPos = Vector(spawnPoint:GetOrigin())
-		        // Move the spawn position up a little bit so the player won't start
-		        // embedded in the ground if the spawn point is positioned on the floor
-		        spawnPos.y = spawnPos.y + 0.01
-		    end
-		    
-		    self:SetOrigin(spawnPos)
-		    self.health = self.defaultHealth
-		    self.deaths = self.deaths + 1
-		    attacker.kills = attacker.kills + 1
-		end
-		
+        self.health = self.health - damage
+        self.score = self.health        
+        if (self.health <= 0) then
+            local extents = Player.extents
+            local offset  = Vector(0, extents.y + 0.01, 0)
+        
+            repeat
+                spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
+            until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
+        
+            local spawnPos = Vector(0, 0, 0)
+        
+            if (spawnPoint ~= nil) then
+                spawnPos = Vector(spawnPoint:GetOrigin())
+                // Move the spawn position up a little bit so the player won't start
+                // embedded in the ground if the spawn point is positioned on the floor
+                spawnPos.y = spawnPos.y + 0.01
+            end
+            
+            self:SetOrigin(spawnPos)
+            self.health = self.defaultHealth
+            self.deaths = self.deaths + 1
+            attacker.kills = attacker.kills + 1
+        end
+        
     end
 
 end
