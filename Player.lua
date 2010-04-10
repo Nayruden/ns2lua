@@ -8,7 +8,6 @@
 //=============================================================================
 
 Script.Load("lua/Utility.lua")
-Script.Load("lua/BuildBot.lua")
 
 class 'Player' (Actor)
 
