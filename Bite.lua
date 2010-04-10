@@ -112,7 +112,7 @@ function Bite:Idle(player)
 
     local viewModel = player:GetViewModelEntity()
 
-    viewModel:SetAnimationWithBlending( "idle", 0.25 )
+    viewModel:SetAnimationWithBlending( "bite_idle", 0.25 )
     viewModel:SetOverlayAnimation( nil )
 
 end
