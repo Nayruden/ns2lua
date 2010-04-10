@@ -20,7 +20,7 @@ Player.networkVars =
         velocity                    = "predicted vector",
         activeWeaponId              = "entityid",
         overlayAnimationSequence    = "integer (-1 to 60)",
-        overlayAnimationStart       = "float",        
+        overlayAnimationStart       = "float",
         thirdPerson                 = "boolean",
         activity                    = "predicted integer (1 to 3)",
         activityEnd                 = "predicted float",
@@ -33,14 +33,14 @@ Player.networkVars =
         moveSpeed                   = "integer",
         invert_mouse                = "integer (0 to 1)",
     }
-    
-Player.modelName = "models/marine/male/male.model" 
+
+Player.modelName = "models/marine/male/male.model"
 Player.extents   = Vector(0.4064, 0.7874, 0.4064)
-   
+
 Player.moveAcceleration     =  4
 Player.gravity              = -9.81
 Player.stepHeight           =  0.2
-Player.jumpHeight           =  1   
+Player.jumpHeight           =  1
 Player.friction             =  6
 Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
@@ -53,12 +53,12 @@ Shared.PrecacheModel("models/alien/skulk/skulk.model")
 Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
 
 function Player:OnInit()
-    
+
     Actor.OnInit(self)
 
     self:SetModel(Player.modelName)
 
-    self.canJump                    = 1     
+    self.canJump                    = 1
     self.viewPitch                  = 0
     self.viewRoll                   = 0
 
@@ -67,14 +67,14 @@ function Player:OnInit()
     self.activeWeaponId             = 0
     self.activity                   = Player.Activity.None
     self.activityEnd                = 0
-    
+
     self.viewOffset                 = Vector(0, 1.6256, 0)
-    
+
     self.thirdPerson                = false
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
-    
+
     self.health                     = 100
     self.score                      = 0
     self.kills                      = 0
@@ -83,30 +83,30 @@ function Player:OnInit()
     self.gravity                    = -9.81
     self.moveSpeed                  = 7
     self.invert_mouse               = 0
-        
+
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
     self.moveGroupMask              = 0xFFFFFFFD
-    
+
     if (Server) then
-        
+
         // Create the view model entity which is used to display our current weapon.
         local viewModel = Server.CreateEntity(ViewModel.mapName, self:GetOrigin())
         viewModel:SetParent(self)
         self.viewModelId = viewModel:GetId()
-        
+
         // Give ourself a weapon.
         self:GiveWeapon("weapon_rifle")
-        
+
     end
 
     if (Client) then
-        
+
         self:SetHud("ui/hud.swf")
-        
+
         self.horizontalSwing = 0
         self.verticalSwing   = 0
-        
+
     end
 
     self:SetBaseAnimation("run")
@@ -124,22 +124,22 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -9.81
-        
+
     elseif newClass == Player.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
         self:SetViewModel("models/alien/skulk/skulk_view.model")
         self:GiveWeapon("weapon_bite")
         self.viewOffset = Vector(0, 0.6, 0)
-        self.moveSpeed = 14 
+        self.moveSpeed = 14
         self.defaultHealth = 75
         self.extents = Vector(0.4064, 0.4064, 0.4064)
         self.gravity = -9.81
-        
+
     elseif newClass == Player.Classes.BuildBot then
         self:SetModel("models/marine/build_bot/build_bot.model")
         self:GiveWeapon("weapon_peashooter")
         self.viewOffset = Vector(0, 0.6, 0)
-        self.moveSpeed = 7  
+        self.moveSpeed = 7
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -4.40
@@ -178,14 +178,14 @@ end
 function Player:SetOverlayAnimation( animationName )
 
     if ( animationName ~= nil ) then
-    
+
         local animationSequence = self:GetAnimationIndex( animationName )
-    
+
         if (self.overlayAnimationSequence ~= animationSequence) then
             self.overlayAnimationSequence = animationSequence
             self.overlayAnimationStart    = Shared.GetTime()
         end
-        
+
     else
         self.overlayAnimationSequence = Model.invalidSequence
     end
@@ -199,13 +199,13 @@ function Player:SetBaseAnimation(activity)
 
     local animationPrefix = ""
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon) then
         animationPrefix =  weapon:GetAnimationPrefix() .. "_"
         weapon:SetAnimation( activity )
     end
 
-    self:SetAnimation(animationPrefix .. activity)    
+    self:SetAnimation(animationPrefix .. activity)
 
 end
 
@@ -213,7 +213,7 @@ end
  * Called by the engine to construct the pose of the bones for the player's model.
  */
 function Player:BuildPose(poses)
-    
+
     Actor.BuildPose(self, poses)
 
     // Apply the overlay animation if we have one.
@@ -221,7 +221,7 @@ function Player:BuildPose(poses)
         self:AccumulateAnimation(poses, self.overlayAnimationSequence, self.overlayAnimationStart)
     end
 
-end   
+end
 
 /**
  * Called to handle user input for the player.
@@ -229,50 +229,50 @@ end
 function Player:OnProcessMove(input)
 
     if (Client) then
-    
+
         self:UpdateWeaponSwing(input)
-    
+
         if (Client.GetIsRunningPrediction()) then
-        
+
             // When exit hit, bring up menu
             if(bit.band(input.commands, Move.Exit) ~= 0) then
                 ShowInGameMenu()
             end
-            
+
         end
 
     end
-    
+
     local canMove = self:GetCanMove()
 
-    // Update the view angles based on the input.  
+    // Update the view angles based on the input.
     local angles
     if (self.invert_mouse == 1) then
-        angles = Angles(-1 * input.pitch, input.yaw, 0.0)   
+        angles = Angles(-1 * input.pitch, input.yaw, 0.0)
     else
-        angles = Angles(input.pitch, input.yaw, 0.0)   
+        angles = Angles(input.pitch, input.yaw, 0.0)
     end
     self:SetViewAngles(angles)
-    
+
     local viewCoords = angles:GetCoords()
 
     local ground, groundNormal = self:GetIsOnGround()
-    
+
     local fowardAxis = nil
     local sideAxis   = nil
-    
+
     // Handle jumpping
-    if (canMove and ground) then    
+    if (canMove and ground) then
         if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
             self.canJump = 1
         elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
             self.canJump = 0
-            
-            // Compute the initial velocity to give us the desired jump         
-            // height under the force of gravity.           
-            self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity)          
+
+            // Compute the initial velocity to give us the desired jump
+            // height under the force of gravity.
+            self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity)
             ground = false
-        end 
+        end
     end
 
     // Handle crouching
@@ -282,6 +282,10 @@ function Player:OnProcessMove(input)
             //self:SetAnimation( "" ) // Needs a crouch animation
             self.origSpeed = self.moveSpeed
             self.moveSpeed = math.floor( self.moveSpeed * 0.2 )
+
+            if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
+                self.viewOffset = Vector(0, 0.9, 0)
+            end
         end
         self.crouching = 3
     elseif (self.crouching) then
@@ -290,12 +294,16 @@ function Player:OnProcessMove(input)
             self.crouching = nil
             self.moveSpeed = self.origSpeed
             self.origSpeed = nil
+
+            if (not Client and self.class == Player.Classes.Marine) then
+                self.viewOffset = Vector(0, 1.6256, 0)
+            end
         end
     end
 
     if (ground) then
         // Since we're standing on the ground, remove any downward velocity.
-        self.velocity.y = 0    
+        self.velocity.y = 0
     else
         // Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + self.gravity * input.time
@@ -304,58 +312,58 @@ function Player:OnProcessMove(input)
     // Compute the forward and side axis aligned with the world xz plane.
     forwardAxis = Vector(viewCoords.zAxis.x, 0, viewCoords.zAxis.z)
     sideAxis    = Vector(viewCoords.xAxis.x, 0, viewCoords.xAxis.z)
-    
+
     forwardAxis:Normalize()
     sideAxis:Normalize()
-    
+
     self:ApplyFriction(input, ground)
-    
+
     if (canMove) then
-    
+
         // Compute the desired movement direction based on the input.
         local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
         local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
-         
+
         // Accelerate in the desired direction, ala Quake/Half-Life
-        
+
         local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
         local addSpeed     = wishSpeed - currentSpeed
-     
+
         if (addSpeed > 0) then
             local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
             self.velocity = self.velocity + wishDirection * accelSpeed
-        end   
-        
+        end
+
         local offset = nil
-        
+
         if (ground) then
             // First move the character upwards to allow them to go up stairs and
             // over small obstacles.
             local start = Vector(self:GetOrigin())
-            offset = self:PerformMovement( Vector(0, Player.stepHeight, 0), 1 ) - start    
+            offset = self:PerformMovement( Vector(0, Player.stepHeight, 0), 1 ) - start
         end
-        
+
         // Move the player with collision detection.
         self:PerformMovement( self.velocity * input.time, 5 )
-        
+
         if (ground) then
             // Finally, move the player back down to compensate for moving them up.
             // We add in an additional step height for moving down steps/ramps.
             offset.y = offset.y + Player.stepHeight
             self:PerformMovement( -offset, 1 )
         end
-            
+
         // Handle the buttons.
 
         if (self.activity ~= Player.Activity.Reloading) then
             if (bit.band(input.commands, Move.Reload) ~= 0) then
-            
+
                 if (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
-                
+
                 self:Reload()
-                
+
             else
 
                 // Process attack
@@ -364,54 +372,54 @@ function Player:OnProcessMove(input)
                 elseif (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
-            
-            end    
+
+            end
         end
-        
+
     end
-    
+
     // Transition to the idle animation if the current activity has finished.
-    
+
     local time = Shared.GetTime()
-    
-    if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then 
-        local weapon = self:GetActiveWeapon()   
+
+    if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then
+        local weapon = self:GetActiveWeapon()
         if (weapon ~= nil) then
-            weapon:ReloadFinish()       
-        end 
-    end     
-        
+            weapon:ReloadFinish()
+        end
+    end
+
     if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
         self:Idle()
     end
-    
+
     if (not Shared.GetIsRunningPrediction()) then
         self:UpdatePoseParameters()
     end
-   
+
 end
 
 function Player:ApplyFriction(input, ground)
 
     local velocity = Vector(self.velocity)
-    
+
     if (ground) then
         velocity.y = 0
     end
 
     local speed = velocity:GetLength()
-    
+
     if (speed > 0) then
-    
+
         local drop = speed * Player.friction * input.time
         local speedScalar = math.max(speed - drop, 0) / speed
-        
+
         // Only apply friction in the movement plane.
         self.velocity.x = self.velocity.x * speedScalar
         self.velocity.z = self.velocity.z * speedScalar
 
     end
-    
+
 end
 
 /**
@@ -435,7 +443,7 @@ function Player:GetIsOnGround()
 
     local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
-    
+
     local center = Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
     local origin = self:GetOrigin()
 
@@ -443,9 +451,9 @@ function Player:GetIsOnGround()
 
     local traceStart = origin + center
     local traceEnd   = traceStart + offset
-    
+
     local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
-    
+
     if (trace.fraction < 1 and trace.normal.y < Player.maxWalkableNormal) then
         return false, nil
     end
@@ -461,7 +469,7 @@ function Player:PerformMovement(offset, maxTraces)
 
     local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
-    
+
     local center = Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
     local origin = Vector(self:GetOrigin())
 
@@ -471,29 +479,29 @@ function Player:PerformMovement(offset, maxTraces)
 
         local traceStart = origin + center
         local traceEnd = traceStart + offset
-        
+
         local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
 
         if (trace.fraction < 1) then
-    
+
             // Remove the amount of the offset we've already moved.
             offset = offset * (1 - trace.fraction)
 
             // Make the motion perpendicular to the surface we collided with so we slide.
             offset = offset - offset:GetProjection(trace.normal)
-            
+
             completedSweep = false
             capsuleSweepHit = true
-    
+
         else
             offset = Vector(0, 0, 0)
         end
-    
+
         origin = trace.endPoint - center
         tracesPerformed = tracesPerformed + 1
 
     end
-    
+
     self:SetOrigin(origin)
     return origin
 
@@ -523,9 +531,9 @@ function Player:GetActiveWeapon()
     if (self.activeWeaponId > 0) then
         return Shared.GetEntity(self.activeWeaponId)
     end
-    
+
     return nil
-    
+
 end
 
 /**
@@ -534,16 +542,16 @@ end
 function Player:DrawWeapon()
 
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
-    
+
         // Apply the weapon's view model.
         self:SetViewModel(weapon:GetViewModelName())
         weapon:Draw(self)
-        
+
         self.activity    = Player.Activity.Drawing
         self.activityEnd = Shared.GetTime() + weapon:GetDrawTime()
-        
+
     end
 
 end
@@ -554,9 +562,9 @@ end
 function Player:Reload()
 
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
-        
+
         local time = Shared.GetTime()
 
         if (time > self.activityEnd and weapon:Reload(self)) then
@@ -564,7 +572,7 @@ function Player:Reload()
             self.activityEnd = time + weapon:GetReloadTime()
             self.activity    = Player.Activity.Reloading
         end
-        
+
     end
 
 end
@@ -575,11 +583,11 @@ end
 function Player:PrimaryAttack()
 
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
-    
+
         local time = Shared.GetTime()
-    
+
         if (time > self.activityEnd) then
 
            if (weapon:FireBullets(self)) then
@@ -588,17 +596,17 @@ function Player:PrimaryAttack()
                 self.activity    = Player.Activity.Shooting
             else
                 // The weapon can't fire anymore (out of bullets, etc.)
-                if (self.activity == Player.Activity.Shooting) then    
+                if (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
-                end 
+                end
                 if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
-                    self:Reload()       
-                else                    
-                    self:Idle()             
-                end            
+                    self:Reload()
+                else
+                    self:Idle()
+                end
             end
         end
-        
+
     end
 
 end
@@ -606,11 +614,11 @@ end
 function Player:StopPrimaryAttack()
 
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
         weapon:StopPrimaryAttack(self)
     end
-    
+
     self.activity = Player.Activity.None
 
 end
@@ -618,7 +626,7 @@ end
 function Player:Idle()
 
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
         weapon:Idle(self)
     end
@@ -636,15 +644,15 @@ end
  * Retursn the amount of ammo in the clip for the active weapon.
  */
 function Player:GetWeaponClip()
-    
+
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
         return weapon:GetClip()
     end
-    
+
     return 0
-    
+
 end
 
 /**
@@ -653,11 +661,11 @@ end
 function Player:GetWeaponAmmo()
 
     local weapon = self:GetActiveWeapon()
-    
+
     if (weapon ~= nil) then
         return weapon:GetAmmo()
     end
-    
+
     return 0
 
 end
@@ -666,22 +674,22 @@ function Player:UpdatePoseParameters()
 
     local viewAngles = self:GetViewAngles()
     local pitch = -Math.Wrap( Math.Degrees(viewAngles.pitch), -180, 180 )
-    
+
     self:SetPoseParam("body_pitch", pitch)
-   
+
     local viewCoords = viewAngles:GetCoords()
-    
+
     local horizontalVelocity = Vector(self.velocity)
     horizontalVelocity.y = 0
-    
+
     local x = Math.DotProduct(viewCoords.xAxis, horizontalVelocity)
     local z = Math.DotProduct(viewCoords.zAxis, horizontalVelocity)
-    
+
     local moveYaw = math.atan2(z, x) * 180 / math.pi
-    
+
     self:SetPoseParam("move_yaw",   moveYaw)
     self:SetPoseParam("move_speed", horizontalVelocity:GetLength() * 0.25)
-    
+
 end
 
 /**
@@ -695,15 +703,15 @@ end
  * Sets whether or not the player is being viewed in 3rd person mode.
  */
 function Player:SetIsThirdPerson(thirdPerson)
-    
+
     self.thirdPerson = thirdPerson
-    
+
     // Hide the view model when we're in third person mode.
     local viewModel = self:GetViewModelEntity()
     if (viewModel ~= nil) then
         viewModel:SetIsVisible( not self.thirdPerson )
     end
-    
+
 end
 
 /**
@@ -711,16 +719,16 @@ end
  * for the camera.
  */
 function Player:GetCameraViewCoords()
-    
-    local viewCoords  = self:GetViewAngles():GetCoords()   
+
+    local viewCoords  = self:GetViewAngles():GetCoords()
 
     viewCoords.origin = self:GetOrigin() + self.viewOffset
-    
+
     if (self.thirdPerson) then
-        //viewCoords.origin = viewCoords.origin - viewCoords.zAxis * 0.4 - viewCoords.xAxis * 0.35 + viewCoords.yAxis * 0.1 
+        //viewCoords.origin = viewCoords.origin - viewCoords.zAxis * 0.4 - viewCoords.xAxis * 0.35 + viewCoords.yAxis * 0.1
         viewCoords.origin = viewCoords.origin - viewCoords.zAxis * 2.5
     end
-    
+
     return viewCoords
 
 end
@@ -728,43 +736,43 @@ end
 if (Server) then
 
     function Player:GiveWeapon(className)
-        
+
         local weapon = Server.CreateEntity(className, self:GetOrigin())
-        
+
         weapon:SetParent(self)
         weapon:SetAttachPoint("RHand_Weapon")
-        
+
         self.activeWeaponId = weapon:GetId()
         self:DrawWeapon()
-        
+
     end
-    
+
     function Player:TakeDamage(attacker, damage, doer, point, direction)
         self.health = self.health - damage
-        self.score = self.health        
+        self.score = self.health
         if (self.health <= 0) then
             local extents = Player.extents
             local offset  = Vector(0, extents.y + 0.01, 0)
-        
+
             repeat
                 spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
             until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
-        
+
             local spawnPos = Vector(0, 0, 0)
-        
+
             if (spawnPoint ~= nil) then
                 spawnPos = Vector(spawnPoint:GetOrigin())
                 // Move the spawn position up a little bit so the player won't start
                 // embedded in the ground if the spawn point is positioned on the floor
                 spawnPos.y = spawnPos.y + 0.01
             end
-            
+
             self:SetOrigin(spawnPos)
             self.health = self.defaultHealth
             self.deaths = self.deaths + 1
             attacker.kills = attacker.kills + 1
         end
-        
+
     end
 
 end
@@ -777,25 +785,25 @@ function Player:CreateWeaponEffect(playerAttachPointName, entityAttachPointName,
     local viewEffect = Client and (Client.GetLocalPlayer() == self) and not self:GetIsThirdPerson()
 
     if (viewEffect) then
-    
+
         // Create the effect on the view model entity.
         local viewModel = self:GetViewModelEntity()
         Shared.CreateAttachedEffect(self, cinematicName, viewModel, Coords.GetTranslation(self:GetViewOffset()), entityAttachPointName, true)
 
     else
-    
+
         // Create the effect on the weapon entity.
-    
+
         local attachPoint = self:GetAttachPointIndex(playerAttachPointName)
         local coords = Coords.GetIdentity();
-        
+
         if (attachPoint ~= -1) then
             coords = self:GetObjectToWorldCoords():GetInverse() * self:GetAttachPointCoords(attachPoint)
         end
-        
+
         local weapon = self:GetActiveWeapon()
         Shared.CreateAttachedEffect(self, cinematicName, weapon, coords, entityAttachPointName, false)
-         
+
     end
 
 end
@@ -807,13 +815,13 @@ if (Client) then
      * Sets the Flash movie that's displayed for the HUD.
      */
     function Player:SetHud(hudFileName)
-        
+
         local flashPlayer = Client.CreateFlashPlayer()
         Client.AddFlashPlayerToDisplay(flashPlayer)
-    
+
         flashPlayer:Load(hudFileName)
-        flashPlayer:SetBackgroundOpacity(0)    
-        
+        flashPlayer:SetBackgroundOpacity(0)
+
     end
 
     function Player:GetRenderFov()
@@ -821,21 +829,21 @@ if (Client) then
     end
 
     function Player:UpdateClientEffects(deltaTime)
-    
+
         Actor.UpdateClientEffects(self, deltaTime)
-    
+
         // Show or hide the local player model depending on whether or not
         // we're in third person mode for the local player.
         local showModel = Client.GetLocalPlayer() ~= self or self:GetIsThirdPerson()
         self:ShowModel( showModel )
-        
+
         local activeWeapon = self:GetActiveWeapon()
         if (activeWeapon ~= nil) then
             activeWeapon:ShowModel( showModel )
         end
-        
+
         self:UpdatePoseParameters()
-        
+
     end
 
     function Player:UpdateWeaponSwing(input)
@@ -847,7 +855,7 @@ if (Client) then
 
         local pitchDiff = GetAnglesDifference(self:GetViewAngles().pitch, input.pitch)
         self.verticalSwing = self.verticalSwing - pitchDiff*kSwingSensitivity
-        
+
         // Decrease it non-linearly over time (the farther off center it is the faster it will return)
         local horizontalSwingDampening = 100*input.time*math.sin((math.abs(self.horizontalSwing)/45)*math.pi/2)
         local verticalSwingDampening   = 100*input.time*math.sin((math.abs(self.verticalSwing)/45)*math.pi/2)
@@ -863,22 +871,22 @@ if (Client) then
         elseif (self.verticalSwing > 0) then
             self.verticalSwing = Math.Clamp(self.verticalSwing - verticalSwingDampening,  0, 1)
         end
-        
+
         local viewModel = self:GetViewModelEntity()
-        
+
         if (viewModel ~= nil) then
-        
+
             local weapon      = self:GetActiveWeapon()
             local swingAmount = 0
-            
+
             if (weapon ~= nil) then
                 swingAmount = weapon:GetSwingAmount()
             end
-            
+
             viewModel:SetPoseParam("swing_yaw", self.horizontalSwing * swingAmount)
             viewModel:SetPoseParam("swing_pitch", self.verticalSwing * swingAmount)
         end
-        
+
     end
 
 end
