@@ -75,6 +75,7 @@ end
 function OnConsoleBuildBot(player)
 	player:SetModel("models/marine/build_bot/build_bot.model")
 	player.viewOffset = Vector(0, 0.6, 0)
+	player.moveSpeed = 7
 end
 
 function OnConsoleSkulk(player)
@@ -82,6 +83,7 @@ function OnConsoleSkulk(player)
 	player:SetViewModel("models/alien/skulk/skulk_view.model")
 	player:GiveWeapon("weapon_bite")
 	player.viewOffset = Vector(0, 0.6, 0)
+	player.moveSpeed = 14
 end
 
 function OnConsoleMarine(player)
@@ -89,6 +91,7 @@ function OnConsoleMarine(player)
 	player:SetViewModel("models/marine/rifle/rifle_view.model")
 	player:GiveWeapon("weapon_rifle")
 	player.viewOffset = Vector(0, 1.6256, 0)
+	player.moveSpeed = 7
 end
 
 function OnConsoleStuck(player)
@@ -111,6 +114,12 @@ function OnConsoleStuck(player)
     player:SetOrigin(spawnPos)
 end
 
+function OnConsoleTurret(player)
+    local turret = Server.CreateEntity( "turret",  player:GetOrigin() )
+    player:SetAngles( player:GetAngles() )
+
+end
+
 
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
@@ -122,3 +131,5 @@ Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
 Event.Hook("Console_skulk", 		OnConsoleSkulk)
 Event.Hook("Console_marine",		OnConsoleMarine)
 Event.Hook("Console_stuck",			OnConsoleStuck)
+
+Event.Hook("Console_turret",		OnConsoleTurret)
