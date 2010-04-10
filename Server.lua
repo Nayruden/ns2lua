@@ -79,6 +79,7 @@ end
 function OnConsoleSkulk(player)
 	player:SetModel("models/alien/skulk/skulk.model")
 	player:SetViewModel("models/alien/skulk/skulk_view.model")
+	player:GiveWeapon("weapon_bite")
 end
 
 function OnConsoleMarine(player)
