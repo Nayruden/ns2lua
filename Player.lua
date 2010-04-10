@@ -283,24 +283,26 @@ function Player:OnProcessMove(input)
             
         // Handle the buttons.
 
-        if (bit.band(input.commands, Move.Reload) ~= 0) then
-        
-            if (self.activity == Player.Activity.Shooting) then
-                self:StopPrimaryAttack()
-            end
-            
-            self:Reload()
-            
-        else
+		if (self.activity ~= Player.Activity.Reloading) then
+			if (bit.band(input.commands, Move.Reload) ~= 0) then
+			
+				if (self.activity == Player.Activity.Shooting) then
+					self:StopPrimaryAttack()
+				end
+				
+				self:Reload()
+				
+			else
 
-            // Process attack
-            if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
-                self:PrimaryAttack()
-            elseif (self.activity == Player.Activity.Shooting) then
-                self:StopPrimaryAttack()
-            end
-        
-        end    
+				// Process attack
+				if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
+					self:PrimaryAttack()
+				elseif (self.activity == Player.Activity.Shooting) then
+					self:StopPrimaryAttack()
+				end
+			
+			end    
+		end
         
     end
     
