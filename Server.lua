@@ -116,8 +116,9 @@ function OnConsoleStuck(player)
     player:SetOrigin(spawnPos)
 end
 
-function OnConsoleSay(player, message)
-    Chat.instance:SetMessage(message)
+function OnConsoleSay(player, ...)
+    local args = table.concat( { ... }, " " )
+    Chat.instance:SetMessage(args)
 end
 
 function OnConsoleTurret(player)
