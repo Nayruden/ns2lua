@@ -72,7 +72,19 @@ function OnConsoleThirdPerson(player)
     player:SetIsThirdPerson( not player:GetIsThirdPerson() )
 end
 
-//function OnConsoleChangeClass(
+function OnConsoleChangeClass(player,type) 
+	if (type == "buildbot") then
+		player:ChangeClass(Player.Classes.BuildBot)
+		Shared.Message("You have become a BuildBot!");
+	elseif (type == "skulk") then
+		player:ChangeClass(Player.Classes.Skulk)
+		Shared.Message("You have become a Skulk!");
+	else
+		player:ChangeClass(Player.Classes.Marine)
+		Shared.Message("You have become a Marine!");
+	end
+end
+
 function OnConsoleInvertMouse(player)
 	if (player.invert_mouse == 1) then
 		player.invert_mouse = 0
@@ -81,18 +93,6 @@ function OnConsoleInvertMouse(player)
 		player.invert_mouse = 1		
 		Shared.Message("Enabled mouse inversion.")
 	end
-end
-
-function OnConsoleBuildBot(player)
-	player:ChangeClass(Player.Classes.BuildBot)
-end
-
-function OnConsoleSkulk(player)
-	player:ChangeClass(Player.Classes.Skulk)
-end
-
-function OnConsoleMarine(player)
-	player:ChangeClass(Player.Classes.Marine)
 end
 
 function OnConsoleStuck(player)
@@ -130,11 +130,8 @@ Event.Hook("MapPostLoad",           OnMapPostLoad)
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
 
 Event.Hook("Console_invertmouse",	OnConsoleInvertMouse)
-//Event.Hook("Console_changeclass",	OnConsoleChangeClass)
+Event.Hook("Console_changeclass",	OnConsoleChangeClass)
 
-Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
-Event.Hook("Console_skulk", 		OnConsoleSkulk)
-Event.Hook("Console_marine",		OnConsoleMarine)
 Event.Hook("Console_stuck",			OnConsoleStuck)
 
 Event.Hook("Console_turret",		OnConsoleTurret)
