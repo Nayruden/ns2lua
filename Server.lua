@@ -124,7 +124,25 @@ end
 function OnConsoleTurret(player)
     local turret = Server.CreateEntity( "turret",  player:GetOrigin() )
     player:SetAngles( player:GetAngles() )
+end
 
+function OnConsoleDumpCmds(player)
+	Shared.Message("Server:")
+	for k,v in pairs(Server) do 
+		Shared.Message(k)
+		//for k1,v1 in debug.getinfo(v) do 
+		//	Shared.Message(tostring(k1) .. " " .. tostring(v1))
+		//end
+		
+	end
+	Shared.Message("Shared:")
+	for k,v in pairs(Shared) do Shared.Message(k .. " " .. tostring(v)) end
+	Shared.Message("Event:")
+	for k,v in pairs(Event) do Shared.Message(k .. " " .. tostring(v)) end
+	//Shared.Message("Game:")
+	//for k,v in pairs(Game) do Shared.Message(k .. " " .. tostring(v)) end
+	Shared.Message("Player:")
+	for k,v in pairs(Player) do Shared.Message(k .. " " .. tostring(v)) end
 end
 
 
@@ -143,3 +161,5 @@ Event.Hook("Console_stuck",			OnConsoleStuck)
 Event.Hook("Console_say",			OnConsoleSay)
 
 Event.Hook("Console_turret",		OnConsoleTurret)
+
+Event.Hook("Console_dumpcmds", 		OnConsoleDumpCmds)
