@@ -21,10 +21,17 @@ Client.SetMouseCaptured(true)
 Client.SetMouseClipped(false)
 
 function ShowInGameMenu()
-    
+
     Client.SetMouseVisible(true)
     Client.SetMouseCaptured(false)
-    
+
     Shared.SetMenu("ui/main_menu.swf")
-    
+
 end
+
+function OnCommandNick( data, nickname )
+	Main.SetOptionString( kNicknameOptionsKey, nickname )
+	Shared.Message( "Nick changed to " .. nickname )
+end
+
+Event.Hook( "Console_nick", OnCommandNick )
