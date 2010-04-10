@@ -133,7 +133,6 @@ if (Server) then
     function Game:DestroyTarget(player, target)
     
         self.numTargets = self.numTargets - 1    
-        player.score = player.score + 1
     
     end
     
