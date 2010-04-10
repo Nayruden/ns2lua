@@ -29,13 +29,13 @@ Player.networkVars =
 		canJump						= "integer (0 to 1)",
 		kills						= "integer",
         deaths						= "integer",
-        class						= "interger (0 to 3)"
+        class						= "integer (0 to 3)",
+        moveSpeed                   = "integer",
     }
     
 Player.modelName = "models/marine/male/male.model" 
 Player.extents   = Vector(0.4064, 0.7874, 0.4064)
    
-Player.moveSpeed            =  7
 Player.moveAcceleration     =  4
 Player.gravity              = -9.81
 Player.stepHeight           =  0.2
@@ -80,6 +80,7 @@ function Player:OnInit()
     self.deaths						= 0
     self.class 						= Player.Classes.Marine
     self.gravity					= -9.81
+    self.moveSpeed                  = 7
         
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -267,16 +268,22 @@ function Player:OnProcessMove(input)
 		end 
 	end
 
-	// Handle crouching
-    if (bit.band(input.commands, Move.Crouch) ~= 0 and not self.crouching) then
-        //self:SetAnimation( "" ) // Needs a crouch animation
-        self.crouching = true
-        self.origSpeed = self.moveSpeed
-        self.moveSpeed = math.floor( self.moveSpeed * 0.2 )
+    // Handle crouching
+    // From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
+    if (bit.band(input.commands, Move.Crouch) ~= 0) then
+        if (not self.crouching) then
+            //self:SetAnimation( "" ) // Needs a crouch animation
+            self.origSpeed = self.moveSpeed
+            self.moveSpeed = math.floor( self.moveSpeed * 0.2 )
+        end
+        self.crouching = 3
     elseif (self.crouching) then
-        self.crouching = nil
-        self.moveSpeed = self.origSpeed
-        self.origSpeed = nil
+        self.crouching = self.crouching - 1
+        if (self.crouching <= 0) then
+            self.crouching = nil
+            self.moveSpeed = self.origSpeed
+            self.origSpeed = nil
+        end
     end
 
 	if (ground) then
