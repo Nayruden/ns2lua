@@ -29,10 +29,12 @@ Target.networkVars =
     }
 
 function Target:OnInit()
-
 	self.NextRespawn = 0
     Actor.OnInit(self)
     
+	//self:SetModel(self.modelName)
+    //self:SetAnimation( "idle" )
+	
     self.impulsePosition  = Vector(0, 0, 0)
     self.impulseDirection = Vector(0, 0, 0)
     
@@ -45,6 +47,9 @@ function Target:OnInit()
     if (Server) then
         
         self.popupTime  = 0
+		self.popupRadius  = 393.7
+		self.popupDelay = 0
+		
         self.state      = Target.State.Unpopped
         
         self:SetNextThink(Target.thinkInterval)
@@ -54,7 +59,6 @@ function Target:OnInit()
 end
 
 function Target:OnLoad()
-
     Actor.OnLoad(self)
 
     self.popupRadius = tonumber(self.popupRadius)
@@ -101,7 +105,7 @@ if (Server) then
             // Inform the game that a target was destroyed so that points
             // can be awarded, etc.
             Game.instance:DestroyTarget(attacker, self)
-			self.NextRespawn = Game.instance:GetGameTime() + 5
+			self.NextRespawn = Game.instance:GetGameTime() + 30
             
             // Create a rag doll.
             self:SetPhysicsActor()
@@ -113,10 +117,6 @@ if (Server) then
             
             self:SetNextThink(Target.respawnInterval)
             
-            //local target = Server.CreateEntity( "target",  self:GetOrigin() )
-            target:SetAngles( self:GetAngles() )
-            target:Popup()
-        
         end
         
     end
@@ -145,12 +145,18 @@ if (Server) then
         end
         
         if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn ) then
-            local target = Server.CreateEntity( "target",  self:GetOrigin() )
-            target:SetAngles( self:GetAngles() )
-            target:Popup()
-            
-            self.state = Target.State.Respawned
-      	end        	
+            local player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.popupRadius, nil)                
+			
+			if (player ~= nil) then
+				// Wait until the player leaves
+				self.NextRespawn = Game.instance:GetGameTime() + 5
+            else
+				local target = Server.CreateEntity( "target",  self:GetOrigin() )
+				target:SetAngles( self:GetAngles() )
+				self.state = Target.State.Respawned			
+			end
+			
+      	end         	
         
         self:SetNextThink(Target.thinkInterval)
 
