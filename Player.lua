@@ -28,7 +28,8 @@ Player.networkVars =
         health						= "integer",
 		canJump						= "integer (0 to 1)",
 		kills						= "integer",
-        deaths						= "integer"
+        deaths						= "integer",
+        class						= "interger (0 to 3)"
     }
     
 Player.modelName = "models/marine/male/male.model" 
@@ -43,6 +44,7 @@ Player.friction             =  6
 Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' }
+Player.Classes				= enum { 'Marine', 'Skulk', 'BuildBot' }
 
 Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
@@ -76,6 +78,8 @@ function Player:OnInit()
     self.score                      = 0
     self.kills 						= 0
     self.deaths						= 0
+    self.class 						= Player.Classes.Marine
+    self.gravity					= -9.81
         
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -103,7 +107,42 @@ function Player:OnInit()
     end
 
     self:SetBaseAnimation("run")
+    //self:ChangeClass(Player.Classes.Marine)
 
+end
+
+function Player:ChangeClass(newClass)
+	if newClass == Player.Classes.Marine then
+		self:SetModel("models/marine/male/male.model")
+		self:SetViewModel("models/marine/rifle/rifle_view.model")
+		self:GiveWeapon("weapon_rifle")
+		self.viewOffset = Vector(0, 1.6256, 0)
+		self.moveSpeed = 7
+		self.defaultHealth = 100
+		self.extents = Vector(0.4064, 0.7874, 0.4064)
+		self.gravity = -9.81
+		
+	elseif newClass == Player.Classes.Skulk then
+		self:SetModel("models/alien/skulk/skulk.model")
+		self:SetViewModel("models/alien/skulk/skulk_view.model")
+		self:GiveWeapon("weapon_bite")
+		self.viewOffset = Vector(0, 0.6, 0)
+		self.moveSpeed = 14	
+		self.defaultHealth = 75
+		self.extents = Vector(0.4064, 0.4064, 0.4064)
+		self.gravity = -9.81
+		
+	elseif newClass == Player.Classes.BuildBot then
+		self:SetModel("models/marine/build_bot/build_bot.model")
+		self:GiveWeapon("weapon_rifle")
+		self:SetViewModel("models/marine/rifle/rifle_view_shell.model")
+		self.viewOffset = Vector(0, 0.6, 0)
+		self.moveSpeed = 7	
+		self.defaultHealth = 100
+		self.extents = Vector(0.4064, 0.7874, 0.4064)
+		self.gravity = -4.40
+	end
+	self.class = newClass
 end
 
 /**
@@ -224,7 +263,7 @@ function Player:OnProcessMove(input)
 			
 			// Compute the initial velocity to give us the desired jump			
 			// height under the force of gravity.			
-			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * Player.gravity) 			
+			self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity) 			
 			ground = false
 		end 
 	end
@@ -234,7 +273,7 @@ function Player:OnProcessMove(input)
        	self.velocity.y = 0    
     else
         // Apply the gravitational acceleration.
-        self.velocity.y = self.velocity.y + Player.gravity * input.time
+        self.velocity.y = self.velocity.y + self.gravity * input.time
     end
 
     // Compute the forward and side axis aligned with the world xz plane.
@@ -676,7 +715,7 @@ if (Server) then
     end
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)
-    	self.health = self.health - damage*10
+    	self.health = self.health - damage
     	self.score = self.health    	
     	if (self.health <= 0) then
     	    local extents = Player.extents
@@ -696,7 +735,7 @@ if (Server) then
 		    end
 		    
 		    self:SetOrigin(spawnPos)
-		    self.health = 100
+		    self.health = self.defaultHealth
 		    self.deaths = self.deaths + 1
 		    attacker.kills = attacker.kills + 1
 		end
