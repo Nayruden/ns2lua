@@ -84,7 +84,7 @@ end
  */
 function Bite:Draw(player)
     local viewModel = player:GetViewModelEntity()
-    viewModel:SetAnimation( "draw" )
+    //viewModel:SetAnimation( "draw" )
     player:PlaySound(self.drawSound)
 end
 
@@ -105,6 +105,7 @@ function Bite:Idle(player)
     local viewModel = player:GetViewModelEntity()
 
     viewModel:SetAnimationWithBlending( "bite_idle", 0.25 )
+    // There's more idle animations, not sure if we want to use them here though
     viewModel:SetOverlayAnimation( nil )
 
 end
@@ -117,8 +118,10 @@ function Bite:FireBullets(player)
     local viewModel = player:GetViewModelEntity()
 
     if (not self.firing) then
-        viewModel:SetAnimationWithBlending( "attack_arms_loop", 0.01 )
-        viewModel:SetOverlayAnimation( "attack_gun_loop" )
+        local suffix = tostring( math.random( 4 ) ):gsub( "1", "" ) -- Nothing, 2, 3, or 4
+        viewModel:SetAnimationWithBlending( "bite_attack" .. suffix, 0.01 )
+        player:SetAnimation( "bite" )
+        // viewModel:SetOverlayAnimation( "attack_gun_loop" )
     end
 
      local viewCoords = player:GetCameraViewCoords()
