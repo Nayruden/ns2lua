@@ -115,6 +115,10 @@ function OnConsoleStuck(player)
     player:SetOrigin(spawnPos)
 end
 
+function OnConsoleSay(player, message)
+    Chat.instance:SetMessage(message)
+end
+
 function OnConsoleTurret(player)
     local turret = Server.CreateEntity( "turret",  player:GetOrigin() )
     player:SetAngles( player:GetAngles() )
@@ -133,5 +137,7 @@ Event.Hook("Console_invertmouse",	OnConsoleInvertMouse)
 Event.Hook("Console_changeclass",	OnConsoleChangeClass)
 
 Event.Hook("Console_stuck",			OnConsoleStuck)
+
+Event.Hook("Console_say",			OnConsoleSay)
 
 Event.Hook("Console_turret",		OnConsoleTurret)
