@@ -72,9 +72,19 @@ function OnConsoleThirdPerson(player)
     player:SetIsThirdPerson( not player:GetIsThirdPerson() )
 end
 
+function OnConsoleBuildBot(player)
+	player:SetModel("models/marine/build_bot/build_bot.model")
+end
+
+function OnConsoleSkulk(player)
+	player:SetModel("models/alien/skulk/skulk.model")
+end
+
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
 Event.Hook("MapPostLoad",           OnMapPostLoad)
 
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
+Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
+Event.Hook("Console_skulk", 		OnConsoleSkulk)
