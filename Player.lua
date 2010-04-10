@@ -40,7 +40,10 @@ Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' }
 
-Shared.PrecacheModel(Player.modelName)
+Shared.PrecacheModel("models/marine/male/male.model")
+Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
+Shared.PrecacheModel("models/alien/skulk/skulk.model")
+Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
 
 function Player:OnInit()
     

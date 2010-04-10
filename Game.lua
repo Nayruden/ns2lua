@@ -90,7 +90,10 @@ if (Server) then
     function Game:StartGame()
     
         // Start the game in 5 seconds.
-        self.startTime = Shared.GetTime() + 5
+		if (self.startTime == 0) then
+       		self.startTime = Shared.GetTime() + 5
+		end
+
         
     end
 

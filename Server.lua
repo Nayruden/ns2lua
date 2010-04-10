@@ -45,13 +45,16 @@ function OnClientConnect(client)
     Server.SetControllingPlayer(client, player)
     
     Game.instance:StartGame()
+    
+    Shared.Message("Client " .. client .. " has joined the server")
    
 end
 
 /**
  * Called when a player disconnects from the server
  */
-function OnClientDisconnect(client, player)    
+function OnClientDisconnect(client, player)   
+	Shared.Message("Client " .. client .. " has disconnected") 
 end
 
 /**
@@ -69,9 +72,26 @@ function OnConsoleThirdPerson(player)
     player:SetIsThirdPerson( not player:GetIsThirdPerson() )
 end
 
+function OnConsoleBuildBot(player)
+	player:SetModel("models/marine/build_bot/build_bot.model")
+end
+
+function OnConsoleSkulk(player)
+	player:SetModel("models/alien/skulk/skulk.model")
+	player:SetViewModel("models/alien/skulk/skulk_view.model")
+end
+
+function OnConsoleMarine(player)
+	player:SetModel("models/marine/male/male.model")
+	player:SetViewModel("models/marine/rifle/rifle_view.model")
+end
+
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
 Event.Hook("MapPostLoad",           OnMapPostLoad)
 
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
+Event.Hook("Console_buildbot", 		OnConsoleBuildBot)
+Event.Hook("Console_skulk", 		OnConsoleSkulk)
+Event.Hook("Console_marine",		OnConsoleMarine)
