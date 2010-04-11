@@ -395,6 +395,11 @@ function Player:OnProcessMove(input)
                 elseif (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
+                if (bit.band(input.commands, Move.SecondaryAttack) ~= 0) then
+                    self:SecondaryAttack()
+                elseif (self.activity == Player.Activity.Shooting) then
+                    self:StopPrimaryAttack()
+                end
 
             end
         end
@@ -657,12 +662,57 @@ function Player:PrimaryAttack()
 
 end
 
+/**
+ * Performs the secondary attack for the current weapon
+ */
+function Player:SecondaryAttack()
+    // Check if the current class is marine
+    if (self.class == Player.Classes.Marine) then
+ 
+       local weapon = self:GetActiveWeapon()
+ 
+        if (weapon ~= nil) then
+
+            local time = Shared.GetTime()
+
+            if (time > self.activityEnd) then
+
+               if (weapon:Melee(self)) then
+                    self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" )
+                    self.activityEnd = time + weapon:GetMeleeDelay()
+                    self.activity    = Player.Activity.Shooting
+                else
+                    // The weapon can't fire anymore (out of bullets, etc.)
+                    if (self.activity == Player.Activity.Shooting) then
+                        self:StopSecondaryAttack()
+                    end
+                    self:Idle()
+                end
+            end
+
+        end
+    end
+end  
+
+
 function Player:StopPrimaryAttack()
 
     local weapon = self:GetActiveWeapon()
 
     if (weapon ~= nil) then
         weapon:StopPrimaryAttack(self)
+    end
+
+    self.activity = Player.Activity.None
+
+end
+
+function Player:StopSecondaryAttack()
+
+    local weapon = self:GetActiveWeapon()
+
+    if (weapon ~= nil) then
+        weapon:StopSecondaryAttack(self)
     end
 
     self.activity = Player.Activity.None

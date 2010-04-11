@@ -30,8 +30,10 @@ Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
 Rifle.bulletsToShoot        = 1
 Rifle.spread                = 0.03
 Rifle.range                 = 50
+Rifle.meleeRange            = 1.5     // Range of melee attack
 Rifle.penetration           = 0
 Rifle.fireDelay             = 0.1   // Time between shots
+Rifle.meleeDelay            = 0.6   // Time between melee
 Rifle.reloadTime            = 3     // Time it takes to reload
 Rifle.drawTime              = 1.3   // Time it takes to draw the weapon
 Rifle.clipSize              = 30    // Number of bullets the clip holds
@@ -122,12 +124,73 @@ function Rifle:StopPrimaryAttack(player)
 
 end
 
+function Rifle:StopSecondaryAttack(player)
+
+    if (self.firingState > 0) then
+
+        self:Idle(player)
+
+        self.firingState = 0
+
+    end
+
+end
+
 function Rifle:Idle(player)
 
     local viewModel = player:GetViewModelEntity()
 
     viewModel:SetAnimationWithBlending( "idle", 0.25 )
     viewModel:SetOverlayAnimation( nil )
+
+end
+
+/**
+ * Melee's from the player's current view.
+ */
+function Rifle:Melee(player)
+
+    local viewModel = player:GetViewModelEntity()
+
+    if (not self.firing) then
+        local suffix = tostring( math.random( 6 ) ):gsub( "1", "" ) -- Nothing, 2, 3, 4, 5, or 6
+        viewModel:SetAnimationWithBlending( "attack_secondary" .. suffix, 0.01 )
+        player:SetOverlayAnimation("rifle_alt``")
+    end
+
+     local viewCoords = player:GetCameraViewCoords()
+     local startPoint = viewCoords.origin
+
+    // Filter ourself out of the trace so that we don't hit the weapon or the
+    // player using it.
+    local filter = EntityFilterTwo(player, self)
+
+    local spreadDirection = viewCoords.zAxis
+
+    local endPoint = startPoint + spreadDirection * self.meleeRange
+    local trace = Shared.TraceRay(startPoint, endPoint, filter)
+
+    if (trace.fraction < 1) then
+
+        self:CreateHitEffect(player, trace)
+
+        local target = trace.entity
+
+        if (target ~= nil and target.TakeDamage ~= nil) then
+            local direction = (trace.endPoint - startPoint):GetUnit()
+            target:TakeDamage(player, 50, self, trace.endPoint, direction)
+        end
+
+    end
+
+    // Create the muzzle flash effect.
+    player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", Bite.muzzleFlashCinematic)
+
+    if (self.firingState < 2) then
+        self.firingState = self.firingState + 1
+    end
+
+    return true
 
 end
 
@@ -265,6 +328,13 @@ end
  */
 function Rifle:GetFireDelay()
     return self.fireDelay
+end
+
+/**
+ * Returns the time between melee for the weapon.
+ */
+function Rifle:GetMeleeDelay()
+    return self.meleeDelay
 end
 
 /**
