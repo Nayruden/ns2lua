@@ -46,7 +46,7 @@ Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' }
 Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
-Player.Teams				= enum { 'Marines', 'Aliens' } 
+Player.Teams				= enum { 'Marines', 'Aliens' }
 
 Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
@@ -268,7 +268,7 @@ function Player:OnProcessMove(input)
     local sideAxis   = nil
 
     // Handle jumpping
-    if (canMove and (ground or self.Class == Player.Classes.BuildBot)) then
+    if (canMove and (ground or self.class == Player.Classes.BuildBot)) then
         if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
             self.canJump = 1
         elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
