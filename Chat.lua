@@ -62,7 +62,7 @@ function Chat:OnThink()
     if (not UIEnabled) then
         if (self.lastIDProcessed ~= self.latestMessageID) then
             
-            Shared.Message(GetMessage())
+            Shared.Message(self:GetMessage())
             
         end
     end
@@ -70,7 +70,7 @@ function Chat:OnThink()
 
 end
 
-function Chat::IsNewMessageAvailable()
+function Chat:IsNewMessageAvailable()
     if (self.lastIDProcessed ~= self.latestMessageID) then
         return true
     else
