@@ -128,20 +128,12 @@ end
  */
 function PeaShooter:FireBullets(player)
 
-    local bulletsToShoot = math.min(self.bulletsToShoot, self.numBulletsInClip)
-
-    if (bulletsToShoot == 0) then
-        return false
-    end
-
     local viewModel = player:GetViewModelEntity()
 
     if (not self.firing) then
         viewModel:SetAnimationWithBlending( "attack_arms_loop", 0.01 )
         viewModel:SetOverlayAnimation( "attack_gun_loop" )
     end
-
-    self.numBulletsInClip = self.numBulletsInClip - bulletsToShoot
 
     local viewCoords = player:GetCameraViewCoords()
     local startPoint = viewCoords.origin
@@ -150,37 +142,34 @@ function PeaShooter:FireBullets(player)
     // player using it.
     local filter = EntityFilterTwo(player, self)
 
-    for bullet = 1, self.bulletsToShoot do
+    local spreadDirection = viewCoords.zAxis
 
-        local spreadDirection = viewCoords.zAxis
+    if (self.spread > 0) then
 
-        if (self.spread > 0) then
+        local xSpread = ((NetworkRandom() * 2 * spread) - spread) + ((NetworkRandom() * 2 * spread) - spread)
+        local ySpread = ((NetworkRandom() * 2 * spread) - spread) + ((NetworkRandom() * 2 * spread) - spread)
 
-            local xSpread = ((NetworkRandom() * 2 * spread) - spread) + ((NetworkRandom() * 2 * spread) - spread)
-            local ySpread = ((NetworkRandom() * 2 * spread) - spread) + ((NetworkRandom() * 2 * spread) - spread)
+        spreadDirection = viewCoords.zAxis + viewCoords.xAxis * xSpread + viewCoords.yAxis * ySpread
 
-            spreadDirection = viewCoords.zAxis + viewCoords.xAxis * xSpread + viewCoords.yAxis * ySpread
+    end
 
-        end
+    local endPoint = startPoint + spreadDirection * self.range
+    local trace = Shared.TraceRay(startPoint, endPoint, filter)
 
-        local endPoint = startPoint + spreadDirection * self.range
-        local trace = Shared.TraceRay(startPoint, endPoint, filter)
+    if (trace.fraction < 1) then
 
-        if (trace.fraction < 1) then
+        self:CreateHitEffect(player, trace)
 
-            self:CreateHitEffect(player, trace)
+        local target = trace.entity
 
-            local target = trace.entity
-
-            if (target ~= nil and target.TakeDamage ~= nil) then
-                local direction = (trace.endPoint - startPoint):GetUnit()
-                target:TakeDamage(player, PeaShooter.damage, self, trace.endPoint, direction)
-            end
-
+        if (target ~= nil and target.TakeDamage ~= nil) then
+            local direction = (trace.endPoint - startPoint):GetUnit()
+            target:TakeDamage(player, PeaShooter.damage, self, trace.endPoint, direction)
         end
 
     end
 
+ 
     // Create the muzzle flash effect.
     player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", PeaShooter.muzzleFlashCinematic)
 
@@ -209,34 +198,11 @@ end
  * Returns true if the weapon successfully started a reload.
  */
 function PeaShooter:Reload(player)
-
-    if (self.numBulletsInReserve > 0 and self.numBulletsInClip ~= self.clipSize) then
-
-        local viewModel = player:GetViewModelEntity()
-
-        viewModel:SetAnimation( "reload" )
-        player:PlaySound( self.reloadSound )
-
-        return true
-
-    end
-
     return false
-
 end
 
 function PeaShooter:ReloadFinish(player)
-
-    if (self.numBulletsInReserve > 0 and self.numBulletsInClip ~= self.clipSize) then
-        self.numBulletsInClip = math.min(self.numBulletsInReserve, self.clipSize)
-        self.numBulletsInReserve = self.numBulletsInReserve - self.numBulletsInClip
-
         return true
-
-    end
-
-    return false
-
 end
 
 /**
