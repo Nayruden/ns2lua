@@ -128,11 +128,6 @@ function OnConsoleStuck(player)
 end
 
 function OnConsoleSay(player, ...)
-    local args = table.concat( { ... }, " " )
-    Chat.instance:SetMessage(args)
-end
-
-function OnConsoleSay2(player, ...)
     local args = player:GetNick() .. ": " .. table.concat( { ... }, " " )
     Server.Broadcast( nil, args )
 end
@@ -215,7 +210,6 @@ Event.Hook("Console_changeclass",	OnConsoleChangeClass)
 Event.Hook("Console_stuck",			OnConsoleStuck)
 
 Event.Hook("Console_say",			OnConsoleSay)
-Event.Hook("Console_say2",			OnConsoleSay2)
 
 Event.Hook("Console_target",		OnConsoleTarget)
 Event.Hook("Console_turret",		OnConsoleTurret)
