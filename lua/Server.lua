@@ -74,7 +74,6 @@ function OnMapPostLoad()
     // Create the game object. This is a networked object that manages the game
     // state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
-    Server.CreateEntity("chat", Vector(0, 0, 0))
 
 end
 
