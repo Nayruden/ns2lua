@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // RifleRange/Rifle.lua
-// 
+//
 // Created by Max McGuire (max@unknownworlds.com)
 // Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
 //
@@ -182,7 +182,7 @@ function Rifle:FireBullets(player)
 
             if (target ~= nil and target.TakeDamage ~= nil) then
                 local direction = (trace.endPoint - startPoint):GetUnit()
-                target:TakeDamage(player, 1, self, trace.endPoint, direction)
+                target:TakeDamage(player, 8, self, trace.endPoint, direction)
             end
 
         end
