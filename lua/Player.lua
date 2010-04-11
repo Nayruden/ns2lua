@@ -46,6 +46,7 @@ Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' }
 Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
+Player.Teams				= enum { 'Marines', 'Aliens' } 
 
 Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
@@ -83,6 +84,7 @@ function Player:OnInit()
     self.gravity                    = -9.81
     self.moveSpeed                  = 7
     self.invert_mouse               = 0
+    self.team						= Player.Teams.Marines
 
     // Collide with everything except group 1. That group is reserved
     // for things we don't want to collide with.
@@ -145,6 +147,10 @@ function Player:ChangeClass(newClass)
         self.gravity = -4.40
     end
     self.class = newClass
+end
+
+function Player:ChangeTeam(newTeam)
+	self.team = newTeam
 end
 
 /**

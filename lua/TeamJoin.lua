@@ -46,13 +46,17 @@ if (Server) then
 			local teamnum = Trim(self.editorTeamNumber)
 			if (teamnum == "1") then
 				player:ChangeClass(Player.Classes.Marine)
+				player:ChangeTeam(Player.Teams.Marines)
 			elseif (teamnum == "2") then
 				player:ChangeClass(Player.Classes.Skulk)
+				player:ChangeTeam(Player.Teams.Aliens)
 			elseif (teamnum  == "3") then
 				if (math.random(2) == 1) then
 					player:ChangeClass(Player.Classes.Marine)
+					player:ChangeTeam(Player.Teams.Marines)
 				else
 					player:ChangeClass(Player.Classes.Skulk)
+					player:ChangeTeam(Player.Teams.Aliens)
 				end
 			end
 			self:GoToGame(player)
