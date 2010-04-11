@@ -134,7 +134,7 @@ end
 
 
 
-function OnConsoleMarrineTeam(player)
+function OnConsoleMarineTeam(player)
 	player:ChangeClass(Player.Classes.Marine)
 end
 
@@ -186,6 +186,6 @@ Event.Hook("Console_say",			OnConsoleSay)
 
 Event.Hook("Console_target",		OnConsoleTarget)
 Event.Hook("Console_readyroom",		OnConsoleReadyRoom)
-Event.Hook("Console_marineteam",	OnConsoleMarrineTeam)
+Event.Hook("Console_marineteam",	OnConsoleMarineTeam)
 Event.Hook("Console_alienteam",		OnConsoleAlienTeam)
 Event.Hook("Console_randomteam",	OnConsoleRandomTeam)
