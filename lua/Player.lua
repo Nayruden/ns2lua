@@ -16,7 +16,7 @@ Player.networkVars =
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
         viewModelId                 = "entityid",
-        viewOffset                  = "interpolated vector",
+        viewOffset                  = "interpolated predicted vector",
         velocity                    = "predicted vector",
         activeWeaponId              = "entityid",
         overlayAnimationSequence    = "integer (-1 to 60)",
@@ -289,7 +289,7 @@ function Player:OnProcessMove(input)
             self.origSpeed = self.moveSpeed
             self.moveSpeed = math.floor( self.moveSpeed * 0.5 )
 
-            if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
+            if (self.class == Player.Classes.Marine) then
                 self.viewOffset = Vector(0, 0.9, 0)
             end
         end
@@ -301,7 +301,7 @@ function Player:OnProcessMove(input)
             self.moveSpeed = self.origSpeed
             self.origSpeed = nil
 
-            if (not Client and self.class == Player.Classes.Marine) then
+            if (self.class == Player.Classes.Marine) then
                 self.viewOffset = Vector(0, 1.6256, 0)
             end
         end
