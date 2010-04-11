@@ -7,7 +7,7 @@
 // ========= For more information, visit us at http://www.unknownworlds.com =====================
 
 Script.Load("lua/Constants.lua")
-Script.Load("lua/Table.lua")
+Script.Load("lua/Table.lua")Script.Load("lua/ns2devslib.lua")
   
 // Splits string into array, along whitespace boundaries. First element indexed at 1.
 function StringToArray(instring)
