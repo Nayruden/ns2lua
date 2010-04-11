@@ -119,7 +119,7 @@ end
 function Player:ChangeClass(newClass)
     if newClass == Player.Classes.Marine then
         self:SetModel("models/marine/male/male.model")
-        self:SetViewModel("models/marine/rifle/rifle_view.model")
+        //self:SetViewModel("models/marine/rifle/rifle_view.model") (ChangeWeapon() sets this)
         self:GiveWeapon("weapon_rifle")
         self.viewOffset = Vector(0, 1.6256, 0)
         self.moveSpeed = 7
@@ -129,7 +129,7 @@ function Player:ChangeClass(newClass)
 
     elseif newClass == Player.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
-        self:SetViewModel("models/alien/skulk/skulk_view.model")
+        //self:SetViewModel("models/alien/skulk/skulk_view.model") (ChangeWeapon() sets this)
         self:GiveWeapon("weapon_bite")
         self.viewOffset = Vector(0, 0.6, 0)
         self.moveSpeed = 14
@@ -542,6 +542,30 @@ function Player:GetActiveWeapon()
 
 end
 
+function Player:RetractWeapon()
+	local weaponID = self.activeWeaponId
+	if (weaponID and weaponID > 0) then
+		self:SetViewModel("models/marine/rifle/rifle_view_shell.model") // cheesy empty model
+		// TODO: Implement a better way to get rid of the weapon so that it can be retrieved later
+		if (Server) then
+			Server.DestroyEntity(Shared.GetEntity(weaponID))
+		end
+		self.activeWeaponID = 0
+	end
+end
+
+function Player:ChangeWeapon(weapon)
+	local weaponID = weapon:GetId()
+	if (weaponID ~= self.activeWeaponId) then
+		self:RetractWeapon()
+
+        weapon:SetParent(self)
+        weapon:SetAttachPoint("RHand_Weapon")
+		self.activeWeaponId = weaponID
+		self:DrawWeapon()
+	end
+end
+
 /**
  * Unholsters the active weapon.
  */
@@ -550,7 +574,6 @@ function Player:DrawWeapon()
     local weapon = self:GetActiveWeapon()
 
     if (weapon ~= nil) then
-
         // Apply the weapon's view model.
         self:SetViewModel(weapon:GetViewModelName())
         weapon:Draw(self)
@@ -742,15 +765,9 @@ end
 if (Server) then
 
     function Player:GiveWeapon(className)
-
         local weapon = Server.CreateEntity(className, self:GetOrigin())
-
-        weapon:SetParent(self)
-        weapon:SetAttachPoint("RHand_Weapon")
-
-        self.activeWeaponId = weapon:GetId()
-        self:DrawWeapon()
-
+		// TODO: Add inventory management here
+        self:ChangeWeapon(weapon)
     end
 
     function Player:TakeDamage(attacker, damage, doer, point, direction)
