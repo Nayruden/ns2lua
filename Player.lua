@@ -32,13 +32,13 @@ Player.networkVars =
         class                       = "integer (0 to 3)",
         moveSpeed                   = "integer",
         invert_mouse                = "integer (0 to 1)",
+        gravity						= "float"
     }
 
 Player.modelName = "models/marine/male/male.model"
 Player.extents   = Vector(0.4064, 0.7874, 0.4064)
 
 Player.moveAcceleration     =  4
-Player.gravity              = -9.81
 Player.stepHeight           =  0.2
 Player.jumpHeight           =  1
 Player.friction             =  6
