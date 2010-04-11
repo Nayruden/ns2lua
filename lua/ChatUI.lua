@@ -10,8 +10,11 @@ function ChatUI_GetLatestMessage()
     return Chat.instance:GetMessage()
 end
 
-//this makes it so that nothing is pritned to the console
-function ChatUI_Enable()
-    Chat.instance:EnableUI()
+
+function ChatUI_GetMessage(messageID)
+    return Chat.instance:GetMessageFromLog(messageID)
 end
 
+function ChatUI_GetNumberOfMessagesInLog()
+    return Chat.instance:GetNumberOfMessagesInLog()
+end
