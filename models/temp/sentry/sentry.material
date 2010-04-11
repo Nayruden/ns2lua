@@ -1,0 +1,5 @@
+<material>
+    <maps>
+        <map type="texture" value="models/temp/sentry/sentry.dds" />
+    </maps>
+</material>
