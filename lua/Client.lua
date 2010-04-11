@@ -47,6 +47,8 @@ function OnCommandHelp(userdata, ...)
         Shared.Message("* help")
         Shared.Message("* stuck")
         Shared.Message("* target")
+        Shared.Message("* lua")
+        Shared.Message("* cllua")
     elseif (args[1] == "features") then
 
 
@@ -78,5 +80,18 @@ function OnCommandHelp(userdata, ...)
     end
 end
 
+function OnConsoleClLua(userdata, ...)
+    local str = table.concat( { ... }, " " )
+    Shared.Message( "(Client) Running lua: " .. str )
+    local good, err = loadstring(str)
+    if not good then
+        Shared.Message( err )
+        return
+    end
+    good()
+end
+
 
 Event.Hook("Console_help", OnCommandHelp)
+Event.Hook("Console_cllua",  OnConsoleClLua)
+
