@@ -58,14 +58,9 @@ if (Server) then
             local x1 = target.x - mypos.x
             local y1 = target.y - mypos.y
             local z1 = target.z - mypos.z
-            
-            x1 = x1 / math.sqrt(x1*x1+y1*y1+z1*z1)
-            y1 = y1 / math.sqrt(x1*x1+y1*y1+z1*z1)
-            z1 = z1 / math.sqrt(x1*x1+y1*y1+z1*z1)
-            
-            local desired = -math.atan(z1/x1)
-
-			local angles =  Angles(0,desired,0)
+                     
+			local angles =  Angles(self:GetAngles())
+			angles.yaw = (math.atan2(x1,z1) -3.14/2)
 			
 			Shared.Message("target " .. target.x .. " " .. target.y .. " " .. target.z)
 			Shared.Message("mypos " .. mypos.x .. " " .. mypos.y .. " " .. mypos.z)   					
