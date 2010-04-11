@@ -39,6 +39,7 @@ function Chat:OnInit()
     self.message12 = 0
     self.latestMessageID = 0;
     self.UIEnabled = false
+    self.ChatLog = { }
     if (Server) then
         // Make the game always propagate to all clients (no visibility checks).
         self:SetPropagate(Entity.Propagate_Always)
@@ -52,26 +53,25 @@ function Chat:OnInit()
 
 end
 
-function Chat:EnableUI()
-    self.UIEnabled = true
-    Chat.updateInterval = 1
-end
+
 
 
 function Chat:OnThink()
-    if (self.UIEnabled ~= true) then
-        if (self.lastIDProcessed ~= self.latestMessageID) then
-            
-            Shared.Message(self:GetMessage())
-            
-        end
+    if (self:IsNewMessageAvailable()) then
+        
+        table.insert(self.ChatLog, 1, self:GetMessage() )
+        
     end
     self:SetNextThink(self.updateInterval)
 
 end
 
+function Chat:GetNumberOfMessagesInLog()
+    return table.getn(self.ChatLog)
+end
 function Chat:IsNewMessageAvailable()
     if (self.lastIDProcessed ~= self.latestMessageID) then
+        Print("true");
         return true
     else
         return false
@@ -86,6 +86,10 @@ function Chat:GetMessage()
     end
     return message;
 
+end
+
+function Chat:GetMessageFromLog(ID)
+    return self.ChatLog[ID]
 end
 
 function Chat:SetMessage(message)
