@@ -58,15 +58,18 @@ if (Server) then
             local x1 = target.x - mypos.x
             local y1 = target.y - mypos.y
             local z1 = target.z - mypos.z
-                     
-			local angles =  Angles(self:GetAngles())
-			angles.yaw = (math.atan2(x1,z1) -3.14/2)
-			
-			Shared.Message("target " .. target.x .. " " .. target.y .. " " .. target.z)
-			Shared.Message("mypos " .. mypos.x .. " " .. mypos.y .. " " .. mypos.z)   					
-            Shared.Message("cur " .. angles.pitch .. " " .. angles.yaw)
-            
-            self:SetAngles(angles)
+
+			local horizHypSqr = (x1*x1+z1*z1)
+			local horizHyp = math.sqrt(horizHypSqr)
+			local vertHyp = math.sqrt(horizHypSqr+y1*y1)
+
+			local yaw = math.acos(x1 / horizHyp)
+			if (z1 > 0) then
+				yaw = math.pi*2 - yaw
+			end
+			local pitch = math.asin(y1 / vertHyp)
+
+            self:SetAngles(Angles(0, yaw, pitch))
         end
         
         self:SetNextThink(Turret.thinkInterval)
