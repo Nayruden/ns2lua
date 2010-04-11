@@ -138,6 +138,12 @@ function OnConsoleTarget(player)
     target:Popup()
 end
 
+function OnConsoleTurret(player)
+    local target = Server.CreateEntity( "turret",  player:GetOrigin() )
+    target:SetAngles( player:GetAngles() )
+    target:Popup()
+end
+
 
 
 
@@ -192,6 +198,9 @@ Event.Hook("Console_stuck",			OnConsoleStuck)
 Event.Hook("Console_say",			OnConsoleSay)
 
 Event.Hook("Console_target",		OnConsoleTarget)
+Event.Hook("Console_turret",		OnConsoleTurret)
+
+
 Event.Hook("Console_readyroom",		OnConsoleReadyRoom)
 Event.Hook("Console_marineteam",	OnConsoleMarineTeam)
 Event.Hook("Console_alienteam",		OnConsoleAlienTeam)
