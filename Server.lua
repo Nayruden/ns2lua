@@ -123,30 +123,11 @@ function OnConsoleSay(player, ...)
     Chat.instance:SetMessage(args)
 end
 
-function OnConsoleTurret(player)
-    local turret = Server.CreateEntity( "turret",  player:GetOrigin() )
-    player:SetAngles( player:GetAngles() )
+function OnConsoleTarget(player)
+	local target = Server.CreateEntity( "target",  player:GetOrigin() )
+	target:SetAngles( player:GetAngles() )
+	target:Popup()
 end
-
-function OnConsoleDumpCmds(player)
-	Shared.Message("Server:")
-	for k,v in pairs(Server) do 
-		Shared.Message(k)
-		//for k1,v1 in debug.getinfo(v) do 
-		//	Shared.Message(tostring(k1) .. " " .. tostring(v1))
-		//end
-		
-	end
-	Shared.Message("Shared:")
-	for k,v in pairs(Shared) do Shared.Message(k .. " " .. tostring(v)) end
-	Shared.Message("Event:")
-	for k,v in pairs(Event) do Shared.Message(k .. " " .. tostring(v)) end
-	//Shared.Message("Game:")
-	//for k,v in pairs(Game) do Shared.Message(k .. " " .. tostring(v)) end
-	Shared.Message("Player:")
-	for k,v in pairs(Player) do Shared.Message(k .. " " .. tostring(v)) end
-end
-
 
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
@@ -162,6 +143,4 @@ Event.Hook("Console_stuck",			OnConsoleStuck)
 
 Event.Hook("Console_say",			OnConsoleSay)
 
-Event.Hook("Console_turret",		OnConsoleTurret)
-
-Event.Hook("Console_dumpcmds", 		OnConsoleDumpCmds)
+Event.Hook("Console_target",		OnConsoleTarget)
