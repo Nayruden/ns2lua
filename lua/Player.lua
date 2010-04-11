@@ -32,7 +32,8 @@ Player.networkVars =
         class                       = "integer (0 to 3)",
         moveSpeed                   = "integer",
         invert_mouse                = "integer (0 to 1)",
-        gravity						= "float"
+        gravity						= "float",
+        sprinting					= "boolean"
     }
 
 Player.modelName = "models/marine/male/male.model"
@@ -72,6 +73,7 @@ function Player:OnInit()
     self.viewOffset                 = Vector(0, 1.6256, 0)
 
     self.thirdPerson                = false
+    self.sprinting					= false
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
@@ -83,6 +85,7 @@ function Player:OnInit()
     self.class                      = Player.Classes.Marine
     self.gravity                    = -9.81
     self.moveSpeed                  = 7
+    self.origSpeed					= self.moveSpeed
     self.invert_mouse               = 0
     self.team						= Player.Teams.Marines
 
@@ -150,6 +153,7 @@ function Player:ChangeClass(newClass)
 		self:SetBaseAnimation("fly")
     end
     self.class = newClass
+    self.origSpeed = self.moveSpeed
 end
 
 function Player:ChangeTeam(newTeam)
@@ -289,20 +293,19 @@ function Player:OnProcessMove(input)
     if (bit.band(input.commands, Move.Crouch) ~= 0) then
         if (not self.crouching) then
             //self:SetAnimation( "" ) // Needs a crouch animation
-            self.origSpeed = self.moveSpeed
-            self.moveSpeed = math.floor( self.moveSpeed * 0.5 )
+            self.moveSpeed = math.floor( self.origSpeed * 0.5 )
 			self:SetPoseParam("crouch", 1.0)
             if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
                 self.viewOffset = Vector(0, 0.9, 0)
             end
         end
         self.crouching = 3
+        self.sprinting = false
     elseif (self.crouching) then
         self.crouching = self.crouching - 1
         if (self.crouching <= 0) then
             self.crouching = nil
             self.moveSpeed = self.origSpeed
-            self.origSpeed = nil
 			self:SetPoseParam("crouch", 0.0)
             if (not Client and self.class == Player.Classes.Marine) then
                 self.viewOffset = Vector(0, 1.6256, 0)
@@ -310,6 +313,17 @@ function Player:OnProcessMove(input)
         end
     end
 
+    if (bit.band(input.commands, Move.MovementModifier) ~= 0) and (not self.sprinting) then
+    	self.sprinting = true
+    	self.moveSpeed = 2 * self.origSpeed
+    	self:SetPoseParam("sprint", 1.0)
+    elseif (self.sprinting) then
+    	self.sprinting = false
+    	self.moveSpeed = self.origSpeed
+    	self:SetPoseParam("sprint", 0.0)
+    end
+    
+    
     if (ground) then
         // Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
