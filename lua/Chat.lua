@@ -71,7 +71,6 @@ function Chat:GetNumberOfMessagesInLog()
 end
 function Chat:IsNewMessageAvailable()
     if (self.lastIDProcessed ~= self.latestMessageID) then
-        Print("true");
         return true
     else
         return false
@@ -84,6 +83,7 @@ function Chat:GetMessage()
     for i=0,12 do
         message = message .. self:IntToString(self[ "message" .. i ])
     end
+    Shared.Message(message)
     return message;
 
 end
