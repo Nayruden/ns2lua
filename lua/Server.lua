@@ -74,6 +74,7 @@ function OnMapPostLoad()
     // Create the game object. This is a networked object that manages the game
     // state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
+    Server.CreateEntity("chat", Vector(0, 0, 0))
 
 end
 
@@ -127,11 +128,12 @@ function OnConsoleStuck(player)
 end
 
 function OnConsoleSay(player, ...)
-    local args = player:GetNick() .. ": " .. table.concat( { ... }, " " )
+    local msg = player:GetNick() .. ": " .. table.concat( { ... }, " " )
 	if (Client) then
-		Shared.Message(args)
+		Shared.Message(msg)
 	end
-    Server.Broadcast( nil, args )
+    Server.Broadcast( nil, msg )
+    Chat.instance:SetMessage(msg)
 end
 
 function OnConsoleTarget(player)
