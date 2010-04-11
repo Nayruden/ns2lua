@@ -16,7 +16,7 @@ Player.networkVars =
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
         viewModelId                 = "entityid",
-        viewOffset                  = "vector",
+        viewOffset                  = "interpolated vector",
         velocity                    = "predicted vector",
         activeWeaponId              = "entityid",
         overlayAnimationSequence    = "integer (-1 to 60)",
@@ -268,7 +268,7 @@ function Player:OnProcessMove(input)
     local sideAxis   = nil
 
     // Handle jumpping
-    if (canMove and ground) then
+    if (canMove and (ground or self.Class == Player.Classes.BuildBot)) then
         if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
             self.canJump = 1
         elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
@@ -287,7 +287,7 @@ function Player:OnProcessMove(input)
         if (not self.crouching) then
             //self:SetAnimation( "" ) // Needs a crouch animation
             self.origSpeed = self.moveSpeed
-            self.moveSpeed = math.floor( self.moveSpeed * 0.2 )
+            self.moveSpeed = math.floor( self.moveSpeed * 0.5 )
 
             if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
                 self.viewOffset = Vector(0, 0.9, 0)
