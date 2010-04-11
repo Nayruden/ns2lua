@@ -31,8 +31,8 @@ function ShowInGameMenu()
 end
 
 function OnCommandNick( data, nickname )
-	Main.SetOptionString( kNicknameOptionsKey, nickname )
-	Shared.Message( "Nick changed to " .. nickname )
+    Main.SetOptionString( kNicknameOptionsKey, nickname )
+    Shared.Message( "Nick changed to " .. nickname )
 end
 
 Event.Hook( "Console_nick", OnCommandNick )
@@ -41,9 +41,14 @@ Event.Hook( "Console_nick", OnCommandNick )
 function OnCommandHelp(userdata, ...)
     local args = { ... }
     if (args[1] == "commands") then
-        Shared.Message("this should be a list of commands");
+        Shared.Message("this should be a complete list of commands")
+        Shared.Message("* changeclass")
+        Shared.Message("* nick")
+        Shared.Message("* help")
+        Shared.Message("* stuck")
+        Shared.Message("* target")
     elseif (args[1] == "features") then
-    
+
 
         Shared.Message("Gameplay Changes")
 

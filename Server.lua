@@ -25,10 +25,10 @@ Script.Load("lua/TeamJoin.lua")
 function OnClientConnect(client)
 
     // Get an unobstructured spawn point for the player.
-    
+
     local extents = Player.extents
     local offset  = Vector(0, extents.y + 0.01, 0)
-    
+
     repeat
         spawnPoint = Shared.FindEntityWithClassname("ready_room_start", spawnPoint)
     until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
@@ -45,18 +45,18 @@ function OnClientConnect(client)
     // Create a new player for the client.
     local player = Server.CreateEntity("player", spawnPos)
     Server.SetControllingPlayer(client, player)
-    
+
     Game.instance:StartGame()
-    
+
     Shared.Message("Client " .. client .. " has joined the server")
-   
+
 end
 
 /**
  * Called when a player disconnects from the server
  */
-function OnClientDisconnect(client, player)   
-	Shared.Message("Client " .. client .. " has disconnected") 
+function OnClientDisconnect(client, player)
+    Shared.Message("Client " .. client .. " has disconnected")
 end
 
 /**
@@ -75,32 +75,34 @@ function OnConsoleThirdPerson(player)
     player:SetIsThirdPerson( not player:GetIsThirdPerson() )
 end
 
-function OnConsoleChangeClass(player,type) 
-	if (type == "buildbot") then
-		player:ChangeClass(Player.Classes.BuildBot)
-		Shared.Message("You have become a BuildBot!");
-	elseif (type == "skulk") then
-		player:ChangeClass(Player.Classes.Skulk)
-		Shared.Message("You have become a Skulk!");
-	else
-		player:ChangeClass(Player.Classes.Marine)
-		Shared.Message("You have become a Marine!");
-	end
+function OnConsoleChangeClass(player,type)
+    if (type == "buildbot") then
+        player:ChangeClass(Player.Classes.BuildBot)
+        Shared.Message("You have become a BuildBot!")
+    elseif (type == "skulk") then
+        player:ChangeClass(Player.Classes.Skulk)
+        Shared.Message("You have become a Skulk!")
+    elseif (type == "marine")
+        player:ChangeClass(Player.Classes.Marine)
+        Shared.Message("You have become a Marine!")
+    else
+        Shared.Message("Your options for this command are buildbot, skulk, and marine")
+    end
 end
 
 function OnConsoleInvertMouse(player)
-	if (player.invert_mouse == 1) then
-		player.invert_mouse = 0
-		Shared.Message("Disabled mouse inversion.")
-	else
-		player.invert_mouse = 1		
-		Shared.Message("Enabled mouse inversion.")
-	end
+    if (player.invert_mouse == 1) then
+        player.invert_mouse = 0
+        Shared.Message("Disabled mouse inversion.")
+    else
+        player.invert_mouse = 1
+        Shared.Message("Enabled mouse inversion.")
+    end
 end
 
 function OnConsoleStuck(player)
     local extents = Player.extents
-	local offset  = Vector(0, extents.y + 0.01, 0)
+    local offset  = Vector(0, extents.y + 0.01, 0)
 
     repeat
         spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
@@ -114,7 +116,7 @@ function OnConsoleStuck(player)
         // embedded in the ground if the spawn point is positioned on the floor
         spawnPos.y = spawnPos.y + 0.01
     end
-    
+
     player:SetOrigin(spawnPos)
 end
 
@@ -124,9 +126,9 @@ function OnConsoleSay(player, ...)
 end
 
 function OnConsoleTarget(player)
-	local target = Server.CreateEntity( "target",  player:GetOrigin() )
-	target:SetAngles( player:GetAngles() )
-	target:Popup()
+    local target = Server.CreateEntity( "target",  player:GetOrigin() )
+    target:SetAngles( player:GetAngles() )
+    target:Popup()
 end
 
 // Hook the game methods.
