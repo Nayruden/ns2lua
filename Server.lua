@@ -16,6 +16,8 @@ decoda_name = "Server"
 Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
 Script.Load("lua/TargetSpawn.lua")
+Script.Load("lua/ReadyRoomStart.lua")
+Script.Load("lua/TeamJoin.lua")
 
 /**
  * Called when a player first connects to the server.
@@ -28,7 +30,7 @@ function OnClientConnect(client)
     local offset  = Vector(0, extents.y + 0.01, 0)
     
     repeat
-        spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
+        spawnPoint = Shared.FindEntityWithClassname("ready_room_start", spawnPoint)
     until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
 
     local spawnPos = Vector(0, 0, 0)
