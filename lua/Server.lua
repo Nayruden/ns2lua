@@ -36,7 +36,7 @@ function OnClientConnect(client)
 	// If there is not a ready room.
     if (spawnPoint == nil) then
 		repeat
-			spawnPoint = Shared.FindEntityWithClassname("ready_room_start", spawnPoint)
+			spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
 		until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
     end
 	
