@@ -121,6 +121,12 @@ function OnConsoleSay(player, ...)
     Chat.instance:SetMessage(args)
 end
 
+function OnConsoleTarget(player)
+	local target = Server.CreateEntity( "target",  player:GetOrigin() )
+	target:SetAngles( player:GetAngles() )
+	target:Popup()
+end
+
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
@@ -134,3 +140,5 @@ Event.Hook("Console_changeclass",	OnConsoleChangeClass)
 Event.Hook("Console_stuck",			OnConsoleStuck)
 
 Event.Hook("Console_say",			OnConsoleSay)
+
+Event.Hook("Console_target",		OnConsoleTarget)
