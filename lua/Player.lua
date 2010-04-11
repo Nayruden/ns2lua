@@ -98,7 +98,7 @@ function Player:OnInit()
         self.viewModelId = viewModel:GetId()
 
         // Give ourself a weapon.
-        self:GiveWeapon("weapon_rifle")
+        //self:GiveWeapon("weapon_rifle")
 
     end
 
@@ -126,6 +126,7 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -9.81
+		self:SetBaseAnimation("run")
 
     elseif newClass == Player.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
@@ -136,6 +137,7 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 75
         self.extents = Vector(0.4064, 0.4064, 0.4064)
         self.gravity = -9.81
+		self:SetBaseAnimation("run")
 
     elseif newClass == Player.Classes.BuildBot then
         self:SetModel("models/marine/build_bot/build_bot.model")
@@ -145,6 +147,7 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -4.40
+		self:SetBaseAnimation("fly")
     end
     self.class = newClass
 end
@@ -288,7 +291,7 @@ function Player:OnProcessMove(input)
             //self:SetAnimation( "" ) // Needs a crouch animation
             self.origSpeed = self.moveSpeed
             self.moveSpeed = math.floor( self.moveSpeed * 0.5 )
-
+			self:SetPoseParam("crouch", 1.0)
             if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
                 self.viewOffset = Vector(0, 0.9, 0)
             end
@@ -300,7 +303,7 @@ function Player:OnProcessMove(input)
             self.crouching = nil
             self.moveSpeed = self.origSpeed
             self.origSpeed = nil
-
+			self:SetPoseParam("crouch", 0.0)
             if (not Client and self.class == Player.Classes.Marine) then
                 self.viewOffset = Vector(0, 1.6256, 0)
             end

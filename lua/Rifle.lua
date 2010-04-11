@@ -28,7 +28,7 @@ Rifle.shellCinematic        = "cinematics/marine/rifle/shell.cinematic"
 Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Rifle.bulletsToShoot        = 1
-Rifle.spread                = 0
+Rifle.spread                = 0.03
 Rifle.range                 = 50
 Rifle.penetration           = 0
 Rifle.fireDelay             = 0.1   // Time between shots
@@ -164,8 +164,8 @@ function Rifle:FireBullets(player)
 
         if (self.spread > 0) then
 
-            local xSpread = ((NetworkRandom() * 2 * spread) - spread) + ((NetworkRandom() * 2 * spread) - spread)
-            local ySpread = ((NetworkRandom() * 2 * spread) - spread) + ((NetworkRandom() * 2 * spread) - spread)
+            local xSpread = ((NetworkRandom() * 2 * self.spread) - self.spread) + ((NetworkRandom() * 2 * self.spread) - self.spread)
+            local ySpread = ((NetworkRandom() * 2 * self.spread) - self.spread) + ((NetworkRandom() * 2 * self.spread) - self.spread)
 
             spreadDirection = viewCoords.zAxis + viewCoords.xAxis * xSpread + viewCoords.yAxis * ySpread
 

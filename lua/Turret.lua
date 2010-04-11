@@ -12,7 +12,7 @@ Shared.PrecacheSound(Turret.dieSound)
 Turret.State = enum { 'Idle', 'Firing' }
 
 Turret.thinkInterval = 0.25
-Turret.attackRadius = 393.7
+Turret.attackRadius = 10
 
 function Turret:OnInit()
     Actor.OnInit(self)
