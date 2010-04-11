@@ -59,7 +59,7 @@ end
 
 
 function Chat:OnThink()
-    if (not UIEnabled) then
+    if (self.UIEnabled ~= true) then
         if (self.lastIDProcessed ~= self.latestMessageID) then
             
             Shared.Message(self:GetMessage())
