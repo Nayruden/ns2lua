@@ -781,6 +781,14 @@ if (Server) then
 
     end
 
+    function Player:SetNick( nickname )
+        self.nick = nickname
+    end
+
+    function Player:GetNick()
+        return self.nick
+    end
+
 end
 
 /**

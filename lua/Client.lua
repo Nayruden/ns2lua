@@ -30,13 +30,6 @@ function ShowInGameMenu()
 
 end
 
-function OnCommandNick( data, nickname )
-    Main.SetOptionString( kNicknameOptionsKey, nickname )
-    Shared.Message( "Nick changed to " .. nickname )
-end
-
-Event.Hook( "Console_nick", OnCommandNick )
-
 
 function OnCommandHelp(userdata, ...)
     local args = { ... }

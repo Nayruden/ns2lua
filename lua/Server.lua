@@ -132,6 +132,11 @@ function OnConsoleSay(player, ...)
     Chat.instance:SetMessage(args)
 end
 
+function OnConsoleSay2(player, ...)
+    local args = player:GetNick() .. ": " .. table.concat( { ... }, " " )
+    Server.Broadcast( nil, args )
+end
+
 function OnConsoleTarget(player)
     local target = Server.CreateEntity( "target",  player:GetOrigin() )
     target:SetAngles( player:GetAngles() )
@@ -183,11 +188,17 @@ function OnConsoleLua(player, ...)
     local str = table.concat( { ... }, " " )
     Shared.Message( "(Server) Running lua: " .. str )
     local good, err = loadstring(str)
-	if not good then
-		Shared.Message( err )
+    if not good then
+        Shared.Message( err )
         return
-	end
-	good()
+    end
+    good()
+end
+
+function OnCommandNick( ply, ... )
+    local nickname = table.concat( { ... }, " " )
+    Server.Broadcast( ply, "Nick changed to " .. nickname )
+    ply:SetNick( nickname )
 end
 
 
@@ -204,6 +215,7 @@ Event.Hook("Console_changeclass",	OnConsoleChangeClass)
 Event.Hook("Console_stuck",			OnConsoleStuck)
 
 Event.Hook("Console_say",			OnConsoleSay)
+Event.Hook("Console_say2",			OnConsoleSay2)
 
 Event.Hook("Console_target",		OnConsoleTarget)
 Event.Hook("Console_turret",		OnConsoleTurret)
@@ -213,3 +225,4 @@ Event.Hook("Console_marineteam",	OnConsoleMarineTeam)
 Event.Hook("Console_alienteam",		OnConsoleAlienTeam)
 Event.Hook("Console_randomteam",	OnConsoleRandomTeam)
 Event.Hook("Console_lua",           OnConsoleLua)
+Event.Hook("Console_nick",          OnCommandNick)
