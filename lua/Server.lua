@@ -82,7 +82,7 @@ function OnConsoleChangeClass(player,type)
     elseif (type == "skulk") then
         player:ChangeClass(Player.Classes.Skulk)
         Shared.Message("You have become a Skulk!")
-    elseif (type == "marine")
+    elseif (type == "marine") then
         player:ChangeClass(Player.Classes.Marine)
         Shared.Message("You have become a Marine!")
     else
