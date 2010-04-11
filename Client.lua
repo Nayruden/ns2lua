@@ -35,3 +35,42 @@ function OnCommandNick( data, nickname )
 end
 
 Event.Hook( "Console_nick", OnCommandNick )
+
+
+function OnCommandHelp(userdata, ...)
+    local args = { ... }
+    if (args[1] == "commands") then
+        Shared.Message("this should be a list of commands");
+    elseif (args[1] == "features") then
+    
+
+        Shared.Message("Gameplay Changes")
+
+        Shared.Message("  * Added “changeclass” command for changing your class to “buildbot”, “marine”, or “skulk”")
+        Shared.Message("  * Basic deathmatch functionality. You can kill other players, and get teleported back to spawn when dead.")
+        Shared.Message("  * K/D ratio will be shown in the hud")
+        Shared.Message("  * View height will be adjusted depending on which class (marine/skulk) you choose")
+        Shared.Message("  * Very, very experimental skulk “bite” and buildbot ‘peashooter’ weapons added")
+        Shared.Message("  * Added rifle autoreload")
+        Shared.Message("  * Added crouch ability (only slows you down since there’s no animation)")
+        Shared.Message("  * Skulk moves 2x as fast as marines, Buildbot has 1/2 gravity")
+
+        Shared.Message("General Changes and Fixes")
+
+        Shared.Message("  * Fixed permajump (holding jump made you keep jumping whenever you touched the ground)")
+        Shared.Message("  * Fixed ammo count changing before reload anim finished")
+        Shared.Message("  * Fix 5 second delay when a player joins a server")
+        Shared.Message("  * Added “nick” command for changing your name.")
+        Shared.Message("  * Added “stuck” command")
+        Shared.Message("  * Added an “invertmouse” console command")
+
+
+    else
+        Shared.Message("For more specific help, type help catagory-name")
+        Shared.Message("commands")
+        Shared.Message("features")
+    end
+end
+
+
+Event.Hook("Console_help", OnCommandHelp)
