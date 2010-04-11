@@ -128,6 +128,9 @@ end
 
 function OnConsoleSay(player, ...)
     local args = player:GetNick() .. ": " .. table.concat( { ... }, " " )
+	if (Client) then
+		Shared.Message(args)
+	end
     Server.Broadcast( nil, args )
 end
 
