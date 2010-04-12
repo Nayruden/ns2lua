@@ -42,3 +42,9 @@ end
 function PlayerUI_GetGameTime()
     return Game.instance:GetGameTime()
 end
+
+function PlayerUI_GetStatus()
+	local player = Client.GetLocalPlayer()
+	local origin = Vector(player:GetOrigin())
+	return "" .. origin.x .. " " .. origin.y .. " " .. origin.z
+end
