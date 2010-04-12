@@ -128,9 +128,9 @@ end
 
 function OnConsoleSay(player, ...)
     local args = player:GetNick() .. ": " .. table.concat( { ... }, " " )
-	if (Client) then
-		Shared.Message(args)
-	end
+    if (Client) then
+        Shared.Message(args)
+    end
     Server.Broadcast( nil, args )
 end
 
@@ -179,6 +179,7 @@ function OnConsoleReadyRoom(player)
     end
 
     player:SetOrigin(spawnPos)
+    player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
 end
 
 function OnConsoleLua(player, ...)
@@ -206,19 +207,19 @@ Event.Hook("MapPostLoad",           OnMapPostLoad)
 
 Event.Hook("Console_thirdperson",   OnConsoleThirdPerson)
 
-Event.Hook("Console_invertmouse",	OnConsoleInvertMouse)
-Event.Hook("Console_changeclass",	OnConsoleChangeClass)
+Event.Hook("Console_invertmouse",   OnConsoleInvertMouse)
+Event.Hook("Console_changeclass",   OnConsoleChangeClass)
 
-Event.Hook("Console_stuck",			OnConsoleStuck)
+Event.Hook("Console_stuck",         OnConsoleStuck)
 
-Event.Hook("Console_say",			OnConsoleSay)
+Event.Hook("Console_say",           OnConsoleSay)
 
-Event.Hook("Console_target",		OnConsoleTarget)
-Event.Hook("Console_turret",		OnConsoleTurret)
+Event.Hook("Console_target",        OnConsoleTarget)
+Event.Hook("Console_turret",        OnConsoleTurret)
 
-Event.Hook("Console_readyroom",		OnConsoleReadyRoom)
-Event.Hook("Console_marineteam",	OnConsoleMarineTeam)
-Event.Hook("Console_alienteam",		OnConsoleAlienTeam)
-Event.Hook("Console_randomteam",	OnConsoleRandomTeam)
+Event.Hook("Console_readyroom",     OnConsoleReadyRoom)
+Event.Hook("Console_marineteam",    OnConsoleMarineTeam)
+Event.Hook("Console_alienteam",     OnConsoleAlienTeam)
+Event.Hook("Console_randomteam",    OnConsoleRandomTeam)
 Event.Hook("Console_lua",           OnConsoleLua)
 Event.Hook("Console_nick",          OnCommandNick)

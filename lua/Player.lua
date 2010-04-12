@@ -53,6 +53,7 @@ Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
 Shared.PrecacheModel("models/alien/skulk/skulk.model")
 Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
+Shared.PrecacheModel("models/marine/rifle/rifle_view_shell.model")
 
 function Player:OnInit()
 
