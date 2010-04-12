@@ -120,6 +120,7 @@ function Bite:FireBullets(player)
     if (not self.firing) then
         local suffix = tostring( math.random( 4 ) ):gsub( "1", "" ) -- Nothing, 2, 3, or 4
         viewModel:SetAnimationWithBlending( "bite_attack" .. suffix, 0.01 )
+        player:SetOverlayAnimation(nil) // TEMP FIX
         player:SetOverlayAnimation("bite")
         // viewModel:SetOverlayAnimation( "attack_gun_loop" )
     end
