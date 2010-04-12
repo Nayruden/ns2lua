@@ -149,13 +149,12 @@ end
  * Melee's from the player's current view.
  */
 function Rifle:Melee(player)
-
     local viewModel = player:GetViewModelEntity()
 
     if (not self.firing) then
         local suffix = tostring( math.random( 6 ) ):gsub( "1", "" ) -- Nothing, 2, 3, 4, 5, or 6
         viewModel:SetAnimationWithBlending( "attack_secondary" .. suffix, 0.01 )
-        player:SetOverlayAnimation("rifle_alt``")
+        //player:SetOverlayAnimation("rifle_alt")
     end
 
      local viewCoords = player:GetCameraViewCoords()
@@ -182,9 +181,6 @@ function Rifle:Melee(player)
         end
 
     end
-
-    // Create the muzzle flash effect.
-    player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", Bite.muzzleFlashCinematic)
 
     if (self.firingState < 2) then
         self.firingState = self.firingState + 1

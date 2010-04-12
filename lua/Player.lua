@@ -22,7 +22,7 @@ Player.networkVars =
         overlayAnimationSequence    = "integer (-1 to 60)",
         overlayAnimationStart       = "float",
         thirdPerson                 = "boolean",
-        activity                    = "predicted integer (1 to 3)",
+        activity                    = "predicted integer (1 to 5)",
         activityEnd                 = "predicted float",
         score                       = "integer",
         health                      = "integer",
@@ -44,7 +44,7 @@ Player.jumpHeight           =  1
 Player.friction             =  6
 Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
-Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting' }
+Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
 Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
 Player.Teams				= enum { 'Marines', 'Aliens' }
 
@@ -370,6 +370,9 @@ function Player:OnProcessMove(input)
                 if (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
+                if (self.activity == Player.Activity.AltShooting) then
+                    self:StopSecondaryAttack()
+                end
 
                 self:Reload()
 
@@ -383,8 +386,8 @@ function Player:OnProcessMove(input)
                 end
                 if (bit.band(input.commands, Move.SecondaryAttack) ~= 0) then
                     self:SecondaryAttack()
-                elseif (self.activity == Player.Activity.Shooting) then
-                    self:StopPrimaryAttack()
+                elseif (self.activity == Player.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
+                    self:StopSecondaryAttack()
                 end
 
             end
@@ -664,12 +667,12 @@ function Player:SecondaryAttack()
             if (time > self.activityEnd) then
 
                if (weapon:Melee(self)) then
-                    self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" )
+                    -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" )
                     self.activityEnd = time + weapon:GetMeleeDelay()
-                    self.activity    = Player.Activity.Shooting
+                    self.activity    = Player.Activity.AltShooting
                 else
                     // The weapon can't fire anymore (out of bullets, etc.)
-                    if (self.activity == Player.Activity.Shooting) then
+                    if (self.activity == Player.Activity.AltShooting) then
                         self:StopSecondaryAttack()
                     end
                     self:Idle()
@@ -694,7 +697,6 @@ function Player:StopPrimaryAttack()
 end
 
 function Player:StopSecondaryAttack()
-
     local weapon = self:GetActiveWeapon()
 
     if (weapon ~= nil) then
