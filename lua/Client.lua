@@ -73,7 +73,7 @@ function OnCommandHelp(userdata, ...)
 end
 
 function OnConsoleClLua(userdata, ...)
-    local str = table.concat( { ... }, " " )
+    local str = table.concat( { ... }, " " ):gsub( "%s?([%[%]\\%.%?])%s?", "%1" )
     Shared.Message( "(Client) Running lua: " .. str )
     local good, err = loadstring(str)
     if not good then
@@ -86,4 +86,3 @@ end
 
 Event.Hook("Console_help", OnCommandHelp)
 Event.Hook("Console_cllua",  OnConsoleClLua)
-

@@ -141,7 +141,7 @@ function Bite:FireBullets(player)
 
     if (trace.fraction < 1) then
 
-        self:CreateHitEffect(player, trace)
+        // self:CreateHitEffect(player, trace) // Sparks, really weird looking since we're biting
 
         local target = trace.entity
 
@@ -151,9 +151,6 @@ function Bite:FireBullets(player)
         end
 
     end
-
-    // Create the muzzle flash effect.
-    player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", Bite.muzzleFlashCinematic)
 
     if (self.firingState < 2) then
         self.firingState = self.firingState + 1
