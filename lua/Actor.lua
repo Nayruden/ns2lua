@@ -581,7 +581,6 @@ if (Client) then
                 self.model = nil
             else
 			    Client.DestroyRenderModel(self.model)
-                self.model = nil
                 self.model = Client.CreateRenderModel()
                 self.model:SetModel(self.modelIndex)
             end
