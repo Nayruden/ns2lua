@@ -154,7 +154,6 @@ function Rifle:Melee(player)
     if (not self.firing) then
         local suffix = tostring( math.random( 6 ) ):gsub( "1", "" ) -- Nothing, 2, 3, 4, 5, or 6
         viewModel:SetAnimationWithBlending( "attack_secondary" .. suffix, 0.01 )
-        //player:SetOverlayAnimation("rifle_alt")
     end
 
      local viewCoords = player:GetCameraViewCoords()
@@ -170,9 +169,7 @@ function Rifle:Melee(player)
     local trace = Shared.TraceRay(startPoint, endPoint, filter)
 
     if (trace.fraction < 1) then
-
-        self:CreateHitEffect(player, trace)
-
+    
         local target = trace.entity
 
         if (target ~= nil and target.TakeDamage ~= nil) then
