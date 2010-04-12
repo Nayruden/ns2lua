@@ -599,7 +599,7 @@ function Player:RetractWeapon()
 		if (Server) then
 			Server.DestroyEntity(Shared.GetEntity(weaponID))
 		end
-		self.activeWeaponID = 0
+		self.activeWeaponId = 0
 	end
 end
 
