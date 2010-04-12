@@ -120,6 +120,7 @@ function Player:OnInit()
 end
 
 function Player:ChangeClass(newClass)
+    self.class = newClass
     if newClass == Player.Classes.Marine then
         self:SetModel("models/marine/male/male.model")
         //self:SetViewModel("models/marine/rifle/rifle_view.model") (ChangeWeapon() sets this)
@@ -129,7 +130,7 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -9.81
-		self:SetBaseAnimation("run")
+		self:SetBaseAnimation("run", true)
 
     elseif newClass == Player.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
@@ -140,7 +141,7 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 75
         self.extents = Vector(0.4064, 0.4064, 0.4064)
         self.gravity = -9.81
-		self:SetBaseAnimation("run")
+		self:SetBaseAnimation("run", true)
 
     elseif newClass == Player.Classes.BuildBot then
         self:SetModel("models/marine/build_bot/build_bot.model")
@@ -150,9 +151,8 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -4.40
-		self:SetBaseAnimation("fly")
+		self:SetBaseAnimation("fly", true)
     end
-    self.class = newClass
     self.origSpeed = self.moveSpeed
 end
 
@@ -214,8 +214,10 @@ function Player:SetBaseAnimation(activity)
     local weapon = self:GetActiveWeapon()
 
     if (weapon) then
-        animationPrefix =  weapon:GetAnimationPrefix() .. "_"
-        weapon:SetAnimation( activity )
+        if (self.class == Player.Classes.Marine ) then
+            animationPrefix =  weapon:GetAnimationPrefix() .. "_"
+            weapon:SetAnimation( activity )
+        end
     end
 
     self:SetAnimation(animationPrefix .. activity)
@@ -397,6 +399,9 @@ function Player:OnProcessMove(input)
                     self:PrimaryAttack()
                 elseif (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
+                    if(self.class ~= Player.Classes.Skulk or Shared.GetTime() > self.activityEnd) then
+                       self:StopPrimaryAttack()
+                    end
                 end
                 if (bit.band(input.commands, Move.SecondaryAttack) ~= 0) then
                     self:SecondaryAttack()
@@ -412,6 +417,10 @@ function Player:OnProcessMove(input)
     // Transition to the idle animation if the current activity has finished.
 
     local time = Shared.GetTime()
+    
+    if (time > self.activityEnd and self.activity == Player.Activity.PrimaryAttack) then
+        player:SetOverlayAnimation(nil)
+    end
 
     if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then
         local weapon = self:GetActiveWeapon()
@@ -645,7 +654,9 @@ function Player:PrimaryAttack()
         if (time > self.activityEnd) then
 
            if (weapon:FireBullets(self)) then
-                self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_fire" )
+               if (self.class == Player.Classes.Marine ) then
+                   self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_fire")
+               end
                 self.activityEnd = time + weapon:GetFireDelay()
                 self.activity    = Player.Activity.Shooting
             else
@@ -772,8 +783,17 @@ function Player:UpdatePoseParameters()
 
     local viewAngles = self:GetViewAngles()
     local pitch = -Math.Wrap( Math.Degrees(viewAngles.pitch), -180, 180 )
-
-    self:SetPoseParam("body_pitch", pitch)
+    
+    if (self.class == Player.Classes.Marine) then
+        self:SetPoseParam("body_pitch", pitch)
+    elseif (self.class == Player.Classes.Skulk) then
+        self:SetPoseParam("look_pitch", pitch)
+    end
+    
+    if(self.class == Player.Classes.Skulk) then
+       local yaw = -Math.Wrap( Math.Degrees(viewAngles.yaw), -180, 180 )
+       self:SetPoseParam("look_yaw", yaw)
+    end
 
     local viewCoords = viewAngles:GetCoords()
 
