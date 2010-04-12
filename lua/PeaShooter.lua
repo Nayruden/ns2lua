@@ -19,7 +19,7 @@ PeaShooter.shellCinematic        = "cinematics/marine/rifle/shell.cinematic"
 PeaShooter.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 PeaShooter.bulletsToShoot        = 1
-PeaShooter.damage				 = 2
+PeaShooter.damage				 = 4
 PeaShooter.spread                = 0
 PeaShooter.range                 = 50
 PeaShooter.penetration           = 0
