@@ -604,9 +604,11 @@ function Player:ChangeWeapon(weapon)
 		self:RetractWeapon()
 
         weapon:SetParent(self)
-        weapon:SetAttachPoint("RHand_Weapon")
-		self.activeWeaponId = weaponID
-		self:DrawWeapon()
+        if (self.class == Player.Classes.Marine) then
+            weapon:SetAttachPoint("RHand_Weapon")
+        end
+	    self.activeWeaponId = weaponID
+	    self:DrawWeapon()
 	end
 end
 
