@@ -108,7 +108,11 @@ function Player:OnInit()
     if (Client) then
 
         self:SetHud("ui/hud.swf")
-
+        
+        //23begin
+        self:SetHud("ui/health.swf")
+        //12end  
+        
         self.horizontalSwing = 0
         self.verticalSwing   = 0
 

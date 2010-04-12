@@ -35,7 +35,7 @@ end
 function PlayerUI_GetScore()
 
     local player = Client.GetLocalPlayer()
-    return "K/D: " .. player.kills .. "/".. player.deaths .. "\rHP: " .. player.health
+    return "K/D: " .. player.kills .. "/".. player.deaths
     
 end
 
@@ -58,3 +58,26 @@ function PlayerUI_GetStatus()
 		return ""
 	end
 end
+
+// 23 BEGIN
+displystring = ""
+stringID = 0
+
+function PlayerUI_GetHealth()
+    local player = Client.GetLocalPlayer()
+    return player.health
+end
+
+function PlayerUI_GetStringID()
+    return stringID
+end
+
+function PlayerUI_SetDisplayString( eingabe )
+    stringID = stringID + 1
+    displystring = eingabe
+end
+
+function PlayerUI_GetDisplayString()
+    return displystring
+end
+// 23 END
