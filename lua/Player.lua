@@ -42,7 +42,7 @@ Player.extents   = Vector(0.4064, 0.7874, 0.4064)
 Player.moveAcceleration     =  4
 Player.stepHeight           =  0.2
 Player.jumpHeight           =  1
-Player.friction             =  6
+Player.friction				=  6
 Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
@@ -151,6 +151,7 @@ function Player:ChangeClass(newClass)
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -4.40
+
 		self:SetBaseAnimation("fly", true)
     end
     self.origSpeed = self.moveSpeed
@@ -275,8 +276,15 @@ function Player:OnProcessMove(input)
 
     local fowardAxis = nil
     local sideAxis   = nil
+    
+    // Compute the forward and side axis aligned with the world xz plane.
+    forwardAxis = Vector(viewCoords.zAxis.x, 0, viewCoords.zAxis.z)
+    sideAxis    = Vector(viewCoords.xAxis.x, 0, viewCoords.xAxis.z)
 
-    // Handle jumpping
+    forwardAxis:Normalize()
+    sideAxis:Normalize()
+
+    // Handle jumping
     if (canMove and (ground or self.class == Player.Classes.BuildBot)) then
         if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
             self.canJump = 1
@@ -286,6 +294,11 @@ function Player:OnProcessMove(input)
             // Compute the initial velocity to give us the desired jump
             // height under the force of gravity.
             self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity)
+            
+            if (self.class == Player.Classes.BuildBot) then
+            	self.velocity.x = self.velocity.x + forwardAxis.x*10
+            	self.velocity.z = self.velocity.z + forwardAxis.z*10
+			end
             ground = false
         end
     end
@@ -333,13 +346,6 @@ function Player:OnProcessMove(input)
         // Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + self.gravity * input.time
     end
-
-    // Compute the forward and side axis aligned with the world xz plane.
-    forwardAxis = Vector(viewCoords.zAxis.x, 0, viewCoords.zAxis.z)
-    sideAxis    = Vector(viewCoords.xAxis.x, 0, viewCoords.xAxis.z)
-
-    forwardAxis:Normalize()
-    sideAxis:Normalize()
 
     self:ApplyFriction(input, ground)
 
@@ -440,9 +446,8 @@ function Player:OnProcessMove(input)
 end
 
 function Player:ApplyFriction(input, ground)
-
     local velocity = Vector(self.velocity)
-
+  
     if (ground) then
         velocity.y = 0
     end
@@ -452,6 +457,11 @@ function Player:ApplyFriction(input, ground)
     if (speed > 0) then
 
         local drop = speed * Player.friction * input.time
+        
+        if (self.class == Player.Classes.BuildBot) then
+        	drop = drop * 0.25
+        end
+        
         local speedScalar = math.max(speed - drop, 0) / speed
 
         // Only apply friction in the movement plane.
@@ -747,6 +757,10 @@ end
 
 function Player:GetViewOffset()
     return self.viewOffset
+end
+
+function Player:GetVelocity()
+	return self.velocity
 end
 
 /**
