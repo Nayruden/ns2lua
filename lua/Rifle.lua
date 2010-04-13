@@ -37,6 +37,8 @@ Rifle.meleeDelay            = 0.6   // Time between melee
 Rifle.reloadTime            = 3     // Time it takes to reload
 Rifle.drawTime              = 1.3   // Time it takes to draw the weapon
 Rifle.clipSize              = 30    // Number of bullets the clip holds
+Rifle.numBulletsInReserve	= 1000	// Number of bullets in reserve that come with the weapon by default
+Rifle.maxBulletsInReserve	= 1000	// (For future use)
 Rifle.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(Rifle.viewModelName)
@@ -65,7 +67,7 @@ function Rifle:OnInit()
     self.prevAnimationStart         = 0
     self.blendLength                = 0.0
 
-    self.numBulletsInReserve        = 1000
+    self.numBulletsInReserve        = Rifle.numBulletsInReserve
     self.numBulletsInClip           = self.clipSize
 
     self.firingState                = 0 // Not firing
@@ -292,8 +294,9 @@ end
 function Rifle:ReloadFinish(player)
 
     if (self.numBulletsInReserve > 0 and self.numBulletsInClip ~= self.clipSize) then
-        self.numBulletsInClip = math.min(self.numBulletsInReserve, self.clipSize)
-        self.numBulletsInReserve = self.numBulletsInReserve - self.numBulletsInClip
+		local bulletsToAdd = math.min(self.numBulletsInReserve, self.clipSize - self.numBulletsInClip)
+        self.numBulletsInClip = self.numBulletsInClip + bulletsToAdd
+        self.numBulletsInReserve = self.numBulletsInReserve - bulletsToAdd
 
         return true
 

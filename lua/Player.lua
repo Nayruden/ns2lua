@@ -43,7 +43,7 @@ Player.moveAcceleration     =  4
 Player.stepHeight           =  0.2
 Player.jumpHeight           =  1
 Player.friction				=  6
-Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
+Player.maxWalkableNormal    =  math.cos(math.pi * 0.25)
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
 Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
@@ -101,9 +101,6 @@ function Player:OnInit()
         viewModel:SetParent(self)
         self.viewModelId = viewModel:GetId()
 
-        // Give ourself a weapon.
-        //self:GiveWeapon("weapon_rifle")
-
     end
 
     if (Client) then
@@ -129,7 +126,6 @@ function Player:ChangeClass(newClass)
     self.class = newClass
     if newClass == Player.Classes.Marine then
         self:SetModel("models/marine/male/male.model")
-        //self:SetViewModel("models/marine/rifle/rifle_view.model") (ChangeWeapon() sets this)
         self:GiveWeapon("weapon_rifle")
         self.viewOffset = Vector(0, 1.6256, 0)
         if Server.instagib == true then
@@ -144,7 +140,6 @@ function Player:ChangeClass(newClass)
 
     elseif newClass == Player.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
-        //self:SetViewModel("models/alien/skulk/skulk_view.model") (ChangeWeapon() sets this)
         self:GiveWeapon("weapon_bite")
         self.viewOffset = Vector(0, 0.6, 0)
         self.moveSpeed = 14
@@ -599,8 +594,8 @@ end
 function Player:RetractWeapon()
 	local weaponID = self.activeWeaponId
 	if (weaponID and weaponID > 0) then
-		self:SetViewModel("models/marine/rifle/rifle_view_shell.model") // cheesy empty model
-		// TODO: Implement a better way to get rid of the weapon so that it can be retrieved later
+		self:SetViewModel("")
+		// TODO: Inventory management here
 		if (Server) then
 			Server.DestroyEntity(Shared.GetEntity(weaponID))
 		end
@@ -645,21 +640,18 @@ end
  * Reloads the current weapon.
  */
 function Player:Reload()
+	if (self.activity ~= Player.Activity.Reloading) then
+		local weapon = self:GetActiveWeapon()
+		if (weapon ~= nil) then
+			local time = Shared.GetTime()
 
-    local weapon = self:GetActiveWeapon()
-
-    if (weapon ~= nil) then
-
-        local time = Shared.GetTime()
-
-        if (time > self.activityEnd and weapon:Reload(self)) then
-            self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_reload" )
-            self.activityEnd = time + weapon:GetReloadTime()
-            self.activity    = Player.Activity.Reloading
-        end
-
-    end
-
+			if (time > self.activityEnd and weapon:Reload(self)) then
+				self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_reload" )
+				self.activityEnd = time + weapon:GetReloadTime()
+				self.activity    = Player.Activity.Reloading
+			end
+		end
+	end
 end
 
 /**
