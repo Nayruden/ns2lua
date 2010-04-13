@@ -129,7 +129,7 @@ if (Server) then
         
             local time = Shared.GetTime()
         
-            if (self.popupTime ~= 0 and time > self.popupTime) then
+            if (self.popupTime ~= 0 and time > self.popupTime) and Server.targetsEnabled == true then
                 self:Popup()
             else
             
