@@ -19,7 +19,7 @@ Script.Load("lua/TargetSpawn.lua")
 Script.Load("lua/ReadyRoomStart.lua")
 Script.Load("lua/TeamJoin.lua")
 
-Server.targetsEnabled = true
+Server.targetsEnabled = false
 Server.instagib = false
 
 /**
@@ -215,14 +215,12 @@ function OnCommandInstaGib( ply )
         Server.Broadcast( nil, "Game changed to instagib mode by " .. ply:GetNick() )
         Server.instagib = true
         Rifle.clipSize              =  1
-        Rifle.reloadTime            =  2.5 
         Player.moveAcceleration     =  5
         Player.jumpHeight           =  0.7   
     else
         Server.Broadcast( nil, "Game changed to normal mode by " .. ply:GetNick() )
         Server.instagib = false
         Rifle.clipSize              =  30
-        Rifle.reloadTime            =  3 
         Player.moveAcceleration     =  4
         Player.jumpHeight           =  1   
     end
