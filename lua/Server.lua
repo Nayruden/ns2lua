@@ -28,32 +28,11 @@ Server.instagib = false
 function OnClientConnect(client)
 
     // Get an unobstructured spawn point for the player.
-
-    local extents = Player.extents
-    local offset  = Vector(0, extents.y + 0.01, 0)
-
-    repeat
-        spawnPoint = Shared.FindEntityWithClassname("ready_room_start", spawnPoint)
-    until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
-
-    // If there is not a ready room.
-    if (spawnPoint == nil) then
-        repeat
-            spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
-        until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
-    end
-
-    local spawnPos = Vector(0, 0, 0)
-
-    if (spawnPoint ~= nil) then
-        spawnPos = Vector(spawnPoint:GetOrigin())
-        // Move the spawn position up a little bit so the player won't start
-        // embedded in the ground if the spawn point is positioned on the floor
-        spawnPos.y = spawnPos.y + 0.01
-    end
+    local player = Server.CreateEntity("player", Vector(0, 0, 0))
+    OnConsoleReadyRoom(player)
 
     // Create a new player for the client.
-    local player = Server.CreateEntity("player", spawnPos)
+    
     Server.SetControllingPlayer(client, player)
 
     Game.instance:StartGame()
@@ -77,7 +56,7 @@ function OnMapPostLoad()
     // Create the game object. This is a networked object that manages the game
     // state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
-	Server.CreateEntity("chat", Vector(0, 0, 0))
+    Server.CreateEntity("chat", Vector(0, 0, 0))
     Server.CreateEntity("kill", Vector(0, 0, 0))
 end
 
@@ -161,14 +140,22 @@ function OnConsoleReadyRoom(player)
         spawnPoint = Shared.FindEntityWithClassname("ready_room_start", spawnPoint)
     until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
 
+    // If there is not a ready room.
+    if (spawnPoint == nil) then
+        repeat
+            spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
+        until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
+    end
+
     local spawnPos = Vector(0, 0, 0)
+
     if (spawnPoint ~= nil) then
         spawnPos = Vector(spawnPoint:GetOrigin())
         // Move the spawn position up a little bit so the player won't start
         // embedded in the ground if the spawn point is positioned on the floor
         spawnPos.y = spawnPos.y + 0.01
     end
-
+    
     player:SetOrigin(spawnPos)
     player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
 end
