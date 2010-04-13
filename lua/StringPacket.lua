@@ -4,7 +4,7 @@ class 'StringPacket' (DataPacket)
 
 StringPacket.networkVars = {}
 
-// NOTE: self.numInts must be set before this constructor is called
+-- NOTE: self.numInts must be set before this constructor is called
 function StringPacket:OnInit()
 	DataPacket.OnInit(self)
 	self:ClearString()
@@ -43,7 +43,7 @@ function StringPacket.IntToString(intBunch)
 end
 
 function StringPacket.StringToInt(strBunch)
-	// Pad with nulls to prevent mutant tails
+	-- Pad with nulls to prevent mutant tails
     for i = 1, 4 - string.len(strBunch) do
         strBunch = strBunch .. "\0"
     end

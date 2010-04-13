@@ -720,7 +720,7 @@ function Player:SecondaryAttack()
             if (time > self.activityEnd) then
 
                if (weapon:Melee(self)) then
-                    // self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) // Melee animation for thirdperson
+                    -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) // Melee animation for thirdperson
                     self.activityEnd = time + weapon:GetMeleeDelay()
                     self.activity    = Player.Activity.AltShooting
                 else
