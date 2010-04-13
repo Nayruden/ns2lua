@@ -117,7 +117,7 @@ function Player:OnInit()
         
         self.horizontalSwing = 0
         self.verticalSwing   = 0
-
+        self.fov = math.atan(math.tan(math.pi / 4.0) * (GetAspectRatio() / (4.0 / 3.0))) * 2
     end
 
     self:SetBaseAnimation("run")
@@ -976,7 +976,11 @@ if (Client) then
     end
 
     function Player:GetRenderFov()
-        return (math.atan(math.tan(math.pi / 4.0) * (GetAspectRatio() / (4.0 / 3.0))) * 2)
+        return self.fov
+    end
+    
+    function Player:SetRenderFov(fov)
+        self.fov = fov
     end
 
     function Player:UpdateClientEffects(deltaTime)
