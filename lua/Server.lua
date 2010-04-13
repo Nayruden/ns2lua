@@ -19,6 +19,10 @@ Script.Load("lua/TargetSpawn.lua")
 Script.Load("lua/ReadyRoomStart.lua")
 Script.Load("lua/TeamJoin.lua")
 
+function Server:OnInit()
+    self.targetsEnabled = true
+end
+
 /**
  * Called when a player first connects to the server.
  */
@@ -74,6 +78,7 @@ function OnMapPostLoad()
     // Create the game object. This is a networked object that manages the game
     // state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
+	Server.CreateEntity("chat", Vector(0, 0, 0))
 
 end
 
@@ -127,11 +132,8 @@ function OnConsoleStuck(player)
 end
 
 function OnConsoleSay(player, ...)
-    local args = player:GetNick() .. ": " .. table.concat( { ... }, " " )
-	if (Client) then
-		Shared.Message(args)
-	end
-    Server.Broadcast( nil, args )
+    local msg = player:GetNick() .. ": " .. table.concat( { ... }, " " )
+    Chat.instance:SetMessage(msg)
 end
 
 function OnConsoleTarget(player)
@@ -198,6 +200,34 @@ function OnCommandNick( ply, ... )
     ply:SetNick( nickname )
 end
 
+function OnCommandInstaGib( ply )
+    if Server.instagib ~= true then
+        Server.Broadcast( ply, "Game changed to instagib mode by " .. ply:GetNick() )
+        Server.instagib = true
+        Rifle.clipSize              =  1
+        Rifle.reloadTime            =  2.5 
+        Player.moveAcceleration     =  5
+        Player.jumpHeight           =  0.7   
+    else
+        Server.Broadcast( ply, "Game changed to normal mode by " .. ply:GetNick() )
+        Server.instagib = false
+        Rifle.clipSize              =  30
+        Rifle.reloadTime            =  3 
+        Player.moveAcceleration     =  4
+        Player.jumpHeight           =  1   
+    end
+end
+
+function OnCommandTargets( ply )
+    if Server.targetsEnabled == true then
+        Server.Broadcast( ply, "Targets OFF by " .. ply:GetNick() )
+        Server.targetsEnabled = false
+    else
+        Server.Broadcast( ply, "Tragets ON by " .. ply:GetNick() )
+        Server.targetsEnabled = true  
+    end
+end
+
 
 // Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
@@ -222,3 +252,6 @@ Event.Hook("Console_alienteam",		OnConsoleAlienTeam)
 Event.Hook("Console_randomteam",	OnConsoleRandomTeam)
 Event.Hook("Console_lua",           OnConsoleLua)
 Event.Hook("Console_nick",          OnCommandNick)
+
+Event.Hook("Console_instagib",      OnCommandInstaGib)
+Event.Hook("Console_targets",       OnCommandTargets)
