@@ -43,7 +43,7 @@ Player.moveAcceleration     =  4
 Player.stepHeight           =  0.2
 Player.jumpHeight           =  1
 Player.friction				=  6
-Player.maxWalkableNormal    =  math.cos( math.pi/2 - math.rad(45) )
+Player.maxWalkableNormal    =  math.cos(math.pi * 0.25)
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
 Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
@@ -101,14 +101,12 @@ function Player:OnInit()
         viewModel:SetParent(self)
         self.viewModelId = viewModel:GetId()
 
-        // Give ourself a weapon.
-        //self:GiveWeapon("weapon_rifle")
-
     end
 
     if (Client) then
 
         self:SetHud("ui/hud.swf")
+		self:SetHud("ui/chat.swf")
         
         //23begin
         self:SetHud("ui/health.swf")
@@ -116,7 +114,7 @@ function Player:OnInit()
         
         self.horizontalSwing = 0
         self.verticalSwing   = 0
-
+        self.fov = math.atan(math.tan(math.pi / 4.0) * (GetAspectRatio() / (4.0 / 3.0))) * 2
     end
 
     self:SetBaseAnimation("run")
@@ -128,10 +126,13 @@ function Player:ChangeClass(newClass)
     self.class = newClass
     if newClass == Player.Classes.Marine then
         self:SetModel("models/marine/male/male.model")
-        //self:SetViewModel("models/marine/rifle/rifle_view.model") (ChangeWeapon() sets this)
         self:GiveWeapon("weapon_rifle")
         self.viewOffset = Vector(0, 1.6256, 0)
-        self.moveSpeed = 7
+        if Server.instagib == true then
+            self.moveSpeed = 12
+        else
+            self.moveSpeed = 7
+        end
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
         self.gravity = -9.81
@@ -139,7 +140,6 @@ function Player:ChangeClass(newClass)
 
     elseif newClass == Player.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
-        //self:SetViewModel("models/alien/skulk/skulk_view.model") (ChangeWeapon() sets this)
         self:GiveWeapon("weapon_bite")
         self.viewOffset = Vector(0, 0.6, 0)
         self.moveSpeed = 14
@@ -594,8 +594,8 @@ end
 function Player:RetractWeapon()
 	local weaponID = self.activeWeaponId
 	if (weaponID and weaponID > 0) then
-		self:SetViewModel("models/marine/rifle/rifle_view_shell.model") // cheesy empty model
-		// TODO: Implement a better way to get rid of the weapon so that it can be retrieved later
+		self:SetViewModel("")
+		// TODO: Inventory management here
 		if (Server) then
 			Server.DestroyEntity(Shared.GetEntity(weaponID))
 		end
@@ -640,21 +640,18 @@ end
  * Reloads the current weapon.
  */
 function Player:Reload()
+	if (self.activity ~= Player.Activity.Reloading) then
+		local weapon = self:GetActiveWeapon()
+		if (weapon ~= nil) then
+			local time = Shared.GetTime()
 
-    local weapon = self:GetActiveWeapon()
-
-    if (weapon ~= nil) then
-
-        local time = Shared.GetTime()
-
-        if (time > self.activityEnd and weapon:Reload(self)) then
-            self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_reload" )
-            self.activityEnd = time + weapon:GetReloadTime()
-            self.activity    = Player.Activity.Reloading
-        end
-
-    end
-
+			if (time > self.activityEnd and weapon:Reload(self)) then
+				self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_reload" )
+				self.activityEnd = time + weapon:GetReloadTime()
+				self.activity    = Player.Activity.Reloading
+			end
+		end
+	end
 end
 
 /**
@@ -881,6 +878,9 @@ if (Server) then
     end
 
     function Player:TakeDamage(attacker, damage, doer, point, direction)
+        if Server.instagib == true then
+            damage = 100
+        end
         self.health = self.health - damage
         self.score = self.health
         if (self.health <= 0) then
@@ -904,6 +904,8 @@ if (Server) then
             self.health = self.defaultHealth
             self.deaths = self.deaths + 1
             attacker.kills = attacker.kills + 1
+			
+			Kill.instance:AddKill(attacker:GetNick(), self:GetNick())
         end
 
     end
@@ -966,7 +968,11 @@ if (Client) then
     end
 
     function Player:GetRenderFov()
-        return (math.atan(math.tan(math.pi / 4.0) * (GetAspectRatio() / (4.0 / 3.0))) * 2)
+        return self.fov
+    end
+    
+    function Player:SetRenderFov(fov)
+        self.fov = fov
     end
 
     function Player:UpdateClientEffects(deltaTime)
