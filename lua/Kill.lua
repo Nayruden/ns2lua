@@ -56,10 +56,10 @@ end
 
 function Kill:AddKill(killer, killed)
     for i=0,4 do
-        self[ "killer" .. i ] = Chat:StringToInt(killer:sub((i*4)+1, (i*4)+5))
+        self[ "killer" .. i ] = StringPacket.StringToInt(killer:sub((i*4)+1, (i*4)+5))
     end
     for i=0,4 do
-        self[ "killed" .. i ] = Chat:StringToInt(killed:sub((i*4)+1, (i*4)+5))
+        self[ "killed" .. i ] = StringPacket.StringToInt(killed:sub((i*4)+1, (i*4)+5))
     end
     
     self.latestKillID = self.latestKillID + 1;
@@ -68,7 +68,7 @@ end
 function Kill:GetKiller()
     local killer = ""
     for i=0,4 do
-        killer = killer .. Chat:IntToString(self[ "killer" .. i ])
+        killer = killer .. StringPacket.IntToString(self[ "killer" .. i ])
     end
     return killer;
 end
@@ -76,7 +76,7 @@ end
 function Kill:GetKilled()
     local killed = ""
     for i=0,4 do
-        killed = killed .. Chat:IntToString(self[ "killed" .. i ])
+        killed = killed .. StringPacket.IntToString(self[ "killed" .. i ])
     end
     return killed;
 end

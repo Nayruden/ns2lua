@@ -31,6 +31,7 @@ Player.networkVars =
         deaths                      = "integer",
         class                       = "integer (0 to 3)",
         moveSpeed                   = "integer",
+        moveSpeedBackwards          = "integer",
         invert_mouse                = "integer (0 to 1)",
         gravity						= "float",
         sprinting					= "boolean"
@@ -86,6 +87,7 @@ function Player:OnInit()
     self.class                      = Player.Classes.Marine
     self.gravity                    = -9.81
     self.moveSpeed                  = 7
+    self.moveSpeedBackwards         = 4
     self.origSpeed					= self.moveSpeed
     self.invert_mouse               = 0
     self.team						= Player.Teams.Marines
@@ -130,8 +132,10 @@ function Player:ChangeClass(newClass)
         self.viewOffset = Vector(0, 1.6256, 0)
         if Server.instagib == true then
             self.moveSpeed = 12
+            self.moveSpeedBackwards = 9
         else
             self.moveSpeed = 7
+            self.moveSpeedBackwards = 4
         end
         self.defaultHealth = 100
         self.extents = Vector(0.4064, 0.7874, 0.4064)
@@ -358,7 +362,17 @@ function Player:OnProcessMove(input)
 
         -- Compute the desired movement direction based on the input.
         local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
-        local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
+        
+        local wishSpeed = nil
+        if (self.class == Player.Classes.Marine) then
+           if (input.move.z >= 0) then
+              wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
+           else
+              wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeedBackwards
+           end
+        else
+           wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
+        end
 
         -- Accelerate in the desired direction, ala Quake/Half-Life
 
@@ -706,7 +720,7 @@ function Player:SecondaryAttack()
             if (time > self.activityEnd) then
 
                if (weapon:Melee(self)) then
-                    -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" )
+                    // self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) // Melee animation for thirdperson
                     self.activityEnd = time + weapon:GetMeleeDelay()
                     self.activity    = Player.Activity.AltShooting
                 else

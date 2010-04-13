@@ -156,6 +156,8 @@ function Rifle:Melee(player)
     if (not self.firing) then
         local suffix = tostring( math.random( 6 ) ):gsub( "1", "" ) -- Nothing, 2, 3, 4, 5, or 6
         viewModel:SetAnimationWithBlending( "attack_secondary" .. suffix, 0.01 )
+        player:SetOverlayAnimation(nil)
+        player:SetOverlayAnimation(self:GetAnimationPrefix() .. "_alt")
     end
 
      local viewCoords = player:GetCameraViewCoords()
