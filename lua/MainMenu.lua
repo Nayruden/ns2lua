@@ -1,13 +1,13 @@
-//=============================================================================
-//
-// lua/MainMenu.lua
-// 
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright 2010, Unknown Worlds Entertainment
-//
-// This script is loaded when the game first starts. It handles creation of
-// the main menu.
-//=============================================================================
+--=============================================================================
+--
+-- lua/MainMenu.lua
+-- 
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright 2010, Unknown Worlds Entertainment
+--
+-- This script is loaded when the game first starts. It handles creation of
+-- the main menu.
+--=============================================================================
 
 Script.Load("lua/InterfaceSounds_Client.lua")
 Script.Load("lua/ServerBrowser.lua")
@@ -51,9 +51,9 @@ function LeaveMenu()
 
 end
 
-/**
- * Called when the user selects the "Host Game" button in the main menu.
- */
+--
+-- Called when the user selects the "Host Game" button in the main menu.
+--/
 function MainMenu_HostGame(mapFileName, modName)
 
     LeaveMenu()
@@ -79,9 +79,9 @@ function GetModName(mapFileName)
     
 end
 
-/**
- * Called when the user selects the "Join Game" button in the main menu.
- */
+--
+-- Called when the user selects the "Join Game" button in the main menu.
+--/
 function MainMenu_JoinGame(serverAddress)
     
     LeaveMenu()
@@ -96,17 +96,17 @@ function MainMenu_RefreshServerList()
 
 end
 
-/**
- * Returns true if we hit ESC while playing to display menu, false otherwise. 
- * Indicates to display the "Back to game" button.
- */
+--
+-- Returns true if we hit ESC while playing to display menu, false otherwise. 
+-- Indicates to display the "Back to game" button.
+--/
 function MainMenu_IsInGame()
     return Main.GetInGame()
 end
 
-/**
- * Called when button clicked to return to game.
- */
+--
+-- Called when button clicked to return to game.
+--/
 function MainMenu_ReturnToGame()
 
     LeaveMenu()
@@ -120,7 +120,7 @@ end
 
 function MainMenu_Loaded()
 
-    // Don't load anything unnecessary during development
+    -- Don't load anything unnecessary during development
     if(not Main.GetDevMode() and not MainMenu_IsInGame()) then
     
         Main.SetMenuCinematic("cinematics/main_menu.cinematic")
@@ -130,9 +130,9 @@ function MainMenu_Loaded()
     
 end
 
-/**
- * Called when the user selects the "Quit" button in the main menu.
- */
+--
+-- Called when the user selects the "Quit" button in the main menu.
+--/
 function MainMenu_Quit()
     Main.Exit()
 end

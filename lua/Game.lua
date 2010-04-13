@@ -1,15 +1,15 @@
-//=============================================================================
-//
-// RifleRange/Game.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
-//
-// This file contains the Game class  which handles the rules for the game.
-// This class derives from entity to take advantage of the networking and
-// synchronization facilities of the engine.
-//
-//=============================================================================
+--=============================================================================
+--
+-- RifleRange/Game.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
+--
+-- This file contains the Game class  which handles the rules for the game.
+-- This class derives from entity to take advantage of the networking and
+-- synchronization facilities of the engine.
+--
+--=============================================================================
 
 class 'Game' (Entity)
 
@@ -19,9 +19,9 @@ Game.networkVars =
         startTime = "float",
     }
 
-/**
- * Returns a table of all the entities in the world with the specified class name.
- */
+--
+-- Returns a table of all the entities in the world with the specified class name.
+--/
 function GetEntitiesWithClassname(className)
 
     local entities = { }
@@ -49,11 +49,11 @@ function Game:OnInit()
 
     if (Server) then
 
-        // Make the game always propagate to all clients (no visibility checks).
+        -- Make the game always propagate to all clients (no visibility checks).
         self:SetPropagate(Entity.Propagate_Always)
         self:SetNextThink(self.updateInterval)
 
-        // Get all of the target spawn points in the level.
+        -- Get all of the target spawn points in the level.
         self.targetSpawns = GetEntitiesWithClassname("target_spawn")
         self.numTargets = 0
 
@@ -67,10 +67,10 @@ function Game:OnInit()
 
 end
 
-/**
- * Returns the number of seconds that have elapsed since the game started.
- * Note this can be negative if the game hasn't started yet.
- */
+--
+-- Returns the number of seconds that have elapsed since the game started.
+-- Note this can be negative if the game hasn't started yet.
+--/
 function Game:GetGameTime()
 
     if (self.startTime ~= 0) then
@@ -81,10 +81,10 @@ function Game:GetGameTime()
 
 end
 
-/**
- * Returns true if the game has started. The game does not immediately start,
- * there is an initial countdown period.
- */
+--
+-- Returns true if the game has started. The game does not immediately start,
+-- there is an initial countdown period.
+--/
 function Game:GetHasGameStarted()
     return self:GetGameTime() > 0
 end
@@ -93,7 +93,7 @@ if (Server) then
 
     function Game:StartGame()
 
-        // Start the game in 5 seconds.
+        -- Start the game in 5 seconds.
         if (self.startTime == 0) then
             self.startTime = Shared.GetTime() + 5
         end
@@ -105,13 +105,13 @@ if (Server) then
 
         if (self.startTime > 0 and Shared.GetTime() > self.startTime) then
 
-            // Popup any targets based on spawns.
+            -- Popup any targets based on spawns.
 
             local numTargetSpawns = table.maxn(self.targetSpawns)
 
             if (self.numTargets == 0 and numTargetSpawns > 0) then
 
-                // Create new targets.
+                -- Create new targets.
 
                 local spawnIndex  = math.random(1, numTargetSpawns)
                 local spawnOrigin = self.targetSpawns[spawnIndex]:GetOrigin()
@@ -131,9 +131,9 @@ if (Server) then
 
     end
 
-    /**
-     * Destroys the specified target.
-     */
+    --
+    -- * Destroys the specified target.
+    -- */
     function Game:DestroyTarget(player, target)
 
         self.numTargets = self.numTargets - 1

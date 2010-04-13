@@ -1,11 +1,11 @@
-//=============================================================================
-//
-// RifleRange/Rifle.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
-//
-//=============================================================================
+--=============================================================================
+--
+-- RifleRange/Rifle.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
+--
+--=============================================================================
 
 class 'Rifle' (Weapon)
 
@@ -30,15 +30,15 @@ Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
 Rifle.bulletsToShoot        = 1
 Rifle.spread                = 0.03
 Rifle.range                 = 50
-Rifle.meleeRange            = 1.5     // Range of melee attack
+Rifle.meleeRange            = 1.5     -- Range of melee attack
 Rifle.penetration           = 0
-Rifle.fireDelay             = 0.1   // Time between shots
-Rifle.meleeDelay            = 0.6   // Time between melee
-Rifle.reloadTime            = 3     // Time it takes to reload
-Rifle.drawTime              = 1.3   // Time it takes to draw the weapon
-Rifle.clipSize              = 30    // Number of bullets the clip holds
-Rifle.numBulletsInReserve	= 1000	// Number of bullets in reserve that come with the weapon by default
-Rifle.maxBulletsInReserve	= 1000	// (For future use)
+Rifle.fireDelay             = 0.1   -- Time between shots
+Rifle.meleeDelay            = 0.6   -- Time between melee
+Rifle.reloadTime            = 3     -- Time it takes to reload
+Rifle.drawTime              = 1.3   -- Time it takes to draw the weapon
+Rifle.clipSize              = 30    -- Number of bullets the clip holds
+Rifle.numBulletsInReserve	= 1000	-- Number of bullets in reserve that come with the weapon by default
+Rifle.maxBulletsInReserve	= 1000	-- (For future use)
 Rifle.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(Rifle.viewModelName)
@@ -70,7 +70,7 @@ function Rifle:OnInit()
     self.numBulletsInReserve        = Rifle.numBulletsInReserve
     self.numBulletsInClip           = self.clipSize
 
-    self.firingState                = 0 // Not firing
+    self.firingState                = 0 -- Not firing
 
 end
 
@@ -78,31 +78,31 @@ function Rifle:GetViewModelName()
     return Rifle.viewModelName
 end
 
-/**
- * Returns then amount of time it takes to reload the weapon.
- */
+--
+-- Returns then amount of time it takes to reload the weapon.
+--/
 function Rifle:GetReloadTime()
     return Rifle.reloadTime
 end
 
-/**
- * Returns then amount of time it takes to draw (unholster) the weapon.
- */
+--
+-- Returns then amount of time it takes to draw (unholster) the weapon.
+--/
 function Rifle:GetDrawTime()
     return Rifle.drawTime
 end
 
-/**
- * Returns the text that's prepended on the activity name to get the name of the
- * animation that the player should play.
- */
+--
+-- Returns the text that's prepended on the activity name to get the name of the
+-- animation that the player should play.
+--/
 function Rifle:GetAnimationPrefix()
     return Rifle.animationPrefix
 end
 
-/**
- * Unholsters the weapon.
- */
+--
+-- Unholsters the weapon.
+--/
 function Rifle:Draw(player)
     local viewModel = player:GetViewModelEntity()
     viewModel:SetAnimation( "draw" )
@@ -147,9 +147,9 @@ function Rifle:Idle(player)
 
 end
 
-/**
- * Melee's from the player's current view.
- */
+--
+-- Melee's from the player's current view.
+--/
 function Rifle:Melee(player)
     local viewModel = player:GetViewModelEntity()
 
@@ -161,8 +161,8 @@ function Rifle:Melee(player)
      local viewCoords = player:GetCameraViewCoords()
      local startPoint = viewCoords.origin
 
-    // Filter ourself out of the trace so that we don't hit the weapon or the
-    // player using it.
+    -- Filter ourself out of the trace so that we don't hit the weapon or the
+    -- player using it.
     local filter = EntityFilterTwo(player, self)
 
     local spreadDirection = viewCoords.zAxis
@@ -189,9 +189,9 @@ function Rifle:Melee(player)
 
 end
 
-/**
- * Fires the specified number of bullets in a cone from the player's current view.
- */
+--
+-- Fires the specified number of bullets in a cone from the player's current view.
+--/
 function Rifle:FireBullets(player)
 
     local bulletsToShoot = math.min(self.bulletsToShoot, self.numBulletsInClip)
@@ -212,8 +212,8 @@ function Rifle:FireBullets(player)
     local viewCoords = player:GetCameraViewCoords()
     local startPoint = viewCoords.origin
 
-    // Filter ourself out of the trace so that we don't hit the weapon or the
-    // player using it.
+    -- Filter ourself out of the trace so that we don't hit the weapon or the
+    -- player using it.
     local filter = EntityFilterTwo(player, self)
 
     for bullet = 1, self.bulletsToShoot do
@@ -247,16 +247,16 @@ function Rifle:FireBullets(player)
 
     end
 
-    // Create the muzzle flash effect.
+    -- Create the muzzle flash effect.
     player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", Rifle.muzzleFlashCinematic)
 
-    // Create the shell casing ejecting effect.
+    -- Create the shell casing ejecting effect.
     player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflecasing", Rifle.shellCinematic)
 
-    // Play the sound effect. One the first bullet we fire we play the single
-    // shot sound effect. After that we start the looping firing sound effect.
-    // This gives us a clear sound if fire a single shot, but allows better sound
-    // quality and variation if we hold the trigger.
+    -- Play the sound effect. One the first bullet we fire we play the single
+    -- shot sound effect. After that we start the looping firing sound effect.
+    -- This gives us a clear sound if fire a single shot, but allows better sound
+    -- quality and variation if we hold the trigger.
     if (self.firingState == 0) then
         player:PlaySound(self.fireSound)
     elseif (self.firingState == 1) then
@@ -271,9 +271,9 @@ function Rifle:FireBullets(player)
 
 end
 
-/**
- * Returns true if the weapon successfully started a reload.
- */
+--
+-- Returns true if the weapon successfully started a reload.
+--/
 function Rifle:Reload(player)
 
     if (self.numBulletsInReserve > 0 and self.numBulletsInClip ~= self.clipSize) then
@@ -306,12 +306,12 @@ function Rifle:ReloadFinish(player)
 
 end
 
-/**
- * Creates the hit effect from firing the weapon.
- */
+--
+-- Creates the hit effect from firing the weapon.
+--/
 function Rifle:CreateHitEffect(player, trace)
 
-    // Create a coordinate frame where "up" is the normal of the surface we hit.
+    -- Create a coordinate frame where "up" is the normal of the surface we hit.
     local coords = Coords.GetOrthonormal(trace.normal)
     coords.origin = trace.endPoint
 
@@ -319,30 +319,30 @@ function Rifle:CreateHitEffect(player, trace)
 
 end
 
-/**
- * Returns the time between shots for the weapon.
- */
+--
+-- Returns the time between shots for the weapon.
+--/
 function Rifle:GetFireDelay()
     return self.fireDelay
 end
 
-/**
- * Returns the time between melee for the weapon.
- */
+--
+-- Returns the time between melee for the weapon.
+--/
 function Rifle:GetMeleeDelay()
     return self.meleeDelay
 end
 
-/**
- * Returns the total amount of ammo in the weapon's reserve ammo.
- */
+--
+-- Returns the total amount of ammo in the weapon's reserve ammo.
+--/
 function Rifle:GetAmmo()
     return self.numBulletsInReserve
 end
 
-/**
- * Retursn the amount of ammo in the clip for the weapon.
- */
+--
+-- Retursn the amount of ammo in the clip for the weapon.
+--/
 function Rifle:GetClip()
     return self.numBulletsInClip
 end

@@ -19,14 +19,14 @@ function TeamJoin:GoToGame(player)
     repeat
         spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
     until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
-	// Repeat this because you fall throught the world on the first map.
+	-- Repeat this because you fall throught the world on the first map.
 	spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
     local spawnPos = Vector(0, 0, 0)
 
     if (spawnPoint ~= nil) then
         spawnPos = Vector(spawnPoint:GetOrigin())
-        // Move the spawn position up a little bit so the player won't start
-        // embedded in the ground if the spawn point is positioned on the floor
+        -- Move the spawn position up a little bit so the player won't start
+        -- embedded in the ground if the spawn point is positioned on the floor
         spawnPos.y = spawnPos.y + 0.01
     end
     
@@ -42,7 +42,7 @@ if (Server) then
 		
 		local player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), 2.5, nil)   
 		if (player ~= nil) then
-			// Trigger a popup in the future (with the mean being the specfied delay).
+			-- Trigger a popup in the future (with the mean being the specfied delay).
 			local teamnum = Trim(self.editorTeamNumber)
 			if (teamnum == "1") then
 				player:ChangeClass(Player.Classes.Marine)

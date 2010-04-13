@@ -18,8 +18,8 @@ function Turret:OnInit()
     Actor.OnInit(self)
        
     if (Client) then    
-        // Don't collide with the player (once we're physically simulated)
-        // since the simulation is different on the server and client.
+        -- Don't collide with the player (once we're physically simulated)
+        -- since the simulation is different on the server and client.
         self.physicsGroup = 1
     end
     
@@ -49,8 +49,8 @@ if (Server) then
         local player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.attackRadius, nil)
         
         if (player ~= nil) then
-        	// Trigger a popup in the future (with the mean being the specfied delay).
-            //self.popupTime = time + Shared.GetRandomFloat(0, self.popupDelay * 2)
+        	-- Trigger a popup in the future (with the mean being the specfied delay).
+            --self.popupTime = time + Shared.GetRandomFloat(0, self.popupDelay * 2)
             
             local target = Vector(player:GetOrigin())
             local mypos = Vector(self:GetOrigin())

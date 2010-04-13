@@ -1,20 +1,20 @@
-//=============================================================================
-//
-// TestMod/PlayerUI.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
-//
-//=============================================================================
+--=============================================================================
+--
+-- TestMod/PlayerUI.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
+--
+--=============================================================================
 
 function PlayerUI_GetAuxWeaponClip()
     return 0
 end
 
-/**
- * Called by Flash to get the number of bullets left in the reserve for 
- * the active weapon.
- */
+--
+-- Called by Flash to get the number of bullets left in the reserve for 
+-- the active weapon.
+--/
 function PlayerUI_GetWeaponClip()
     
 local player = Client.GetLocalPlayer()
@@ -22,9 +22,9 @@ local player = Client.GetLocalPlayer()
 
 end
 
-/**
- * Called by Flash to get the number of bullets in the active weapon.
- */
+--
+-- Called by Flash to get the number of bullets in the active weapon.
+--/
 function PlayerUI_GetWeaponAmmo()
     
     local player = Client.GetLocalPlayer()
@@ -59,7 +59,7 @@ function PlayerUI_GetStatus()
     end
 end
 
-// 23 BEGIN
+-- 23 BEGIN
 displystring = ""
 stringID = 0
 
@@ -80,4 +80,4 @@ end
 function PlayerUI_GetDisplayString()
     return displystring
 end
-// 23 END
+-- 23 END

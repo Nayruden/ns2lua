@@ -1,15 +1,15 @@
-//=============================================================================
-//
-// lua/Main.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright 2010, Unknown Worlds Entertainment
-//
-// This script is loaded when the game first starts. It handles creation of
-// the main menu.
-//=============================================================================
+--=============================================================================
+--
+-- lua/Main.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright 2010, Unknown Worlds Entertainment
+--
+-- This script is loaded when the game first starts. It handles creation of
+-- the main menu.
+--=============================================================================
 
-// Set the name of the VM for debugging
+-- Set the name of the VM for debugging
 decoda_name = "Main"
 
 Script.Load("lua/Globals.lua")
@@ -22,23 +22,23 @@ maps =
         { name = "Range #2", fileName = "ns2_dm2.level" },
     }
 
-/**
- * Called when the user types the "map" command at the console.
- */
+--
+-- Called when the user types the "map" command at the console.
+--/
 function OnCommandMap(mapFileName)
     MainMenu_HostGame(mapFileName)
 end
 
-/**
- * Called when the user types the "connect" command at the console.
- */
+--
+-- Called when the user types the "connect" command at the console.
+--/
 function OnCommandConnect(serverAddress)
     MainMenu_JoinGame(serverAddress)
 end
 
-/**
- * Called when the user types the "exit" command at the console or clicks the exit button.
- */
+--
+-- Called when the user types the "exit" command at the console or clicks the exit button.
+--/
 function OnCommandExit()
     Main.Exit()
 end

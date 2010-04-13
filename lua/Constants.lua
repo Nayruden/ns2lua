@@ -1,14 +1,14 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\Constants.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com) and
-//                  Max McGuire (max@unknownworlds.com)
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\Constants.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com) and
+--                  Max McGuire (max@unknownworlds.com)
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 Script.Load("lua/Balance.lua")
 
-// Keycodes (for panel key press events)
+-- Keycodes (for panel key press events)
 kKeyCodeNone                            = 0
 kKeyCode0                               = 1
 kKeyCode1                               = 2
@@ -117,12 +117,12 @@ kKeyCodeCapsLockToggle                  = 104
 kKeyCodeNumLockToggle                   = 105
 kKeyCodeScrollLockToggle                = 106
 
-// Mouse buttons
+-- Mouse buttons
 kLeftMouseButton                        = 0
 kRightMouseButton                       = 1
 
-// Math constants
+-- Math constants
 kEpsilon                                = 0.0001
 
-// Minimum player velocity for network performance and ease of debugging
+-- Minimum player velocity for network performance and ease of debugging
 kMinimumPlayerVelocity                  = .05

@@ -18,9 +18,9 @@ Bite.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Bite.range                 = 3
 Bite.penetration           = 0
-Bite.fireDelay             = 1   // Time between shots
-Bite.reloadTime            = 3     // Time it takes to reload
-Bite.drawTime              = 1.3   // Time it takes to draw the weapon
+Bite.fireDelay             = 1   -- Time between shots
+Bite.reloadTime            = 3     -- Time it takes to reload
+Bite.drawTime              = 1.3   -- Time it takes to draw the weapon
 Bite.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(Bite.viewModelName)
@@ -49,7 +49,7 @@ function Bite:OnInit()
     self.prevAnimationStart         = 0
     self.blendLength                = 0.0
 
-    self.firingState                = 0 // Not firing
+    self.firingState                = 0 -- Not firing
 
 end
 
@@ -57,34 +57,34 @@ function Bite:GetViewModelName()
     return Bite.viewModelName
 end
 
-/**
- * Returns then amount of time it takes to reload the weapon.
- */
+--
+-- Returns then amount of time it takes to reload the weapon.
+--/
 function Bite:GetReloadTime()
     return Bite.reloadTime
 end
 
-/**
- * Returns then amount of time it takes to draw (unholster) the weapon.
- */
+--
+-- Returns then amount of time it takes to draw (unholster) the weapon.
+--/
 function Bite:GetDrawTime()
     return Bite.drawTime
 end
 
-/**
- * Returns the text that's prepended on the activity name to get the name of the
- * animation that the player should play.
- */
+--
+-- Returns the text that's prepended on the activity name to get the name of the
+-- animation that the player should play.
+--/
 function Bite:GetAnimationPrefix()
     return Bite.animationPrefix
 end
 
-/**
- * Unholsters the weapon.
- */
+--
+-- Unholsters the weapon.
+--/
 function Bite:Draw(player)
     local viewModel = player:GetViewModelEntity()
-    //viewModel:SetAnimation( "draw" )
+    --viewModel:SetAnimation( "draw" )
     player:PlaySound(self.drawSound)
 end
 
@@ -105,14 +105,14 @@ function Bite:Idle(player)
     local viewModel = player:GetViewModelEntity()
 
     viewModel:SetAnimationWithBlending( "bite_idle", 0.25 )
-    // There's more idle animations, not sure if we want to use them here though
+    -- There's more idle animations, not sure if we want to use them here though
     viewModel:SetOverlayAnimation( nil )
 
 end
 
-/**
- * Fires the specified number of bullets in a cone from the player's current view.
- */
+--
+-- Fires the specified number of bullets in a cone from the player's current view.
+--/
 function Bite:FireBullets(player)
 
     local viewModel = player:GetViewModelEntity()
@@ -120,16 +120,16 @@ function Bite:FireBullets(player)
     if (not self.firing) then
         local suffix = tostring( math.random( 4 ) ):gsub( "1", "" ) -- Nothing, 2, 3, or 4
         viewModel:SetAnimationWithBlending( "bite_attack" .. suffix, 0.01 )
-        player:SetOverlayAnimation(nil) // TEMP FIX
+        player:SetOverlayAnimation(nil) -- TEMP FIX
         player:SetOverlayAnimation("bite")
-        // viewModel:SetOverlayAnimation( "attack_gun_loop" )
+        -- viewModel:SetOverlayAnimation( "attack_gun_loop" )
     end
 
      local viewCoords = player:GetCameraViewCoords()
     local startPoint = viewCoords.origin
 
-    // Filter ourself out of the trace so that we don't hit the weapon or the
-    // player using it.
+    -- Filter ourself out of the trace so that we don't hit the weapon or the
+    -- player using it.
     local filter = EntityFilterTwo(player, self)
 
 
@@ -141,7 +141,7 @@ function Bite:FireBullets(player)
 
     if (trace.fraction < 1) then
 
-        // self:CreateHitEffect(player, trace) // Sparks, really weird looking since we're biting
+        -- self:CreateHitEffect(player, trace) -- Sparks, really weird looking since we're biting
 
         local target = trace.entity
 
@@ -160,19 +160,19 @@ function Bite:FireBullets(player)
 
 end
 
-/**
- * Returns true if the weapon successfully started a reload.
- */
+--
+-- Returns true if the weapon successfully started a reload.
+--/
 function Bite:Reload(player)
     return false
 end
 
-/**
- * Creates the hit effect from firing the weapon.
- */
+--
+-- Creates the hit effect from firing the weapon.
+--/
 function Bite:CreateHitEffect(player, trace)
 
-    // Create a coordinate frame where "up" is the normal of the surface we hit.
+    -- Create a coordinate frame where "up" is the normal of the surface we hit.
     local coords = Coords.GetOrthonormal(trace.normal)
     coords.origin = trace.endPoint
 
@@ -180,23 +180,23 @@ function Bite:CreateHitEffect(player, trace)
 
 end
 
-/**
- * Returns the time between shots for the weapon.
- */
+--
+-- Returns the time between shots for the weapon.
+--/
 function Bite:GetFireDelay()
     return self.fireDelay
 end
 
-/**
- * Returns the total amount of ammo in the weapon's reserve ammo.
- */
+--
+-- Returns the total amount of ammo in the weapon's reserve ammo.
+--/
 function Bite:GetAmmo()
     return self.numBulletsInReserve
 end
 
-/**
- * Retursn the amount of ammo in the clip for the weapon.
- */
+--
+-- Retursn the amount of ammo in the clip for the weapon.
+--/
 function Bite:GetClip()
     return self.numBulletsInClip
 end

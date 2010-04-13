@@ -1,16 +1,16 @@
-//=============================================================================
-//
-// lua/BindingsDialog.lua
-// 
-// Populate and manage key bindings in options screen.
-//
-// Created by Henry Kropf and Charlie Cleveland
-// Copyright 2010, Unknown Worlds Entertainment
-//
-//=============================================================================
+--=============================================================================
+--
+-- lua/BindingsDialog.lua
+-- 
+-- Populate and manage key bindings in options screen.
+--
+-- Created by Henry Kropf and Charlie Cleveland
+-- Copyright 2010, Unknown Worlds Entertainment
+--
+--=============================================================================
 
-// Default key bindings if not saved in options
-// When changing values in the right-hand column, make sure to change BindingsUI_GetBindingsText() below.
+-- Default key bindings if not saved in options
+-- When changing values in the right-hand column, make sure to change BindingsUI_GetBindingsText() below.
 local defaults = {
     {"MoveForward", "W"},
     {"MoveLeft", "A"},
@@ -33,7 +33,7 @@ local defaults = {
     {"Weapon5", "5"},
 }
 
-// Order, names, description of keys in menu
+-- Order, names, description of keys in menu
 local globalControlBindings = {
     "Movement", "title", "Movement", "",
     "MoveForward", "input", "Move forward", "W",
@@ -77,9 +77,9 @@ function GetDefaultInputValue(controlId)
     
 end
 
-/**
- * Get the value of the input control
- */
+--
+-- Get the value of the input control
+--/
 function BindingsUI_GetInputValue(controlId)
 
     local value = Main.GetOptionString( "input/" .. controlId, "" )
@@ -97,9 +97,9 @@ function BindingsUI_GetInputValue(controlId)
     
 end
 
-/**
- * Set the value of the input control
- */
+--
+-- Set the value of the input control
+--/
 function BindingsUI_SetInputValue(controlId, controlValue)
 
     if(controlId ~= nil) then
@@ -108,19 +108,19 @@ function BindingsUI_SetInputValue(controlId, controlValue)
     
 end
 
-/**
- * Return data in linear array of config elements
- * controlId, "input", name, value
- * controlId, "title", name, instructions
- * controlId, "separator", unused, unused
- */
+--
+-- Return data in linear array of config elements
+-- controlId, "input", name, value
+-- controlId, "title", name, instructions
+-- controlId, "separator", unused, unused
+--/
 function BindingsUI_GetBindingsData()
     return globalControlBindings   
 end
 
-/**
- * Returns list of control ids and text to display for each.
- */
+--
+-- Returns list of control ids and text to display for each.
+--/
 function BindingsUI_GetBindingsTranslationData()
 
     local bindingsTranslationData = {}
@@ -129,7 +129,7 @@ function BindingsUI_GetBindingsTranslationData()
     
         local text = string.upper(string.char(i))
         
-        // Add special values (must match any values in 'defaults' above)
+        -- Add special values (must match any values in 'defaults' above)
         for j = 1, table.count(specialKeys) do
         
             if(specialKeys[j][1] == text) then
@@ -150,9 +150,9 @@ function BindingsUI_GetBindingsTranslationData()
     
 end
 
-/**
- * Called when bindings is exited and something was changed.
- */
+--
+-- Called when bindings is exited and something was changed.
+--/
 function BindingsUI_ExitDialog()
     
     Main.ReloadKeyOptions()

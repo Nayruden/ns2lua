@@ -1,10 +1,10 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\Globals.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\Globals.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
 kPlayerReadyRoomSpawn                   = "ready_room_start"
 kPlayerSpawn                            = "player_start"
@@ -107,95 +107,95 @@ kChamberAbilityMapName               = "chamber"
 kSpikesMapName                       = "spikes"
 kSporesMapName                       = "spores"
 
-// Team numbers - corresponds with teamNumber in editor_setup.xml
+-- Team numbers - corresponds with teamNumber in editor_setup.xml
 kNeutralTeamType = 0
 kMarineTeamType = 1
 kAlienTeamType = 2
 kRandomTeamType = 3
 
-// Initial class when joining a team
+-- Initial class when joining a team
 kMarineSpawnClass                       = kMarineMapName
 kAlienSpawnClass                        = kSkulkMapName
 
-// Team colors 
+-- Team colors 
 kMarineTeamColor = 0x4DB1FF
 kAlienTeamColor = 0xFFCA3A
 kNeutralTeamColor = 0xEEEEEE
 kChatTextColor = 0xDDDDDD
 
-// Team indices
+-- Team indices
 kTeamInvalid = -1
 kTeamReadyRoom = 0
 kTeam1Index = 1
 kTeam2Index = 2
 kSpectatorIndex = 3
 
-// Marines vs. Aliens
+-- Marines vs. Aliens
 kTeam1Type = kMarineTeamType
 kTeam2Type = kAlienTeamType
 
-// Used for playing team and scoreboard
+-- Used for playing team and scoreboard
 kTeam1Name = "Frontiersmen"
 kTeam2Name = "Kharaa"
 kSpectatorTeamName = "Ready room"
 kDefaultPlayerName = "NsPlayer"
 
-// Weapon slots (marine only)
+-- Weapon slots (marine only)
 kPrimaryWeaponSlot = 1
 kSecondaryWeaponSlot = 2
 kTertiaryWeaponSlot = 3
 
-// Damage types - keep very simple
+-- Damage types - keep very simple
 kGenericDamageType = 0
 kMeleeDamageType = 1
 kProjectileDamageType = 2
 kAirDamageType = 3
 
-// Player modes. When outside the default player mode, input isn't processed from the player
+-- Player modes. When outside the default player mode, input isn't processed from the player
 kDefaultMode = 0
 kTauntMode = 1
 kGorgeStructureMode = 2
 kGorgeStartArmorMode = 3
 kGorgeArmorMode = 4
 kGorgeEndArmorMode = 5
-// transitioning to sliding
+-- transitioning to sliding
 kGorgeStartSlideMode = 6
-// sliding
+-- sliding
 kGorgeSlidingMode = 7
-// transitioning from sliding
+-- transitioning from sliding
 kGorgeEndSlideMode = 8
 
-// For components that are purely visual and should never interfere (resource display)
+-- For components that are purely visual and should never interfere (resource display)
 kLowestZ = -2
 
-// Commander input, marquee when not active
+-- Commander input, marquee when not active
 kCommanderInput = -1
 
-// Default
+-- Default
 kNormalZ = 0
 
-// Logout button
+-- Logout button
 kHighPriorityZ = 1
 
-// Scroll components (should be higher priority then all other static components so we always pan)
+-- Scroll components (should be higher priority then all other static components so we always pan)
 kScrollZ = 2
 
-// Marquee while active, to ensure we get mouse release event even if on top of other component
+-- Marquee while active, to ensure we get mouse release event even if on top of other component
 kHighestPriorityZ = 3
 
-// How often to compute LOS visibility for entities (seconds)
+-- How often to compute LOS visibility for entities (seconds)
 kLOSUpdateInterval = .5
 
-// How often to send kills, deaths, nick name changes, etc. for scoreboard
+-- How often to send kills, deaths, nick name changes, etc. for scoreboard
 kScoreboardUpdateInterval = .5
 
-// How often to send ping updates
+-- How often to send ping updates
 kUpdatePingsInterval = 1.25
 
-// How often to send client ping up to server
+-- How often to send client ping up to server
 kClientPingUpdateInterval = 2
 
-// How often blips sent to alien players
+-- How often blips sent to alien players
 kHiveSightUpdateInterval = 2.0
 kBlipTypeUndefined = -1
 kBlipTypeSighted = 0
@@ -203,36 +203,36 @@ kBlipTypeFriendly = 2
 kBlipTypeFriendlyUnderAttack = 3
 kBlipTypeHive = 6
 
-// Flash player indices
+-- Flash player indices
 kSharedFlashIndex = 1
-// Use for marine, skulk, gorge, Commander, etc. specific flash UI
+-- Use for marine, skulk, gorge, Commander, etc. specific flash UI
 kClassFlashIndex = 2
-// Used for menu on top of class 
+-- Used for menu on top of class 
 kMenuFlashIndex = 3
 
-// Fade to black time (then to spectator mode)
+-- Fade to black time (then to spectator mode)
 kFadeToBlackTime = 2
 
-// Constant to prevent z-fighting 
+-- Constant to prevent z-fighting 
 kZFightingConstant = 0.001
 
-// Fade blink mode (used for trying different methods)
-// 1 = billiards
-// 2 = billiards but using velocity and minimum velocity
-// 3 = spec/flying
-// 4 = flying bouncing with fixed start direction
+-- Fade blink mode (used for trying different methods)
+-- 1 = billiards
+-- 2 = billiards but using velocity and minimum velocity
+-- 3 = spec/flying
+-- 4 = flying bouncing with fixed start direction
 kFadeBlinkMode = 3
 
-// libswf's default for the flash "undefined" value
+-- libswf's default for the flash "undefined" value
 kLibSwfUndefined = 2147483648
 
-// Max players allowed in game
+-- Max players allowed in game
 kMaxPlayers = 32
 
-// Max distance to propagate entities with
+-- Max distance to propagate entities with
 kMaxRelevancyDistance = 40
 
-// Options keys
+-- Options keys
 kNicknameOptionsKey = "nickname"
 kVisualDetailOptionsKey = "visualDetail"
 kSoundVolumeOptionsKey = "soundVolume"
@@ -245,9 +245,9 @@ kGraphicsYResolutionOptionsKey = "graphics/display/y-resolution"
 
 kMouseSensitivityScalar         = 50
 
-// Sayings
-//kSayingsMenu = enum( { 'Needs', 'Orders', 'Animations' } )
-//kSaying = enum({ 'MedPack', 'Ammo', 'Order' })
+-- Sayings
+--kSayingsMenu = enum( { 'Needs', 'Orders', 'Animations' } )
+--kSaying = enum({ 'MedPack', 'Ammo', 'Order' })
 
 
 

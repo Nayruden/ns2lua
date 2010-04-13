@@ -1,10 +1,10 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\Effect.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\Effect.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
 class 'Effect' (Actor)
 
@@ -30,7 +30,7 @@ function Effect:OnLoad()
         
 end
 
-// Parse number value from editor_setup and emit error if outside expected range
+-- Parse number value from editor_setup and emit error if outside expected range
 function Effect:GetAndCheckValue(valueString, min, max, valueName, defaultValue)
 
     local numValue = tonumber(valueString)
@@ -82,7 +82,7 @@ end
 
 if (Client) then
 
-    /**
+    --
      * Updates the entity.
      */
     function Effect:UpdateClientEffects(deltaTime)
@@ -96,7 +96,7 @@ if (Client) then
         
     end
 
-    // Check if effect should be turned on or of
+    -- Check if effect should be turned on or of
     function Effect:Update(origin)
 
         if(Client and self:GetStartsOn() and not self.startedOn) then    

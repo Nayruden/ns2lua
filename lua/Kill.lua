@@ -37,7 +37,7 @@ function Kill:OnInit()
     self.KilledLog = { }
     
     if (Server) then
-        // Make the game always propagate to all clients (no visibility checks).
+        -- Make the game always propagate to all clients (no visibility checks).
         self:SetPropagate(Entity.Propagate_Always)
     end
     
