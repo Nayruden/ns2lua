@@ -3,13 +3,13 @@ function ChatUI_SendMessage(message)
 end
 
 function ChatUI_IsNewMessageAvailable()
-    return Chat.instance:IsNewMessageAvailable()
+    return ChatPacket.messageLog:TickMessage()
 end
 
 function ChatUI_GetMessage(messageID)
-    return Chat.instance:GetMessageFromLog(messageID)
+    return ChatPacket.messageLog:GetMessage(messageID)
 end
 
 function ChatUI_GetNumberOfMessagesInLog()
-    return Chat.instance:GetNumberOfMessagesInLog()
+    return ChatPacket.messageLog:GetSize()
 end
