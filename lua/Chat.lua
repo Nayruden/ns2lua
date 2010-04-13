@@ -52,7 +52,11 @@ end
 
 function Chat:OnThink()
     if (self:IsNewMessageAvailable()) then
-        table.insert(self.ChatLog, 1, self:GetMessage() )
+        local message = self:GetMessage()
+        if (Client) then 
+            Shared.Message(message)
+        end
+        table.insert(self.ChatLog, 1, message )
     end
     
     self:SetNextThink(self.updateInterval)
