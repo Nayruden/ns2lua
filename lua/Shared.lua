@@ -21,3 +21,7 @@ Script.Load("lua/PropDynamic.lua")
 Script.Load("lua/Chat.lua")
 --Script.Load("lua/Effect.lua")
 --Script.Load("lua/AmbientSound.lua")
+
+Script.Load("lua/classes/Skulk.lua")
+Script.Load("lua/classes/Marine.lua")
+Script.Load("lua/classes/BuildBot.lua")

@@ -1,8 +1,8 @@
 Script.Load("lua/Utility.lua")
 
-class 'Skulk' (Player)
+class 'Marine' (Player)
 
-Skulk.networkVars =
+Marine.networkVars =
     {
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
@@ -27,33 +27,34 @@ Skulk.networkVars =
         gravity						= "float",
         sprinting					= "boolean"
     }
-  
-Skulk.modelName = "models/alien/skulk/skulk.model"
-Skulk.extents   = Vector(0.4064, 0.4064, 0.4064)
 
-Skulk.moveAcceleration     =  4
-Skulk.stepHeight           =  0.2
-Skulk.jumpHeight           =  1
-Skulk.friction				=  6
-Skulk.maxWalkableNormal    =  math.cos(math.pi * 0.25)
+Marine.modelName = "models/marine/male/male.model"
+Marine.extents   = Vector(0.4064, 0.7874, 0.4064)
 
-Skulk.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
-Skulk.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
-Skulk.Teams				= enum { 'Marines', 'Aliens' }
+Marine.moveAcceleration     =  4
+Marine.stepHeight           =  0.2
+Marine.jumpHeight           =  1
+Marine.friction				=  6
+Marine.maxWalkableNormal    =  math.cos(math.pi * 0.25)
 
-Skulk.alienTauntSound = "sound/ns2.fev/alien/voiceovers/chuckle"
+Marine.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
+Marine.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
+Marine.Teams				= enum { 'Marines', 'Aliens' }
+
+Marine.marineTauntSound = "sound/ns2.fev/marine/voiceovers/taunt"
+
+Shared.PrecacheModel("models/marine/male/male.model")
 
 Shared.PrecacheModel("models/alien/skulk/skulk.model")
-Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
+
 Shared.PrecacheModel("models/marine/rifle/rifle_view_shell.model")
+Shared.PrecacheSound(Marine.marineTauntSound)
 
-Shared.PrecacheSound(Skulk.alienTauntSound)
-
-function Skulk:OnInit()
+function Player:OnInit()
 
     Actor.OnInit(self)
 
-    self:SetModel(Skulk.modelName)
+    self:SetModel(Marine.modelName)
 
     self.canJump                    = 1
     self.viewPitch                  = 0
@@ -62,10 +63,10 @@ function Skulk:OnInit()
     self.velocity                   = Vector(0, 0, 0)
 
     self.activeWeaponId             = 0
-    self.activity                   = Skulk.Activity.None
+    self.activity                   = Marine.Activity.None
     self.activityEnd                = 0
 
-    self.viewOffset                 = Vector(0, 0.6, 0)
+    self.viewOffset                 = Vector(0, 1.6256, 0)
 
     self.thirdPerson                = false
     self.sprinting					= false
@@ -77,14 +78,14 @@ function Skulk:OnInit()
     self.score                      = 0
     self.kills                      = 0
     self.deaths                     = 0
-    self.class                      = Skulk.Classes.Skulk
+    self.class                      = Marine.Classes.Marine
     self.gravity                    = -9.81
-    self.moveSpeed                  = 14
-    self.origSpeed					= self.moveSpeed
+    self.moveSpeed                  = 7
     self.moveSpeedBackwards         = 4
     self.origSpeed					= self.moveSpeed
     self.invert_mouse               = 0
-    self.team						= Skulk.Teams.Skulks
+    self.team						= Marine.Teams.Marines
+    self.controller					= 0
 
     -- Collide with everything except group 1. That group is reserved
     -- for things we don't want to collide with.
@@ -114,16 +115,14 @@ function Skulk:OnInit()
     end
 
     self:SetBaseAnimation("run")
-    --self:ChangeClass(Skulk.Classes.Skulk)
+    --self:ChangeClass(Marine.Classes.Marine)
 
 end
-
-
 
 --
 -- Called to handle user input for the player.
 --
-function Skulk:OnProcessMove(input)
+function Player:OnProcessMove(input)
 
     if (Client) then
 
@@ -178,13 +177,38 @@ function Skulk:OnProcessMove(input)
 
             -- Compute the initial velocity to give us the desired jump
             -- height under the force of gravity.
-            self.velocity.y = math.sqrt(-2 * Skulk.jumpHeight * self.gravity)
+            self.velocity.y = math.sqrt(-2 * Marine.jumpHeight * self.gravity)
             
-            if (self.class == Skulk.Classes.BuildBot) then
+            if (self.class == Marine.Classes.BuildBot) then
             	self.velocity.x = self.velocity.x + forwardAxis.x*10
             	self.velocity.z = self.velocity.z + forwardAxis.z*10
 			end
             ground = false
+        end
+    end
+
+    -- Handle crouching
+    -- From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
+    if (bit.band(input.commands, Move.Crouch) ~= 0) then
+        if (not self.crouching) then
+            --self:SetAnimation( "" ) -- Needs a crouch animation
+            self.moveSpeed = math.floor( self.origSpeed * 0.5 )
+			self:SetPoseParam("crouch", 1.0)
+            if not Client then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
+                self.viewOffset = Vector(0, 0.9, 0)
+            end
+        end
+        self.crouching = 3
+        self.sprinting = false
+    elseif (self.crouching) then
+        self.crouching = self.crouching - 1
+        if (self.crouching <= 0) then
+            self.crouching = nil
+            self.moveSpeed = self.origSpeed
+			self:SetPoseParam("crouch", 0.0)
+            if not Client then
+                self.viewOffset = Vector(0, 1.6256, 0)
+            end
         end
     end
 
@@ -215,7 +239,7 @@ function Skulk:OnProcessMove(input)
         local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
         
         local wishSpeed = nil
-        if (self.class == Skulk.Classes.Skulk) then
+        if (self.class == Marine.Classes.Marine) then
            if (input.move.z >= 0) then
               wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
            else
@@ -232,7 +256,7 @@ function Skulk:OnProcessMove(input)
         local addSpeed     = wishSpeed - currentSpeed
 
         if (addSpeed > 0) then
-            local accelSpeed = math.min(addSpeed, Skulk.moveAcceleration * input.time * wishSpeed)
+            local accelSpeed = math.min(addSpeed, Marine.moveAcceleration * input.time * wishSpeed)
             self.velocity = self.velocity + wishDirection * accelSpeed
         end
 
@@ -242,7 +266,7 @@ function Skulk:OnProcessMove(input)
             -- First move the character upwards to allow them to go up stairs and
             -- over small obstacles.
             local start = Vector(self:GetOrigin())
-            offset = self:PerformMovement( Vector(0, Skulk.stepHeight, 0), 1 ) - start
+            offset = self:PerformMovement( Vector(0, Marine.stepHeight, 0), 1 ) - start
         end
 
         -- Move the player with collision detection.
@@ -251,19 +275,19 @@ function Skulk:OnProcessMove(input)
         if (ground) then
             -- Finally, move the player back down to compensate for moving them up.
             -- We add in an additional step height for moving down steps/ramps.
-            offset.y = offset.y + Skulk.stepHeight
+            offset.y = offset.y + Marine.stepHeight
             self:PerformMovement( -offset, 1 )
         end
 
         -- Handle the buttons.
 
-        if (self.activity ~= Skulk.Activity.Reloading) then
+        if (self.activity ~= Marine.Activity.Reloading) then
             if (bit.band(input.commands, Move.Reload) ~= 0) then
 
-                if (self.activity == Skulk.Activity.Shooting) then
+                if (self.activity == Marine.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
-                if (self.activity == Skulk.Activity.AltShooting) then
+                if (self.activity == Marine.Activity.AltShooting) then
                     self:StopSecondaryAttack()
                 end
 
@@ -274,15 +298,15 @@ function Skulk:OnProcessMove(input)
                 -- Process attack
                 if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
                     self:PrimaryAttack()
-                elseif (self.activity == Skulk.Activity.Shooting) then
+                elseif (self.activity == Marine.Activity.Shooting) then
                     self:StopPrimaryAttack()
-                    if(self.class ~= Skulk.Classes.Skulk or Shared.GetTime() > self.activityEnd) then
+                    if(self.class ~= Marine.Classes.Skulk or Shared.GetTime() > self.activityEnd) then
                        self:StopPrimaryAttack()
                     end
                 end
                 if (bit.band(input.commands, Move.SecondaryAttack) ~= 0) then
                     self:SecondaryAttack()
-                elseif (self.activity == Skulk.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
+                elseif (self.activity == Marine.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
                     self:StopSecondaryAttack()
                 end
 
@@ -295,18 +319,18 @@ function Skulk:OnProcessMove(input)
 
     local time = Shared.GetTime()
     
-    if (time > self.activityEnd and self.activity == Skulk.Activity.PrimaryAttack) then
+    if (time > self.activityEnd and self.activity == Marine.Activity.PrimaryAttack) then
         player:SetOverlayAnimation(nil)
     end
 
-    if (time > self.activityEnd and self.activity == Skulk.Activity.Reloading) then
+    if (time > self.activityEnd and self.activity == Marine.Activity.Reloading) then
         local weapon = self:GetActiveWeapon()
         if (weapon ~= nil) then
             weapon:ReloadFinish()
         end
     end
 
-    if (time > self.activityEnd and self.activity ~= Skulk.Activity.None) then
+    if (time > self.activityEnd and self.activity ~= Marine.Activity.None) then
         self:Idle()
     end
 
@@ -317,4 +341,4 @@ function Skulk:OnProcessMove(input)
 end
 
 
-Shared.LinkClassToMap("Skulk", "skulk", Skulk.networkVars )
+Shared.LinkClassToMap("Player", "player", Marine.networkVars )
