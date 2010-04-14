@@ -134,6 +134,7 @@ function Bite:FireBullets(player)
     // player using it.
     local filter = EntityFilterTwo(player, self)
 
+
     player:PlaySound(self.fireSound)
 
     local spreadDirection = viewCoords.zAxis
