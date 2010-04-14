@@ -33,11 +33,9 @@ local kSortTypePing = 5
 local sortType = kSortTypePing
 local ascending = true
 local justSorted = false
-if (io ~= null) then
+
 numServers = tonumber(http.request("http://serverlist.devicenull.org/serverlist.php?get=servercount"), 10)
-else
-numServers = 0
-end
+
 --
 -- Sort option for the name field in order specified by ascending boolean
 --/
