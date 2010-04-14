@@ -224,7 +224,7 @@ function MainMenu_SBGetServerList()
             end
         end
 
-        
+        Main.RebuildServerList()
         --hasNewData = true
         local numServer = Main.GetNumServers()
         for serverIndex = 1, numServer - 1 do
