@@ -7,7 +7,9 @@
 --
 --=============================================================================
 Script.Load("lua/Utility.lua")
-
+if (io ~= null) then
+http = require("socket.http")
+end
 local hasNewData = true
 local updateStatus = ""
 
@@ -29,7 +31,11 @@ local kSortTypePing = 5
 local sortType = kSortTypePing
 local ascending = true
 local justSorted = false
-
+if (io ~= null) then
+numServers = tonumber(http.request("http://serverlist.devicenull.org/serverlist.php?get=servercount"), 10)
+else
+numServers = 0
+end
 --
 -- Sort option for the name field in order specified by ascending boolean
 --/
@@ -89,7 +95,7 @@ function MainMenu_SBGetUpdateStatus()
 end
 
 function GetNumServers()
-    return Main.GetNumServers()
+    return numServers
 end
 
 --
@@ -100,8 +106,8 @@ function MainMenu_SBHasNewData()
     local numServers = GetNumServers()
     hasNewData = (numServers ~= table.maxn(serverRecords))
     if(numServers < table.maxn(serverRecords)) then
-        returnServerList = {}
-        serverRecords = {}
+        --returnServerList = {}
+        --serverRecords = {}
     end
     
     if(not hasNewData) then
@@ -142,9 +148,10 @@ function SortReturnServerList()
         table.sort(serverRecords, sortString)
     end
 end
-
+refresh = false
 function RefreshServerList()
-    Main.RebuildServerList()
+    refresh = true
+    --MainMenu_SBGetServerList()
 end
 
 -- Trim off unnecessary path and extension
@@ -166,14 +173,57 @@ end
 -- {servername, gametype, map, playercount, ping, serverUID}
 -- order
 --/
+local notupdated = true
+
+function split(str, delim)
+    fields = {}
+    str:gsub("([^"..delim.."]*)"..delim, function(c) table.insert(fields, c) end)
+    return fields;
+end
+
 function MainMenu_SBGetServerList()
-
-    if(hasNewData) then
-
-        local numServers = GetNumServers()
+    
+    if(notupdated) then
+        notupdated = false
+        --local numServers = GetNumServers()
         updateStatus = string.format("Retrieving %d %s...", numServers, ConditionalValue(numServers == 1, "server", "servers"))
-        
-        if(numServers > table.maxn(serverRecords)) then
+        local servers, headers, code = http.request("http://serverlist.devicenull.org/serverlist.php")
+        --servers = "127.0.0.1\t27015\tname\t5\t10\tmap\t\n127.0.0.2\t27015\tnadme\t5\t10\tmap\t\n"
+        lines = split(servers,"\n")
+        for key1,value1 in pairs(lines) do
+            if (key1 ~= 1) then
+                
+                rows = split(value1,"\t")
+                name = ""
+                ip = ""
+                map = ""
+                players = ""
+                gametype = ""
+                for key,value in pairs(rows) do
+                    if (key == 1) then
+                        ip = value
+                    end
+                    if (key == 2) then
+                        port = value
+                    end
+                    if (key == 3) then
+                        name = value
+                    end
+                    if (key == 4) then
+                        players = value
+                    end
+                    if (key == 6) then
+                        map = value
+                    end
+                    if (key == 7) then
+                        gametype = value
+                    end
+                end
+                table.insert(serverRecords, {name, gametype, map, players, "10", ip})
+            end
+        end
+
+        --[[if(numServers > table.maxn(serverRecords)) then
         
             hasNewData = true
             
@@ -186,7 +236,7 @@ function MainMenu_SBGetServerList()
 
             end
             
-        end
+        end--]]
         
         SortReturnServerList()
         

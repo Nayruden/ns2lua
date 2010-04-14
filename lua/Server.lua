@@ -12,7 +12,9 @@
 
 -- Set the name of the VM for debugging
 decoda_name = "Server"
-
+if (io ~= null) then
+http = require("socket.http")
+end
 Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
 Script.Load("lua/TargetSpawn.lua")
@@ -76,8 +78,12 @@ function OnMapPostLoad()
 
     -- Create the game object. This is a networked object that manages the game
     -- state and logic.
+    
     Server.CreateEntity("game", Vector(0, 0, 0))
     Server.CreateEntity("kill", Vector(0, 0, 0))
+    if (io ~= null) then
+    http.request("http://serverlist.devicenull.org/register.php?port=27015")
+    end
 end
 
 function OnConsoleThirdPerson(player)
