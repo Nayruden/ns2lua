@@ -218,10 +218,6 @@ function OnCommandNick( ply, ... )
     ply:SetNick( nickname )
 end
 
-function OnConsoleSay(player, ...)
-	local chatPacket = Server.CreateEntity("chatpacket", Vector(0, 0, 0))
-    chatPacket:SetString(player:GetNick() .. ": " .. table.concat( { ... }, " " ))
-end
 
 function OnCommandInstaGib( ply )
     if Server.instagib ~= true then
@@ -239,8 +235,17 @@ function OnCommandInstaGib( ply )
     end
 end
 
+
+function OnConsoleSay(player, ...)
+	local msg = string.format("cmsg \"%s\" \"%s\"", player:GetNick(), table.concat( { ... }, " " ))
+	Shared.Message(msg)
+	Server.SendCommand(nil, msg)
+	--local chatPacket = Server.CreateEntity("chatpacket", Vector(0, 0, 0))
+    --chatPacket:SetString(player:GetNick() .. ": " .. table.concat( { ... }, " " ))
+end
+
 function Server.SendKillMessage(killer, killed)
-	Server.SendCommand(nil, string.format("kill %s %s",killer,killed))
+	Server.SendCommand(nil, string.format("kill \"%s\" \"%s\"",killer,killed))
 end
 
 -- Hook the game methods.

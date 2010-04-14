@@ -5,6 +5,9 @@ function KillUI_AddKill(killer, killed)
 		attacker=killer, 
 		victim=killed
 	});
+	for i = 4, #KillUI_KillLog do
+		KillUI_KillLog[i] = nil
+	end	
 end
 
 function KillUI_GetKiller(ID)
@@ -16,5 +19,5 @@ function KillUI_GetKilled(ID)
 end
 
 function KillUI_GetNumberOfKillsInLog()
-   return table.getn(KillUI_KillLog)
+   return #KillUI_KillLog
 end

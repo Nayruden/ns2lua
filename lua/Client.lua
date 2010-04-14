@@ -85,11 +85,19 @@ function OnConsoleClLua(userdata, ...)
     good()
 end
 
-function OnKillMessage(src, killer, killed)	
-	-- should use the src argument to find out if this was sent from server...
+qtrm = "^\"?(.-)\"?$"
+function OnKillMessage(src, killer, killed)	-- Should test if this message is coming from server
+	killer = killer:match(qtrm)
+	killed = killed:match(qtrm)
 	KillUI_AddKill(killer,killed)
+end
+function OnChatMessage(src, name, msg)	-- Should test if this message is coming from server
+	name = name:match(qtrm)
+	msg = msg:match(qtrm)
+	ChatUI_AddMessage(name..": "..msg)
 end
 
 Event.Hook("Console_help", OnCommandHelp)
 Event.Hook("Console_cllua",  OnConsoleClLua)
 Event.Hook("Console_kill",  OnKillMessage)
+Event.Hook("Console_cmsg",  OnChatMessage)

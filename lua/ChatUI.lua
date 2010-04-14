@@ -1,15 +1,20 @@
-function ChatUI_SendMessage(message)
-    Shared.ConsoleCommand("say " .. message)
+ChatUI_MessageLog = { }
+
+function ChatUI_AddMessage(msg)
+	table.insert(ChatUI_MessageLog, 1, msg)
+	for i = 4, #ChatUI_MessageLog do
+		ChatUI_MessageLog[i] = nil
+	end	
 end
 
 function ChatUI_IsNewMessageAvailable()
     return ChatPacket.messageLog:TickMessage()
 end
 
-function ChatUI_GetMessage(messageID)
-    return ChatPacket.messageLog:GetMessage(messageID)
+function ChatUI_GetMessage(ID)
+    return ChatUI_MessageLog[ID]
 end
 
 function ChatUI_GetNumberOfMessagesInLog()
-    return ChatPacket.messageLog:GetSize()
+    return #ChatUI_MessageLog
 end
