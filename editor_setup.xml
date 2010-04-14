@@ -319,6 +319,16 @@
         <model>
             <file>models/misc/door/door.model</file>
         </model>
+		
+        <!-- Team number -->
+        <parameter name="behaviorType" type="choice" label="Door Behavior" default="1">
+            <choice label="Proximity" value="1"/>
+            <choice label="Always Open" value="2"/>
+            <choice label="Always Shut" value="3"/>            
+        </parameter>
+
+		<parameter name="touchRadius" type="distance" label="Proximity radius" default="150.0" help="Players within this radius will cause the door to open."/>
+        
     </class>
        
     <!-- Power grid -->
@@ -331,6 +341,7 @@
         <sphere>
             <radius>powerRadius</radius>
         </sphere>
+
     </class>
     
   <!-- Cinematic entity -->
