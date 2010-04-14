@@ -139,7 +139,7 @@ function Player:GetController()
 end
 
 function Player:ChangeClass(newClass) -- this is just a shortcut (might keep a bit of backwards compatibility)
-    ChangePlayerClass(self.controller, newClass, self:GetOrigin())
+    ChangePlayerClass(self.controller, newClass, self, self:GetOrigin())
    --[[ self.class = newClass
     if newClass == Player.Classes.Marine then
         self:SetModel("models/marine/male/male.model")

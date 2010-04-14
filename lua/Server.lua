@@ -26,8 +26,8 @@ Script.Load("lua/TeamJoin.lua")
 Server.targetsEnabled = false
 Server.instagib = false
 
-function ChangePlayerClass(client, class, spawnPos)
-    if client.active_controlee then
+function ChangePlayerClass(client, class, active, spawnPos)
+    if active then
         --spawnPos = client.active_controlee:GetOrigin()
         Server.DeleteEntity(client.active_controlee)
     end
@@ -67,7 +67,7 @@ function OnClientConnect(client)
     end
 
     -- Create a new player for the client.
-    ChangePlayerClass(client, "Default", spawnPos)
+    ChangePlayerClass(client, "Default", nil, spawnPos)
 
     Game.instance:StartGame()
 
@@ -187,25 +187,23 @@ function OnConsoleReadyRoom(player)
 end
 
 function OnConsoleChangeClass(player,type)
-    if (type == "buildbot") then
-        player:ChangeClass(Player.Classes.BuildBot)
-        Shared.Message("You have become a BuildBot!")
-    elseif (type == "skulk") then
-    
-    	local client = player:GetController()
-    	local spawnPos = Vector(player:GetOrigin())
-	    local newent = Server.CreateEntity("skulk", spawnPos)
-	    Server.SetControllingPlayer(client, newent)
-	    newent:SetController(client)
-    	Server.DestroyEntity(player)
-    
-        --player:ChangeClass(Player.Classes.Skulk)
-        Shared.Message("You have become a Skulk!")
-    elseif (type == "marine") then
-        player:ChangeClass(Player.Classes.Marine)
-        Shared.Message("You have become a Marine!")
+    if type == "Default" then
+        Shared.Message("You cannot use this class!")
+    elseif PlayerClasses[type] then
+        ChangePlayerClass(player.controller, type, player, player:GetOrigin())
+        Shared.Message("You have become a "..type.."!")
     else
-        Shared.Message("Your options for this command are buildbot, skulk, and marine")
+        local options = {}
+        for k,v in pairs(PlayerClasses) do
+            if k ~= "Default" then
+                table.insert(options, k)
+            end
+        end
+        if #options ~= 1 then -- I insist on being grammatically correct!
+            options[#options-1] = options[#options-1].." and "..options[#options]
+            options[#options] = nil
+        end
+        Shared.Message("Your options for this command are "..table.concat(options, ", ")..".")
     end
 end
 
