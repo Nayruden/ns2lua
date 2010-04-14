@@ -11,6 +11,8 @@ Script.Load("lua/Utility.lua")
 
 class 'Player' (Actor)
 
+PlayerClasses.Default = Player
+
 Player.networkVars =
     {
         viewPitch                   = "interpolated predicted angle",
@@ -29,44 +31,46 @@ Player.networkVars =
         canJump                     = "integer (0 to 1)",
         kills                       = "integer",
         deaths                      = "integer",
-        class                       = "integer (0 to 3)",
         moveSpeed                   = "integer",
         moveSpeedBackwards          = "integer",
         invert_mouse                = "integer (0 to 1)",
         gravity						= "float",
-        sprinting					= "boolean"
+        sprinting					= "boolean",
+		walkSpeed                   = "float",
+        sprintSpeed                 = "float",
+		backSpeedScale              = "float",
     }
 
+-- Class specific variables
 Player.modelName = "models/marine/male/male.model"
+Shared.PrecacheModel(Player.modelName)
 Player.extents   = Vector(0.4064, 0.7874, 0.4064)
-
-Player.moveAcceleration     =  4
-Player.stepHeight           =  0.2
-Player.jumpHeight           =  1
-Player.friction				=  6
-Player.maxWalkableNormal    =  math.cos(math.pi * 0.25)
+Player.maxWalkableNormal    = math.cos(math.pi * 0.25)
+Player.stepHeight           = 0.2
+Player.friction				= 6
+Player.moveAcceleration     = 4
+Player.jumpHeight           = 1
+Player.gravity              = -9.81
+Player.walkSpeed            = 10
+Player.sprintSpeedScale     = 5
+Player.backSpeedScale       = 1
+Player.defaultHealth        = 100
+Player.stoodViewOffset      = Vector(0, 1.6256, 0)
+Player.crouchedViewOffset   = Vector(0, 0.9, 0)
+Player.WeaponLoadout        = { }
+Player.TauntSounds          = { }
+for i = 1, #Player.TauntSounds do
+    Shared.PrecacheSound(Player.TauntSounds[i])
+end
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
-Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
 Player.Teams				= enum { 'Marines', 'Aliens' }
-
-Player.marineTauntSound = "sound/ns2.fev/marine/voiceovers/taunt"
-Player.alienTauntSound = "sound/ns2.fev/alien/voiceovers/chuckle"
-Player.robotTauntSound = "sound/ns2.fev/marine/voiceovers/robot_taunt"
-Shared.PrecacheModel("models/marine/male/male.model")
-Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
-Shared.PrecacheModel("models/alien/skulk/skulk.model")
-Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
-Shared.PrecacheModel("models/marine/rifle/rifle_view_shell.model")
-Shared.PrecacheSound(Player.marineTauntSound)
-Shared.PrecacheSound(Player.alienTauntSound)
-Shared.PrecacheSound(Player.robotTauntSound)
 
 function Player:OnInit()
 
     Actor.OnInit(self)
 
-    self:SetModel(Player.modelName)
+    self:SetModel(self.modelName)
 
     self.canJump                    = 1
     self.viewPitch                  = 0
@@ -78,25 +82,24 @@ function Player:OnInit()
     self.activity                   = Player.Activity.None
     self.activityEnd                = 0
 
-    self.viewOffset                 = Vector(0, 1.6256, 0)
-
     self.thirdPerson                = false
     self.sprinting					= false
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
 
-    self.health                     = 100
+    self.health                     = self.defaultHealth
     self.score                      = 0
     self.kills                      = 0
     self.deaths                     = 0
-    self.class                      = Player.Classes.Marine
-    self.gravity                    = -9.81
-    self.moveSpeed                  = 7
-    self.moveSpeedBackwards         = 4
-    self.origSpeed					= self.moveSpeed
+	
+    self.moveSpeed					= self.walkSpeed
     self.invert_mouse               = 0
     self.team						= Player.Teams.Marines
+    self.controller					= 0
+    self.inAir                      = false
+    
+    self.viewOffset                 = self.stoodViewOffset
 
     -- Collide with everything except group 1. That group is reserved
     -- for things we don't want to collide with.
@@ -126,50 +129,23 @@ function Player:OnInit()
     end
 
     self:SetBaseAnimation("run")
-    --self:ChangeClass(Player.Classes.Marine)
-
+    
+    for i, weapon in ipairs(self.WeaponLoadout) do
+        self:GiveWeapon(weapon)
+        Shared.Message("Giving "..weapon..".")
+    end
 end
 
-function Player:ChangeClass(newClass)
-    self.class = newClass
-    if newClass == Player.Classes.Marine then
-        self:SetModel("models/marine/male/male.model")
-        self:GiveWeapon("weapon_rifle")
-        self.viewOffset = Vector(0, 1.6256, 0)
-        if Server.instagib == true then
-            self.moveSpeed = 12
-            self.moveSpeedBackwards = 9
-        else
-            self.moveSpeed = 7
-            self.moveSpeedBackwards = 4
-        end
-        self.defaultHealth = 100
-        self.extents = Vector(0.4064, 0.7874, 0.4064)
-        self.gravity = -9.81
-		self:SetBaseAnimation("run", true)
+function Player:SetController(client)
+	self.controller = client
+end
 
-    elseif newClass == Player.Classes.Skulk then
-        self:SetModel("models/alien/skulk/skulk.model")
-        self:GiveWeapon("weapon_bite")
-        self.viewOffset = Vector(0, 0.6, 0)
-        self.moveSpeed = 14
-        self.defaultHealth = 75
-        self.extents = Vector(0.4064, 0.4064, 0.4064)
-        self.gravity = -9.81
-		self:SetBaseAnimation("run", true)
+function Player:GetController()
+	return self.controller
+end
 
-    elseif newClass == Player.Classes.BuildBot then
-        self:SetModel("models/marine/build_bot/build_bot.model")
-        self:GiveWeapon("weapon_peashooter")
-        self.viewOffset = Vector(0, 0.6, 0)
-        self.moveSpeed = 7
-        self.defaultHealth = 100
-        self.extents = Vector(0.4064, 0.7874, 0.4064)
-        self.gravity = -4.40
-
-		self:SetBaseAnimation("fly", true)
-    end
-    self.origSpeed = self.moveSpeed
+function Player:ChangeClass(newClass, overridePosition) -- this is just a shortcut (might keep a bit of backwards compatibility)
+    return ChangePlayerClass(self.controller, newClass, self, overridePosition or self:GetOrigin())
 end
 
 function Player:ChangeTeam(newTeam)
@@ -221,6 +197,11 @@ function Player:SetOverlayAnimation( animationName )
 
 end
 
+function Player:OnSetBaseAnimation(activity)
+    return  nil,    -- override player animation (false to prevent)
+            nil     -- override weapon animation (false to prevent)
+end
+
 --
 -- Sets the activity the player is currently performing.
 --
@@ -228,16 +209,17 @@ function Player:SetBaseAnimation(activity)
 
     local animationPrefix = ""
     local weapon = self:GetActiveWeapon()
+    
+    local o_activity, o_weapon_activity = self:OnSetBaseAnimation(activity)
 
-    if (weapon) then
-        if (self.class == Player.Classes.Marine ) then
-            animationPrefix =  weapon:GetAnimationPrefix() .. "_"
-            weapon:SetAnimation( activity )
-        end
+    if (o_weapon_activity ~= false and weapon) then
+        animationPrefix =  weapon:GetAnimationPrefix() .. "_"
+        weapon:SetAnimation( o_weapon_activity or activity)
     end
-
-    self:SetAnimation(animationPrefix .. activity)
-
+    
+    if (o_activity ~= false) then
+        self:SetAnimation(o_activity or (animationPrefix .. activity))
+    end
 end
 
 --
@@ -252,6 +234,68 @@ function Player:BuildPose(poses)
         self:AccumulateAnimation(poses, self.overlayAnimationSequence, self.overlayAnimationStart)
     end
 
+end
+
+function Player:GetCanJump(input, ground, groundNormal)
+    return ground
+end
+
+function Player:OnJump(input, forwardAxis, sideAxis)
+    
+end
+function Player:OnLand(input, forwardAxis, sideAxis)
+    
+end
+
+function Player:GetCanCrouch(input, ground, groundNormal)
+    return ground
+end
+
+function Player:OnCrouch(input, forwardAxis, sideAxis)
+    
+end
+function Player:OnStand(input, forwardAxis, sideAxis)
+    
+end
+
+function Player:GetCanSprint(input, ground, groundNormal)
+    return true and not self.crouching
+end
+function Player:OnSprint(input, forwardAxis, sideAxis)
+    
+end
+function Player:OnWalk(input, forwardAxis, sideAxis)
+    
+end
+
+function Player:GetCanPrimaryAttack(input) -- do not use this for ammo checks!
+    return true
+end
+function Player:OnStartPrimaryAttack(input) -- do not use this for animations!
+    
+end
+function Player:OnStopPrimaryAttack(input)
+    
+end
+
+function Player:GetCanSecondaryAttack(input) -- do not use this for ammo checks!
+    return true
+end
+function Player:OnStartSecondaryAttack(input) -- do not use this for animations!
+    
+end
+function Player:OnStopSecondaryAttack(input)
+    
+end
+
+function Player:GetCanReload(input) -- do not use this for checks!
+    return true
+end
+function Player:OnStartReload(input) -- do not use this for animations!
+    
+end
+function Player:OnStopReload(input)
+    
 end
 
 --
@@ -275,13 +319,10 @@ function Player:OnProcessMove(input)
     end
 
 	if(bit.band(input.commands, Move.Taunt) ~= 0) then
-		if(self.class == Player.Classes.Marine) then
-			self:PlaySound(self.marineTauntSound)
-		elseif(self.class == Player.Classes.Skulk) then
-			self:PlaySound(self.alienTauntSound)
-		elseif(self.class == Player.Classes.BuildBot) then
-			self:PlaySound(self.robotTauntSound)
-		end
+        local sound = table.random(self.TauntSounds)
+        if sound then
+			self:PlaySound(sound)
+        end
 	end
 	
     local canMove = self:GetCanMove()
@@ -297,8 +338,6 @@ function Player:OnProcessMove(input)
 
     local viewCoords = angles:GetCoords()
 
-    local ground, groundNormal = self:GetIsOnGround()
-
     local fowardAxis = nil
     local sideAxis   = nil
     
@@ -308,9 +347,15 @@ function Player:OnProcessMove(input)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
+    
+    local ground, groundNormal = self:GetIsOnGround()
+    if (ground and self.inAir) then
+        self:OnLand(input, forwardAxis, sideAxis)
+    end
+    self.inAir = ground
 
     -- Handle jumping
-    if (canMove and (ground or self.class == Player.Classes.BuildBot)) then
+    if (canMove and self:GetCanJump(input, ground, groundNormal)) then
         if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
             self.canJump = 1
         elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
@@ -318,49 +363,47 @@ function Player:OnProcessMove(input)
 
             -- Compute the initial velocity to give us the desired jump
             -- height under the force of gravity.
-            self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity)
+            self.velocity.y = math.sqrt(-2 * self.jumpHeight * self.gravity)
             
-            if (self.class == Player.Classes.BuildBot) then
-            	self.velocity.x = self.velocity.x + forwardAxis.x*10
-            	self.velocity.z = self.velocity.z + forwardAxis.z*10
-			end
+            self:OnJump(input, forwardAxis, sideAxis)
             ground = false
         end
     end
 
     -- Handle crouching
     -- From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
-    if (bit.band(input.commands, Move.Crouch) ~= 0) then
+    if (bit.band(input.commands, Move.Crouch) ~= 0 and self:GetCanCrouch(input, ground, groundNormal)) then
         if (not self.crouching) then
             --self:SetAnimation( "" ) -- Needs a crouch animation
-            self.moveSpeed = math.floor( self.origSpeed * 0.5 )
+            self.moveSpeed = self.crouchSpeed or self.moveSpeed
 			self:SetPoseParam("crouch", 1.0)
-            if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
-                self.viewOffset = Vector(0, 0.9, 0)
-            end
+            self.viewOffset = self.crouchedViewOffset
+            self:OnCrouch(input, forwardAxis, sideAxis)
         end
         self.crouching = 3
-        self.sprinting = false
     elseif (self.crouching) then
         self.crouching = self.crouching - 1
         if (self.crouching <= 0) then
             self.crouching = nil
-            self.moveSpeed = self.origSpeed
+            self.curSpeed = self.moveSpeed
 			self:SetPoseParam("crouch", 0.0)
-            if (not Client and self.class == Player.Classes.Marine) then
-                self.viewOffset = Vector(0, 1.6256, 0)
-            end
+            self.viewOffset = self.stoodViewOffset
+            self:OnStand(input, forwardAxis, sideAxis)
         end
     end
 
-    if (bit.band(input.commands, Move.MovementModifier) ~= 0) and (not self.sprinting) then
-    	self.sprinting = true
-    	self.moveSpeed = 2 * self.origSpeed
-    	self:SetPoseParam("sprint", 1.0)
+    if (bit.band(input.commands, Move.MovementModifier) ~= 0 and self:GetCanSprint(input, ground, groundNormal)) then
+        if (not self.sprinting) then
+            self.sprinting = true
+            self.moveSpeed = self.moveSpeed*self.sprintSpeedScale
+            self:SetPoseParam("sprint", 1.0)
+            self:OnSprint(input, forwardAxis, sideAxis)
+        end
     elseif (self.sprinting) then
     	self.sprinting = false
-    	self.moveSpeed = self.origSpeed
+    	self.moveSpeed = self.walkSpeed
     	self:SetPoseParam("sprint", 0.0)
+        self:OnWalk(input, forwardAxis, sideAxis)
     end
     
     
@@ -379,17 +422,7 @@ function Player:OnProcessMove(input)
         -- Compute the desired movement direction based on the input.
         local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
         
-        local wishSpeed = nil
-        if (self.class == Player.Classes.Marine) then
-           if (input.move.z >= 0) then
-              wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
-           else
-              wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeedBackwards
-           end
-        else
-           wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
-        end
-           
+        local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
 
         -- Accelerate in the desired direction, ala Quake/Half-Life
 
@@ -407,7 +440,7 @@ function Player:OnProcessMove(input)
             -- First move the character upwards to allow them to go up stairs and
             -- over small obstacles.
             local start = Vector(self:GetOrigin())
-            offset = self:PerformMovement( Vector(0, Player.stepHeight, 0), 1 ) - start
+            offset = self:PerformMovement( Vector(0, self.stepHeight, 0), 1 ) - start
         end
 
         -- Move the player with collision detection.
@@ -416,13 +449,13 @@ function Player:OnProcessMove(input)
         if (ground) then
             -- Finally, move the player back down to compensate for moving them up.
             -- We add in an additional step height for moving down steps/ramps.
-            offset.y = offset.y + Player.stepHeight
+            offset.y = offset.y + self.stepHeight
             self:PerformMovement( -offset, 1 )
         end
 
         -- Handle the buttons.
 
-        if (self.activity ~= Player.Activity.Reloading) then
+        if (self.activity ~= Player.Activity.Reloading and self:GetCanReload(input)) then
             if (bit.band(input.commands, Move.Reload) ~= 0) then
 
                 if (self.activity == Player.Activity.Shooting) then
@@ -433,22 +466,24 @@ function Player:OnProcessMove(input)
                 end
 
                 self:Reload()
+                self:OnStartReload(input)
 
             else
 
                 -- Process attack
-                if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
+                if (bit.band(input.commands, Move.PrimaryAttack) ~= 0 and self:GetCanPrimaryAttack(input)) then
                     self:PrimaryAttack()
+                    self:OnStartPrimaryAttack(input)
                 elseif (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
-                    if(self.class ~= Player.Classes.Skulk or Shared.GetTime() > self.activityEnd) then
-                       self:StopPrimaryAttack()
-                    end
+                    self:OnStopPrimaryAttack(input)
                 end
-                if (bit.band(input.commands, Move.SecondaryAttack) ~= 0) then
+                if (bit.band(input.commands, Move.SecondaryAttack) ~= 0 and self:GetCanSecondaryAttack(input)) then
                     self:SecondaryAttack()
+                    self:OnStartSecondaryAttack(input)
                 elseif (self.activity == Player.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
                     self:StopSecondaryAttack()
+                    self:OnStopSecondaryAttack(input)
                 end
 
             end
@@ -468,6 +503,7 @@ function Player:OnProcessMove(input)
         local weapon = self:GetActiveWeapon()
         if (weapon ~= nil) then
             weapon:ReloadFinish()
+            self:OnStopReload(input)
         end
     end
 
@@ -492,11 +528,7 @@ function Player:ApplyFriction(input, ground)
 
     if (speed > 0) then
 
-        local drop = speed * Player.friction * input.time
-        
-        if (self.class == Player.Classes.BuildBot) then
-        	drop = drop * 0.25
-        end
+        local drop = speed * self.friction * input.time
         
         local speedScalar = math.max(speed - drop, 0) / speed
 
@@ -634,15 +666,17 @@ function Player:RetractWeapon()
 	end
 end
 
+function Player:OnChangeWeapon(weapon)
+    
+end
+
 function Player:ChangeWeapon(weapon)
 	local weaponID = weapon:GetId()
 	if (weaponID ~= self.activeWeaponId) then
 		self:RetractWeapon()
 
         weapon:SetParent(self)
-        if (self.class == Player.Classes.Marine) then
-            weapon:SetAttachPoint("RHand_Weapon")
-        end
+        self:OnChangeWeapon(weapon)
 	    self.activeWeaponId = weaponID
 	    self:DrawWeapon()
 	end
@@ -685,6 +719,10 @@ function Player:Reload()
 	end
 end
 
+function Player:OnGetPrimaryFireAnimation(weapon)
+    return nil -- override overlay animation for firing (return false to prevent)
+end
+
 --
 -- Performs the primary attack for the current weapon
 --
@@ -698,10 +736,11 @@ function Player:PrimaryAttack()
 
         if (time > self.activityEnd) then
 
-           if (weapon:FireBullets(self)) then
-               if (self.class == Player.Classes.Marine ) then
-                   self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_fire")
-               end
+            if (weapon:FireBullets(self)) then
+                local o_animation = self:OnGetPrimaryFireAnimation(weapon)
+                if (o_animation ~= false) then
+                    self:SetOverlayAnimation(o_animation or (weapon:GetAnimationPrefix().."_fire"))
+                end
                 self.activityEnd = time + weapon:GetFireDelay()
                 self.activity    = Player.Activity.Shooting
             else
@@ -725,32 +764,7 @@ end
 -- Performs the secondary attack for the current weapon
 --
 function Player:SecondaryAttack()
-    -- Check if the current class is marine
-    if (self.class == Player.Classes.Marine) then
- 
-       local weapon = self:GetActiveWeapon()
- 
-        if (weapon ~= nil) then
-
-            local time = Shared.GetTime()
-
-            if (time > self.activityEnd) then
-
-               if (weapon:Melee(self)) then
-                    -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) -- Melee animation for thirdperson
-                    self.activityEnd = time + weapon:GetMeleeDelay()
-                    self.activity    = Player.Activity.AltShooting
-                else
-                    -- The weapon can't fire anymore (out of bullets, etc.)
-                    if (self.activity == Player.Activity.AltShooting) then
-                        self:StopSecondaryAttack()
-                    end
-                    self:Idle()
-                end
-            end
-
-        end
-    end
+    
 end  
 
 
@@ -828,21 +842,15 @@ function Player:GetWeaponAmmo()
 
 end
 
+function Player:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
+    self:SetPoseParam("move_yaw",   moveYaw)
+    self:SetPoseParam("move_speed", horizontalVelocity:GetLength() * 0.25)
+end
+
 function Player:UpdatePoseParameters()
 
     local viewAngles = self:GetViewAngles()
     local pitch = -Math.Wrap( Math.Degrees(viewAngles.pitch), -180, 180 )
-    
-    if (self.class == Player.Classes.Marine) then
-        self:SetPoseParam("body_pitch", pitch)
-    elseif (self.class == Player.Classes.Skulk) then
-        self:SetPoseParam("look_pitch", pitch)
-    end
-    
-    if(self.class == Player.Classes.Skulk) then
-       local yaw = -Math.Wrap( Math.Degrees(viewAngles.yaw), -180, 180 )
-       self:SetPoseParam("look_yaw", yaw)
-    end
 
     local viewCoords = viewAngles:GetCoords()
 
@@ -853,9 +861,8 @@ function Player:UpdatePoseParameters()
     local z = Math.DotProduct(viewCoords.zAxis, horizontalVelocity)
 
     local moveYaw = math.atan2(z, x) * 180 / math.pi
-
-    self:SetPoseParam("move_yaw",   moveYaw)
-    self:SetPoseParam("move_speed", horizontalVelocity:GetLength() * 0.25)
+    
+    self:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
 
 end
 
@@ -907,7 +914,12 @@ if (Server) then
 		-- TODO: Add inventory management here
         self:ChangeWeapon(weapon)
     end
-
+    
+    function Player:Respawn(overridePosition)
+        self:SetOrigin(overridePosition or GetSpawnPos(self.extents) or Vector())
+        self.health = self.defaultHealth
+    end
+    
     function Player:TakeDamage(attacker, damage, doer, point, direction)
         if Server.instagib == true then
             damage = 100
@@ -915,28 +927,11 @@ if (Server) then
         self.health = self.health - damage
         self.score = self.health
         if (self.health <= 0) then
-            local extents = Player.extents
-            local offset  = Vector(0, extents.y + 0.01, 0)
-
-            repeat
-                spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
-            until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
-
-            local spawnPos = Vector(0, 0, 0)
-
-            if (spawnPoint ~= nil) then
-                spawnPos = Vector(spawnPoint:GetOrigin())
-                -- Move the spawn position up a little bit so the player won't start
-                -- embedded in the ground if the spawn point is positioned on the floor
-                spawnPos.y = spawnPos.y + 0.01
-            end
-
-            self:SetOrigin(spawnPos)
-            self.health = self.defaultHealth
+			Server.SendKillMessage(attacker:GetNick(), self:GetNick())
             self.deaths = self.deaths + 1
             attacker.kills = attacker.kills + 1
-			
-			Server.SendKillMessage(attacker:GetNick(), self:GetNick())
+            
+            self:Respawn()
         end
 
     end
@@ -1069,4 +1064,5 @@ if (Client) then
 
 end
 
+Player.mapName = "player"
 Shared.LinkClassToMap("Player", "player", Player.networkVars )
