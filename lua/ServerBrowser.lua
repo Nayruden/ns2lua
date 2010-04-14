@@ -7,9 +7,11 @@
 --
 --=============================================================================
 Script.Load("lua/Utility.lua")
-if (io ~= null) then
+
+package.path  = ".\\ns2\\lua\\?.lua"
+package.cpath = ".\\ns2\\lua\\?.dll"
 http = require("socket.http")
-end
+
 local hasNewData = true
 local updateStatus = ""
 

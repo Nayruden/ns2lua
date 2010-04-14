@@ -12,9 +12,11 @@
 
 -- Set the name of the VM for debugging
 decoda_name = "Server"
-if (io ~= null) then
+
+package.path  = ".\\ns2\\lua\\?.lua"
+package.cpath = ".\\ns2\\lua\\?.dll"
 http = require("socket.http")
-end
+
 Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
 Script.Load("lua/TargetSpawn.lua")
