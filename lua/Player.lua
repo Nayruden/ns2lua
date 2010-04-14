@@ -594,8 +594,8 @@ function Player:PerformMovement(offset, maxTraces)
 end
 
 --
- * Returns the view model entity.
- */
+-- Returns the view model entity.
+--
 function Player:GetViewModelEntity()
     return Shared.GetEntity(self.viewModelId)
 end
