@@ -230,10 +230,7 @@ function OnCommandInstaGib( ply )
     end
 end
 
-function Server.SendKillMessage(killer, killed) 
-	Shared.Message("--Server--")	
-	Shared.Message("Killer: " .. killer)
-	Shared.Message("Killed: " .. killed)
+function Server.SendKillMessage(killer, killed)
 	Server.SendCommand(nil, string.format("kill %s %s",killer,killed))
 end
 
