@@ -83,9 +83,7 @@ function OnMapPostLoad()
     
     Server.CreateEntity("game", Vector(0, 0, 0))
     Server.CreateEntity("kill", Vector(0, 0, 0))
-    if (io ~= null) then
     http.request("http://serverlist.devicenull.org/register.php?port=27015")
-    end
 end
 
 function OnConsoleThirdPerson(player)
