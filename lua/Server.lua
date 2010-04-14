@@ -21,6 +21,7 @@ Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
 Script.Load("lua/TargetSpawn.lua")
 Script.Load("lua/ReadyRoomStart.lua")
+Script.Load("lua/entities/ResourceNozzle.lua")
 Script.Load("lua/TeamJoin.lua")
 
 Server.targetsEnabled = false
