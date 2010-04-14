@@ -2,6 +2,9 @@ ChatUI_MessageLog = { }
 
 function ChatUI_AddMessage(msg)
 	table.insert(ChatUI_MessageLog, 1, msg)
+	for i = 4, #ChatUI_MessageLog do
+		ChatUI_MessageLog[i] = nil
+	end	
 end
 
 function ChatUI_IsNewMessageAvailable()
@@ -13,5 +16,5 @@ function ChatUI_GetMessage(ID)
 end
 
 function ChatUI_GetNumberOfMessagesInLog()
-    return table.getn(ChatUI_MessageLog)
+    return #ChatUI_MessageLog
 end
