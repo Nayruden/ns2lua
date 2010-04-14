@@ -26,6 +26,16 @@ Script.Load("lua/TeamJoin.lua")
 Server.targetsEnabled = false
 Server.instagib = false
 
+function ChangePlayerClass(client, class, spawnPos)
+    if client.active_controlee then
+        --spawnPos = client.active_controlee:GetOrigin()
+        Server.DeleteEntity(client.active_controlee)
+    end
+    local player = Server.CreateEntity((PlayerClasses[class] or PlayerClasses.Default).mapName, spawnPos)
+    Server.SetControllingPlayer(client, player)
+    player:SetController(client)
+end
+
 --
 -- Called when a player first connects to the server.
 --/
@@ -57,9 +67,7 @@ function OnClientConnect(client)
     end
 
     -- Create a new player for the client.
-    local player = Server.CreateEntity("player", spawnPos)
-    Server.SetControllingPlayer(client, player)
-    player:SetController(client)
+    ChangePlayerClass(client, "Default", spawnPos)
 
     Game.instance:StartGame()
 

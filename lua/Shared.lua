@@ -14,6 +14,9 @@ Script.Load("lua/Weapon.lua")
 Script.Load("lua/Rifle.lua")
 Script.Load("lua/Bite.lua")
 Script.Load("lua/PeaShooter.lua")
+
+PlayerClasses = {}
+
 Script.Load("lua/Player.lua")
 Script.Load("lua/Target.lua")
 Script.Load("lua/Turret.lua")
