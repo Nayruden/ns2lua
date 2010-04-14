@@ -8,7 +8,8 @@ Bite.networkVars =
 Bite.viewModelName         = "models/alien/skulk/skulk_view.model"
 Bite.worldModelName        = "models/alien/skulk/skulk.model"
 Bite.drawSound             = "sound/ns2.fev/marine/rifle/draw"
-Bite.fireSound             = "sound/ns2.fev/marine/rifle/fire_single"
+Bite.fireSound             = "sound/ns2.fev/alien/skulk/bite"
+Bite.hitSound              = "sound/ns2.fev/alien/skulk/bite_hit_marine"
 Bite.fireLoopSound         = "sound/ns2.fev/marine/rifle/fire_14_sec_loop"
 Bite.fireEndSound          = "sound/ns2.fev/marine/rifle/fire_14_sec_end"
 Bite.reloadSound           = "sound/ns2.fev/marine/rifle/reload"
@@ -33,6 +34,7 @@ Shared.PrecacheCinematic(Bite.shellCinematic)
 Shared.PrecacheSound(Bite.drawSound)
 Shared.PrecacheSound(Bite.reloadSound)
 Shared.PrecacheSound(Bite.fireSound)
+Shared.PrecacheSound(Bite.hitSound)
 Shared.PrecacheSound(Bite.fireLoopSound)
 Shared.PrecacheSound(Bite.fireEndSound)
 
@@ -59,14 +61,14 @@ end
 
 --
 -- Returns then amount of time it takes to reload the weapon.
---/
+--
 function Bite:GetReloadTime()
     return Bite.reloadTime
 end
 
 --
 -- Returns then amount of time it takes to draw (unholster) the weapon.
---/
+--
 function Bite:GetDrawTime()
     return Bite.drawTime
 end
@@ -74,14 +76,14 @@ end
 --
 -- Returns the text that's prepended on the activity name to get the name of the
 -- animation that the player should play.
---/
+--
 function Bite:GetAnimationPrefix()
     return Bite.animationPrefix
 end
 
 --
 -- Unholsters the weapon.
---/
+--
 function Bite:Draw(player)
     local viewModel = player:GetViewModelEntity()
     --viewModel:SetAnimation( "draw" )
@@ -110,9 +112,9 @@ function Bite:Idle(player)
 
 end
 
---
+---
 -- Fires the specified number of bullets in a cone from the player's current view.
---/
+--
 function Bite:FireBullets(player)
 
     local viewModel = player:GetViewModelEntity()
@@ -133,6 +135,7 @@ function Bite:FireBullets(player)
     local filter = EntityFilterTwo(player, self)
 
 
+    player:PlaySound(self.fireSound)
 
     local spreadDirection = viewCoords.zAxis
 
@@ -147,6 +150,7 @@ function Bite:FireBullets(player)
 
         if (target ~= nil and target.TakeDamage ~= nil) then
             local direction = (trace.endPoint - startPoint):GetUnit()
+			player:PlaySound(self.hitSound)
             target:TakeDamage(player, 50, self, trace.endPoint, direction)
         end
 
@@ -162,14 +166,14 @@ end
 
 --
 -- Returns true if the weapon successfully started a reload.
---/
+--
 function Bite:Reload(player)
     return false
 end
 
---
+---
 -- Creates the hit effect from firing the weapon.
---/
+--
 function Bite:CreateHitEffect(player, trace)
 
     -- Create a coordinate frame where "up" is the normal of the surface we hit.
@@ -182,21 +186,21 @@ end
 
 --
 -- Returns the time between shots for the weapon.
---/
+--
 function Bite:GetFireDelay()
     return self.fireDelay
 end
 
 --
 -- Returns the total amount of ammo in the weapon's reserve ammo.
---/
+--
 function Bite:GetAmmo()
     return self.numBulletsInReserve
 end
 
 --
 -- Retursn the amount of ammo in the clip for the weapon.
---/
+--
 function Bite:GetClip()
     return self.numBulletsInClip
 end

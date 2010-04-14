@@ -50,11 +50,17 @@ Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting',
 Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
 Player.Teams				= enum { 'Marines', 'Aliens' }
 
+Player.marineTauntSound = "sound/ns2.fev/marine/voiceovers/taunt"
+Player.alienTauntSound = "sound/ns2.fev/alien/voiceovers/chuckle"
+Player.robotTauntSound = "sound/ns2.fev/marine/voiceovers/robot_taunt"
 Shared.PrecacheModel("models/marine/male/male.model")
 Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
 Shared.PrecacheModel("models/alien/skulk/skulk.model")
 Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
 Shared.PrecacheModel("models/marine/rifle/rifle_view_shell.model")
+Shared.PrecacheSound(Player.marineTauntSound)
+Shared.PrecacheSound(Player.alienTauntSound)
+Shared.PrecacheSound(Player.robotTauntSound)
 
 function Player:OnInit()
 
@@ -173,7 +179,7 @@ end
 --
 -- Sets the view angles for the player. Note that setting the yaw of the
 -- view will also adjust the player's yaw.
---/
+--
 function Player:SetViewAngles(viewAngles)
 
     self.viewPitch = viewAngles.pitch
@@ -188,7 +194,7 @@ end
 
 --
 -- Gets the view angles for the player.
---/
+--
 function Player:GetViewAngles(viewAngles)
     return Angles(self.viewPitch, self:GetAngles().yaw, self.viewRoll)
 end
@@ -197,7 +203,7 @@ end
 -- Sets the animation which is played on top of the base animation for the player.
 -- The overlay animation is typically used to combine an animation like an attack
 -- animation with the base movement animation.
---/
+--
 function Player:SetOverlayAnimation( animationName )
 
     if ( animationName ~= nil ) then
@@ -217,7 +223,7 @@ end
 
 --
 -- Sets the activity the player is currently performing.
---/
+--
 function Player:SetBaseAnimation(activity)
 
     local animationPrefix = ""
@@ -236,7 +242,7 @@ end
 
 --
 -- Called by the engine to construct the pose of the bones for the player's model.
---/
+--
 function Player:BuildPose(poses)
 
     Actor.BuildPose(self, poses)
@@ -250,7 +256,7 @@ end
 
 --
 -- Called to handle user input for the player.
---/
+--
 function Player:OnProcessMove(input)
 
     if (Client) then
@@ -268,6 +274,16 @@ function Player:OnProcessMove(input)
 
     end
 
+	if(bit.band(input.commands, Move.Taunt) ~= 0) then
+		if(self.class == Player.Classes.Marine) then
+			self:PlaySound(self.marineTauntSound)
+		elseif(self.class == Player.Classes.Skulk) then
+			self:PlaySound(self.alienTauntSound)
+		elseif(self.class == Player.Classes.BuildBot) then
+			self:PlaySound(self.robotTauntSound)
+		end
+	end
+	
     local canMove = self:GetCanMove()
 
     -- Update the view angles based on the input.
@@ -373,6 +389,7 @@ function Player:OnProcessMove(input)
         else
            wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
         end
+           
 
         -- Accelerate in the desired direction, ala Quake/Half-Life
 
@@ -494,14 +511,14 @@ end
 --
 -- Returns true if the player is allowed to move (this doesn't affect moving
 -- the view).
---/
+--
 function Player:GetCanMove()
     return Game.instance:GetHasGameStarted()
 end
 
 --
 -- Returns true if the player is standing on the ground.
---/
+--
 function Player:GetIsOnGround()
 
     if (self.velocity.y > 0) then
@@ -533,7 +550,7 @@ end
 
 --
 -- Moves by the player by the specified offset, colliding and sliding with the world.
---/
+--
 function Player:PerformMovement(offset, maxTraces)
 
     local capsuleRadius = self.extents.x
@@ -578,14 +595,14 @@ end
 
 --
 -- Returns the view model entity.
---/
+--
 function Player:GetViewModelEntity()
     return Shared.GetEntity(self.viewModelId)
 end
 
 --
 -- Sets the model currently displayed on the view model.
---/
+--
 function Player:SetViewModel(viewModelName)
     local viewModel = self:GetViewModelEntity()
     viewModel:SetModel(viewModelName)
@@ -594,7 +611,7 @@ end
 --
 -- Returns the currently selected weapon if there is one. If there isn't,
 -- returns nil.
---/
+--
 function Player:GetActiveWeapon()
 
     if (self.activeWeaponId > 0) then
@@ -633,7 +650,7 @@ end
 
 --
 -- Unholsters the active weapon.
---/
+--
 function Player:DrawWeapon()
 
     local weapon = self:GetActiveWeapon()
@@ -652,7 +669,7 @@ end
 
 --
 -- Reloads the current weapon.
---/
+--
 function Player:Reload()
 	if (self.activity ~= Player.Activity.Reloading) then
 		local weapon = self:GetActiveWeapon()
@@ -670,7 +687,7 @@ end
 
 --
 -- Performs the primary attack for the current weapon
---/
+--
 function Player:PrimaryAttack()
 
     local weapon = self:GetActiveWeapon()
@@ -706,7 +723,7 @@ end
 
 --
 -- Performs the secondary attack for the current weapon
---/
+--
 function Player:SecondaryAttack()
     -- Check if the current class is marine
     if (self.class == Player.Classes.Marine) then
@@ -720,7 +737,7 @@ function Player:SecondaryAttack()
             if (time > self.activityEnd) then
 
                if (weapon:Melee(self)) then
-                    -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) // Melee animation for thirdperson
+                    -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) -- Melee animation for thirdperson
                     self.activityEnd = time + weapon:GetMeleeDelay()
                     self.activity    = Player.Activity.AltShooting
                 else
@@ -783,7 +800,7 @@ end
 
 --
 -- Retursn the amount of ammo in the clip for the active weapon.
---/
+--
 function Player:GetWeaponClip()
 
     local weapon = self:GetActiveWeapon()
@@ -798,7 +815,7 @@ end
 
 --
 -- Returns the total amount of ammo for the currently selected weapon.
---/
+--
 function Player:GetWeaponAmmo()
 
     local weapon = self:GetActiveWeapon()
@@ -844,14 +861,14 @@ end
 
 --
 -- Returns true if the player is currently being viewed in 3rd person mode.
---/
+--
 function Player:GetIsThirdPerson()
     return self.thirdPerson
 end
 
 --
 -- Sets whether or not the player is being viewed in 3rd person mode.
---/
+--
 function Player:SetIsThirdPerson(thirdPerson)
 
     self.thirdPerson = thirdPerson
@@ -867,7 +884,7 @@ end
 --
 -- Called by the engine to get the object to world space transformation
 -- for the camera.
---/
+--
 function Player:GetCameraViewCoords()
 
     local viewCoords  = self:GetViewAngles():GetCoords()
@@ -936,7 +953,7 @@ end
 
 --
 -- Creates an effect at an attachment point for the active weapon.
---/
+--
 function Player:CreateWeaponEffect(playerAttachPointName, entityAttachPointName, cinematicName)
 
     local viewEffect = Client and (Client.GetLocalPlayer() == self) and not self:GetIsThirdPerson()
@@ -969,8 +986,8 @@ end
 if (Client) then
 
     --
-     --* Sets the Flash movie that's displayed for the HUD.
-     --*/
+    -- Sets the Flash movie that's displayed for the HUD.
+    --
     function Player:SetHud(hudFileName)
 
         local flashPlayer = Client.CreateFlashPlayer()

@@ -223,9 +223,15 @@ function Rifle:FireBullets(player)
         local spreadDirection = viewCoords.zAxis
 
         if (self.spread > 0) then
-
-            local xSpread = ((NetworkRandom() * 2 * self.spread) - self.spread) + ((NetworkRandom() * 2 * self.spread) - self.spread)
-            local ySpread = ((NetworkRandom() * 2 * self.spread) - self.spread) + ((NetworkRandom() * 2 * self.spread) - self.spread)
+        	local usespread = self.spread
+			if player.sprinting then
+				usespread = 1.5*self.spread
+			elseif player.crouching then
+				usespread = 0.5*self.spread
+			end
+			
+            local xSpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
+            local ySpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
 
             spreadDirection = viewCoords.zAxis + viewCoords.xAxis * xSpread + viewCoords.yAxis * ySpread
 

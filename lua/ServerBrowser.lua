@@ -8,6 +8,10 @@
 --=============================================================================
 Script.Load("lua/Utility.lua")
 
+package.path  = ".\\ns2\\lua\\?.lua"
+package.cpath = ".\\ns2\\lua\\?.dll"
+http = require("socket.http")
+
 local hasNewData = true
 local updateStatus = ""
 
@@ -29,6 +33,8 @@ local kSortTypePing = 5
 local sortType = kSortTypePing
 local ascending = true
 local justSorted = false
+
+numServers = tonumber(http.request("http://serverlist.devicenull.org/serverlist.php?get=servercount"), 10)
 
 --
 -- Sort option for the name field in order specified by ascending boolean
@@ -89,7 +95,7 @@ function MainMenu_SBGetUpdateStatus()
 end
 
 function GetNumServers()
-    return Main.GetNumServers()
+    return numServers + Main.GetNumServers()
 end
 
 --
@@ -100,8 +106,8 @@ function MainMenu_SBHasNewData()
     local numServers = GetNumServers()
     hasNewData = (numServers ~= table.maxn(serverRecords))
     if(numServers < table.maxn(serverRecords)) then
-        returnServerList = {}
-        serverRecords = {}
+        --returnServerList = {}
+        --serverRecords = {}
     end
     
     if(not hasNewData) then
@@ -142,9 +148,10 @@ function SortReturnServerList()
         table.sort(serverRecords, sortString)
     end
 end
-
+local refresh = true
 function RefreshServerList()
-    Main.RebuildServerList()
+    refresh = true
+    MainMenu_SBGetServerList()
 end
 
 -- Trim off unnecessary path and extension
@@ -166,27 +173,69 @@ end
 -- {servername, gametype, map, playercount, ping, serverUID}
 -- order
 --/
+
+
+function split(str, delim)
+    fields = {}
+    str:gsub("([^"..delim.."]*)"..delim, function(c) table.insert(fields, c) end)
+    return fields;
+end
+
 function MainMenu_SBGetServerList()
-
-    if(hasNewData) then
-
-        local numServers = GetNumServers()
+    
+    if(refresh) then
+        refresh = false
+        --serverRecords = {}
+        --local numServers = GetNumServers()
         updateStatus = string.format("Retrieving %d %s...", numServers, ConditionalValue(numServers == 1, "server", "servers"))
-        
-        if(numServers > table.maxn(serverRecords)) then
-        
-            hasNewData = true
-            
-            for serverIndex = table.maxn(serverRecords), numServers - 1 do
-            
-                local serverRecord = GetServerRecord(serverIndex)
+        local servers, headers, code = http.request("http://serverlist.devicenull.org/serverlist.php")
+        numServers = tonumber(servers:sub(1,2))
+        lines = split(servers,"\n")
+        for key1,value1 in pairs(lines) do
+            if (key1 ~= 1) then
                 
-                -- Build master list so we don't re-retrieve later
-                table.insert(serverRecords, serverRecord)
-
+                rows = split(value1,"\t")
+                name = ""
+                ip = ""
+                map = ""
+                players = ""
+                gametype = ""
+                for key,value in pairs(rows) do
+                    if (key == 1) then
+                        ip = value
+                    end
+                    if (key == 2) then
+                        port = value
+                    end
+                    if (key == 3) then
+                        name = value
+                    end
+                    if (key == 4) then
+                        players = value
+                    end
+                    if (key == 6) then
+                        map = value
+                    end
+                    if (key == 7) then
+                        gametype = value
+                    end
+                end
+                table.insert(serverRecords, {name, gametype, map, players, "10", ip})
             end
-            
         end
+
+        Main.RebuildServerList()
+        --hasNewData = true
+        local numServer = Main.GetNumServers()
+        for serverIndex = 1, numServer - 1 do
+        
+            local serverRecord = GetServerRecord(serverIndex)
+            
+            -- Build master list so we don't re-retrieve later
+            table.insert(serverRecords, serverRecord)
+
+        end
+
         
         SortReturnServerList()
         
@@ -200,7 +249,7 @@ function MainMenu_SBGetServerList()
             end
             
         end
-            
+        serverRecords = {}
     else
         updateStatus = ""
     end 

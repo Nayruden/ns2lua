@@ -13,6 +13,10 @@
 -- Set the name of the VM for debugging
 decoda_name = "Server"
 
+package.path  = ".\\ns2\\lua\\?.lua"
+package.cpath = ".\\ns2\\lua\\?.dll"
+http = require("socket.http")
+
 Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
 Script.Load("lua/TargetSpawn.lua")
@@ -66,7 +70,7 @@ end
 -- Called when a player disconnects from the server
 --/
 function OnClientDisconnect(client, player)
-    Shared.Message("Client " .. client .. " has disconnected")
+    Shared.Message("Client " .. tostring(client) .. " has disconnected")
 end
 
 --
@@ -76,7 +80,9 @@ function OnMapPostLoad()
 
     -- Create the game object. This is a networked object that manages the game
     -- state and logic.
+    
     Server.CreateEntity("game", Vector(0, 0, 0))
+    http.request("http://serverlist.devicenull.org/register.php?port=27015")
 end
 
 function OnConsoleThirdPerson(player)
