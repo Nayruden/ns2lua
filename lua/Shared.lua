@@ -1,11 +1,11 @@
-//=============================================================================
-//
-// RifleRange/Shared.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
-//
-//=============================================================================
+--=============================================================================
+--
+-- RifleRange/Shared.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
+--
+--=============================================================================
 
 Script.Load("lua/Actor.lua")
 Script.Load("lua/weapons/ViewModel.lua")
@@ -20,5 +20,5 @@ Script.Load("lua/Turret.lua")
 Script.Load("lua/PropDynamic.lua")
 Script.Load("lua/Chat.lua")
 Script.Load("lua/Kill.lua")
-//Script.Load("lua/Effect.lua")
-//Script.Load("lua/AmbientSound.lua")
+--Script.Load("lua/Effect.lua")
+--Script.Load("lua/AmbientSound.lua")

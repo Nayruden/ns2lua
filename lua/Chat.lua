@@ -2,6 +2,7 @@ Script.Load("lua/StringPacket.lua")
 
 class 'ChatPacket' (StringPacket64)
 
+
 ChatPacket.networkVars = {}
 ChatPacket.messageLog = {
 	messages = {},

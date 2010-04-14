@@ -1,14 +1,14 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\AmbientSound.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\AmbientSound.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
 class 'AmbientSound' (Effect)
 
-// Have some network variables here so ents are propagated to client
+-- Have some network variables here so ents are propagated to client
 local networkVars =
 {
     eventNameIndex = "integer",
@@ -20,12 +20,12 @@ local networkVars =
     pitch = "float"
 }
 
-// Read trigger radius and FMOD event name
+-- Read trigger radius and FMOD event name
 function AmbientSound:OnLoad()
 
     Effect.OnLoad(self)
 
-    // Precache sound name and lookup index for it
+    -- Precache sound name and lookup index for it
     Shared.PrecacheSound(self.eventName)
     self.eventNameIndex = Server.GetSoundIndex(self.eventName)
     
@@ -40,7 +40,7 @@ end
 
 if (Client) then
 
-    // From fmod_event.h and fmod.h
+    -- From fmod_event.h and fmod.h
     local kFmod3DSound = 16
     local kFmodLogarithmicRolloff = 1048576
     local kFmodLinearRolloff = 2097152
@@ -57,7 +57,7 @@ if (Client) then
 
     function AmbientSound:StartPlaying()
         if(not self.playing) then
-            // Start playing sound locally only    
+            -- Start playing sound locally only    
             Client.PlayLocalSoundWithIndex(self.eventNameIndex, self:GetOrigin())
             
             local listenerOrigin = self:GetOrigin()
@@ -68,7 +68,7 @@ if (Client) then
             local positioningType = ConditionalValue(self.positioning == 1, kFmodWorldRelative, kFmodHeadRelative)
             Client.SetSoundPropertyInt(listenerOrigin, self.eventNameIndex, kFmodPositioningPropertyIndex, positioningType, true)
          
-            // Set extended FMOD property values according to values in ambient sound entity
+            -- Set extended FMOD property values according to values in ambient sound entity
             Client.SetSoundPropertyInt(listenerOrigin, self.eventNameIndex, kFmodRolloffPropertyIndex, kFmod3DSound, true)
             
             local rolloffType = ConditionalValue(self.falloffType == 1, kFmodLogarithmicRolloff, kFmodLinearRolloff)

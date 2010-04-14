@@ -1,15 +1,15 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua/Actor.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2008-2010, Unknown Worlds Entertainment, Inc.
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua/Actor.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2008-2010, Unknown Worlds Entertainment, Inc.
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
-/**
- * An Actor is a type of Entity that has a model associated with it.
- */
+--
+-- An Actor is a type of Entity that has a model associated with it.
+--/
 class 'Actor' (Entity)
 
 Actor.networkVars = 
@@ -37,7 +37,7 @@ function Actor:OnInit()
     self.physicsModel       = nil
 
     if (Client) then
-        self.physicsGroup  = 0 // Collision group.
+        self.physicsGroup  = 0 -- Collision group.
         self.oldModelIndex = 0
     end
 
@@ -49,7 +49,7 @@ function Actor:OnDestroy()
     
     if (Client) then
     
-        // Destroy the render model.
+        -- Destroy the render model.
         if (self.model ~= nil) then
             Client.DestroyRenderModel(self.model)
             self.model = nil
@@ -64,11 +64,11 @@ function Actor:OnDestroy()
     
 end
 
-/**
- * Assigns the model for the actor. modelName is a string specifying the file
- * name of the model, which should have been precached by calling
- * Shared.PrecacheModel during load time.
- */
+--
+-- Assigns the model for the actor. modelName is a string specifying the file
+-- name of the model, which should have been precached by calling
+-- Shared.PrecacheModel during load time.
+--/
 function Actor:SetModel(modelName)
 
     self.modelIndex = Shared.GetModelIndex(modelName)
@@ -87,10 +87,10 @@ function Actor:SetPhysicsActor()
     self.physicsActor = true
 end
 
-/**
- * Returns the mesh's center, in world coordinates. Needed because some objects
- * have their origin at the ground and others don't.
- */
+--
+-- Returns the mesh's center, in world coordinates. Needed because some objects
+-- have their origin at the ground and others don't.
+--/
 function Actor:GetModelOrigin()
 
     local model = Shared.GetModel(self.modelIndex)
@@ -103,10 +103,10 @@ function Actor:GetModelOrigin()
     
 end
 
-/**
- * Sets the animation currently playing on the actor. The sequence name is the
- * name stored in the current model.
- */
+--
+-- Sets the animation currently playing on the actor. The sequence name is the
+-- name stored in the current model.
+--/
 function Actor:SetAnimation(sequenceName, force)
 
     local model = Shared.GetModel(self.modelIndex, true)
@@ -119,7 +119,7 @@ function Actor:SetAnimation(sequenceName, force)
             self:GetClassName() .. ") with a nil model. The animation will not be played.")
     end
 
-    // Only play the animation if it isn't already playing.
+    -- Only play the animation if it isn't already playing.
     if (animationSequence ~= self.animationSequence or force) then
         self.animationSequence = animationSequence
         self.animationStart    = Shared.GetTime()
@@ -128,9 +128,9 @@ function Actor:SetAnimation(sequenceName, force)
 
 end
 
-/**
- * Returns the name of the currently playing animation.
- */
+--
+-- Returns the name of the currently playing animation.
+--/
 function Actor:GetAnimation()
 
     local model = Shared.GetModel(self.modelIndex)
@@ -147,9 +147,9 @@ function Actor:GetAnimation()
 
 end
 
-/**
- * Returns length of animation sequence in seconds, or 0 if it can't be found.
- */
+--
+-- Returns length of animation sequence in seconds, or 0 if it can't be found.
+--/
 function Actor:GetAnimationLength(sequenceName)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -168,11 +168,11 @@ function Actor:GetAnimationLength(sequenceName)
     
 end
 
-/**
- * Returns the index of an animation with the specified name. If a model isn't
- * assigned to the actor or the named animation doesn't exist, the method
- * returns -1.
- */
+--
+-- Returns the index of an animation with the specified name. If a model isn't
+-- assigned to the actor or the named animation doesn't exist, the method
+-- returns -1.
+--/
 function Actor:GetAnimationIndex(sequenceName)
     
     local model = Shared.GetModel(self.modelIndex)
@@ -185,12 +185,12 @@ function Actor:GetAnimationIndex(sequenceName)
     
 end
 
-/**
- * Sets a parameter used to compute the final pose of an animation. These are
- * named in the actor's .model file and are usually things like the amount the
- * actor is moving, the pitch of the view, etc. This only applies to the currently
- * set model, so if the model is changed, the values will need to be reset.
- */
+--
+-- Sets a parameter used to compute the final pose of an animation. These are
+-- named in the actor's .model file and are usually things like the amount the
+-- actor is moving, the pitch of the view, etc. This only applies to the currently
+-- set model, so if the model is changed, the values will need to be reset.
+--/
 function Actor:SetPoseParam(name, value)
 
     local paramIndex = self:GetPoseParamIndex(name)
@@ -200,11 +200,11 @@ function Actor:SetPoseParam(name, value)
     end
 end
 
-/**
- * Returns the value of a parameter used to compute the final pose of an
- * animation. These are named in the actor's .model file and are usually
- * things like the amount the actor is moving, the pitch of the view, etc.
- */
+--
+-- Returns the value of a parameter used to compute the final pose of an
+-- animation. These are named in the actor's .model file and are usually
+-- things like the amount the actor is moving, the pitch of the view, etc.
+--/
 function Actor:GetPoseParam(name)
 
     local paramIndex = self:GetPoseParamIndex(name)
@@ -217,11 +217,11 @@ function Actor:GetPoseParam(name)
 
 end
 
-/**
- * Returns the index of the named pose parameter on the actor's model. If the
- * actor doesn't have a model set or the pose parameter doesn't exist, the
- * method returns -1
- */
+--
+-- Returns the index of the named pose parameter on the actor's model. If the
+-- actor doesn't have a model set or the pose parameter doesn't exist, the
+-- method returns -1
+--/
 function Actor:GetPoseParamIndex(name)
   
     local model = Shared.GetModel(self.modelIndex)
@@ -235,21 +235,21 @@ function Actor:GetPoseParamIndex(name)
 end
 
 function Actor:SetSkin(skinIndex)
-    // Doesn't currently do anything
+    -- Doesn't currently do anything
 end
 
 function Actor:SetEthereal(ethereal)
-    // Doesn't currently do anything
+    -- Doesn't currently do anything
 end
 
 function Actor:SetAnimationSpeed(speed)
-    // Doesn't currently do anything.
+    -- Doesn't currently do anything.
 end
 
-/**
- * Returns the model's center, in world coordinates. This is needed because
- * some objects have their origin at the ground and others don't.
- */
+--
+-- Returns the model's center, in world coordinates. This is needed because
+-- some objects have their origin at the ground and others don't.
+--/
 function Actor:GetModelOrigin()
 
     local model = Shared.GetModel(self.modelIndex)
@@ -262,11 +262,11 @@ function Actor:GetModelOrigin()
     
 end
     
-/**
- * Called every frame to update the actor. If a derived classe overrides this
- * method, it should call the base class implementation or else animation will
- * not work for the actor.
- */    
+--
+-- Called every frame to update the actor. If a derived classe overrides this
+-- method, it should call the base class implementation or else animation will
+-- not work for the actor.
+--/    
 function Actor:OnUpdate()
 
     Entity.OnUpdate(self)
@@ -277,7 +277,7 @@ function Actor:OnUpdate()
 
     if (model ~= nil) then
 
-        // Check to see if the animation has completed.
+        -- Check to see if the animation has completed.
         if (self.animationSequence ~= Model.invalidSequence) then
 
             local currentTime     = Shared.GetTime()     
@@ -291,12 +291,12 @@ function Actor:OnUpdate()
             
         end
     
-        // Update the bones based on the currently playing animation.
+        -- Update the bones based on the currently playing animation.
         self:UpdateBoneCoords()
         
         if (self.physicsActor) then
     
-            // Update the bones based on the simulation of the physics model.
+            -- Update the bones based on the simulation of the physics model.
             if (self.physicsModel ~= nil) then
                 self.physicsModel:GetBoneCoords(self:GetCoords(), self.boneCoords)
             end
@@ -307,7 +307,7 @@ function Actor:OnUpdate()
     
     if (Client) then
 
-        // Update the model's coordinate frame to match the entity.
+        -- Update the model's coordinate frame to match the entity.
         if (self.model ~= nil) then
             self.model:SetCoords( self:GetCoords() )
             self.model:SetBoneCoords( self.boneCoords )
@@ -331,17 +331,17 @@ function Actor:UpdateBoneCoords()
 
 end
 
-/**
- * Called when an animation finishes playing.
- */
+--
+-- Called when an animation finishes playing.
+--/
 function Actor:OnAnimationComplete()
 end
 
-/**
- * Called to build the final pose for the actor's bones. This may be overriden
- * to apply additional overlay animations, The base class implementation should
- * be called to play the base animation for the actor.
- */
+--
+-- Called to build the final pose for the actor's bones. This may be overriden
+-- to apply additional overlay animations, The base class implementation should
+-- be called to play the base animation for the actor.
+--/
 function Actor:BuildPose(poses)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -353,9 +353,9 @@ function Actor:BuildPose(poses)
 
 end
 
-/**
- * Accmuluates the specified animation on the model into the poses.
- */
+--
+-- Accmuluates the specified animation on the model into the poses.
+--/
 function Actor:AccumulateAnimation(poses, animationIndex, animationStart)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -367,9 +367,9 @@ function Actor:AccumulateAnimation(poses, animationIndex, animationStart)
 
 end
 
-/**
- * Blends an animation over the existing pose by the indicated fraction (0 to 1).
- */
+--
+-- Blends an animation over the existing pose by the indicated fraction (0 to 1).
+--/
 function Actor:BlendAnimation(poses, animationIndex, animationStart, fraction)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -388,13 +388,13 @@ function Actor:BlendAnimation(poses, animationIndex, animationStart, fraction)
     
 end
 
-/**
- * Called by the engine when a ray is traced through the world.
- */
+--
+-- Called by the engine when a ray is traced through the world.
+--/
 function Actor:TraceRay(startPos, endPos, trace)
 
-    // Don't trace if this is a physics actor (since we're
-    // already tracing against the model in the physics scene).
+    -- Don't trace if this is a physics actor (since we're
+    -- already tracing against the model in the physics scene).
     
     if (self.physicsActor) then
         trace:Clear()
@@ -404,7 +404,7 @@ function Actor:TraceRay(startPos, endPos, trace)
         
         if (model ~= nil and model:GetHasHitBoxes()) then
 
-            // Transform the start and end point into the model's local space.
+            -- Transform the start and end point into the model's local space.
         
             local objectToWorldCoords = self:GetCoords()
             local worldToObjectCoords = objectToWorldCoords:GetInverse()
@@ -428,9 +428,9 @@ function Actor:TraceRay(startPos, endPos, trace)
     
 end
 
-/**
- * Overriden from Entity.
- */
+--
+-- Overriden from Entity.
+--/
 function Actor:GetAttachPointIndex(attachPointName)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -443,9 +443,9 @@ function Actor:GetAttachPointIndex(attachPointName)
 
 end
 
-/**
- * Overriden from Entity.
- */
+--
+-- Overriden from Entity.
+--/
 function Actor:GetAttachPointCoords(attachPointIndex)
 
     if (attachPointIndex ~= -1) then
@@ -487,7 +487,7 @@ function Actor:UpdateTags()
 
         while (lastTime >= 0 and lastTime < animationTime) do
         
-            // tag could have changed the sequence
+            -- tag could have changed the sequence
             if (currentSequence ~= self.animationSequence) then
                 return
             end
@@ -500,12 +500,12 @@ function Actor:UpdateTags()
 
         end
 
-        // see if we need to check it again, because we started a new loop since the last update
+        -- see if we need to check it again, because we started a new loop since the last update
         if (animationTime > animationLength) then
         
             if (model:GetIsLooping(self.animationSequence)) then
             
-                // tag could have changed the sequence
+                -- tag could have changed the sequence
                 while (animationTime > animationLength) do
                 
                     if (currentSequence ~= self.animationSequence) then
@@ -536,19 +536,19 @@ function Actor:UpdateTags()
     
 end
 
-/**
- * Called when the playing animation passes a frame tag. Derived classes can
- * can override this.
- */
+--
+-- Called when the playing animation passes a frame tag. Derived classes can
+-- can override this.
+--/
 function Actor:OnTag(tagName)
 end
 
 if (Client) then
 
-    /**
-     * Called when the network variables for the actor are updated from values
-     * from the server.
-     */
+    --
+    -- Called when the network variables for the actor are updated from values
+    -- from the server.
+    --/
     function Actor:OnSynchronized()
     
         Entity.OnSynchronized(self)
@@ -567,15 +567,15 @@ if (Client) then
         
     end
     
-    /** 
-     * Creates the rendering representation of the model if it doesn't match
-     * the currently set model index and update's it state to match the actor.
-     */
+    -- 
+    -- * Creates the rendering representation of the model if it doesn't match
+    -- * the currently set model index and update's it state to match the actor.
+    -- */
     function Actor:UpdateRenderModel()
     
         if (self.oldModelIndex ~= self.modelIndex) then
     
-            // Create/destroy the model as necessary.
+            -- Create/destroy the model as necessary.
             if (self.modelIndex == 0) then
                 Client.DestroyRenderModel(self.model)
                 self.model = nil
@@ -585,16 +585,16 @@ if (Client) then
                 self.model:SetModel(self.modelIndex)
             end
         
-            // Save off the model index so we can detect when it changes.
+            -- Save off the model index so we can detect when it changes.
             self.oldModelIndex = self.modelIndex
             
         end
         
     end
 
-    /**
-     * Shows or hides the actor's model.
-     */
+    --
+   --  * Shows or hides the actor's model.
+    -- */
     function Actor:ShowModel(show)
         if (self.model ~= nil) then
             self.model:SetIsVisible(show)

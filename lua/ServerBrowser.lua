@@ -1,21 +1,21 @@
-//=============================================================================
-//
-// lua/ServerBrowser.lua
-// 
-// Created by Henry Kropf and Charlie Cleveland
-// Copyright 2010, Unknown Worlds Entertainment
-//
-//=============================================================================
+--=============================================================================
+--
+-- lua/ServerBrowser.lua
+-- 
+-- Created by Henry Kropf and Charlie Cleveland
+-- Copyright 2010, Unknown Worlds Entertainment
+--
+--=============================================================================
 Script.Load("lua/Utility.lua")
 
 local hasNewData = true
 local updateStatus = ""
 
-// List of server records - { {servername, gametype, map, playercount, ping, ipAddress}, {servername, gametype, map, playercount, ping, ipAddress}, etc. }
+-- List of server records - { {servername, gametype, map, playercount, ping, ipAddress}, {servername, gametype, map, playercount, ping, ipAddress}, etc. }
 local serverRecords = {}
 
-// Data to return to flash. Single-dimensional array like:
-// {servername, gametype, map, playercount, ping, ipAddress, servername, gametype, map, playercount, ping, ipAddress, ...)
+-- Data to return to flash. Single-dimensional array like:
+-- {servername, gametype, map, playercount, ping, ipAddress, servername, gametype, map, playercount, ping, ipAddress, ...)
 local returnServerList = {}
 
 local kNumColumns = 6
@@ -30,45 +30,45 @@ local sortType = kSortTypePing
 local ascending = true
 local justSorted = false
 
-/**
- * Sort option for the name field in order specified by ascending boolean
- */
+--
+-- Sort option for the name field in order specified by ascending boolean
+--/
 function MainMenu_SBSortByName(newAscending)
     sortType = kSortTypeName
     ascending = newAscending
     justSorted = true
 end
 
-/**
- * Sort option for the game field in order specified by ascending boolean
- */
+--
+-- Sort option for the game field in order specified by ascending boolean
+--/
 function MainMenu_SBSortByGame(newAscending) 
     sortType = kSortTypeGame
     ascending = newAscending
     justSorted = true
 end
 
-/**
- * Sort option for the map field in order specified by ascending boolean
- */
+--
+-- Sort option for the map field in order specified by ascending boolean
+--/
 function MainMenu_SBSortByMap(newAscending) 
     sortType = kSortTypeMap
     ascending = newAscending
     justSorted = true
 end
 
-/**
- * Sort option for the players field in order specified by ascending boolean
- */
+--
+-- Sort option for the players field in order specified by ascending boolean
+--/
 function MainMenu_SBSortByPlayers(newAscending) 
     sortType = kSortTypePlayers
     ascending = newAscending
     justSorted = true
 end
 
-/**
- * Sort option for the ping field in order specified by ascending boolean
- */
+--
+-- Sort option for the ping field in order specified by ascending boolean
+--/
 function MainMenu_SBSortByPing(newAscending) 
     sortType = kSortTypePing
     ascending = newAscending
@@ -81,9 +81,9 @@ function MainMenu_SBRefreshServerList()
     updateStatus = ""
 end
 
-/**
- * Return a string saying what the browser is doing...
- */
+--
+-- Return a string saying what the browser is doing...
+--/
 function MainMenu_SBGetUpdateStatus()
     return updateStatus
 end
@@ -92,9 +92,9 @@ function GetNumServers()
     return Main.GetNumServers()
 end
 
-/**
- * Return a boolean indicating if new data is available since last GetServerList() call. Updates hasNewData as well.
- */
+--
+-- Return a boolean indicating if new data is available since last GetServerList() call. Updates hasNewData as well.
+--/
 function MainMenu_SBHasNewData()
 
     local numServers = GetNumServers()
@@ -117,7 +117,7 @@ function MainMenu_SBHasNewData()
     
 end
 
-// Sort current server list according to sortType and ascending
+-- Sort current server list according to sortType and ascending
 function SortReturnServerList()
 
     function sortString(e1, e2)    
@@ -147,7 +147,7 @@ function RefreshServerList()
     Main.RebuildServerList()
 end
 
-// Trim off unnecessary path and extension
+-- Trim off unnecessary path and extension
 function GetTrimmedMapName(mapName)
 
     for trimmedName in string.gmatch(mapName, "\/(.+)\.level") do
@@ -161,11 +161,11 @@ function GetServerRecord(serverIndex)
     return {Main.GetServerName(serverIndex), Main.GetServerGameDesc(serverIndex), GetTrimmedMapName(Main.GetServerMapName(serverIndex)), Main.GetServerNumPlayers(serverIndex), Main.GetServerPing(serverIndex), Main.GetServerAddress(serverIndex)}
 end
 
-/**
- * Return a linear array of all servers, in 
- * {servername, gametype, map, playercount, ping, serverUID}
- * order
- */
+--
+-- Return a linear array of all servers, in 
+-- {servername, gametype, map, playercount, ping, serverUID}
+-- order
+--/
 function MainMenu_SBGetServerList()
 
     if(hasNewData) then
@@ -181,7 +181,7 @@ function MainMenu_SBGetServerList()
             
                 local serverRecord = GetServerRecord(serverIndex)
                 
-                // Build master list so we don't re-retrieve later
+                -- Build master list so we don't re-retrieve later
                 table.insert(serverRecords, serverRecord)
 
             end
@@ -190,7 +190,7 @@ function MainMenu_SBGetServerList()
         
         SortReturnServerList()
         
-        // Create return server list as linear array
+        -- Create return server list as linear array
         returnServerList = {}
         
         for index, serverRecord in ipairs(serverRecords) do
@@ -209,21 +209,21 @@ function MainMenu_SBGetServerList()
     
 end
 
-/**
- * Join the server specified by UID
- */
+--
+-- Join the server specified by UID
+--/
 function MainMenu_SBJoinServer(uid) 
     LeaveMenu()
     Main.ConnectServer(uid)
 end
 
-/**
- * Return linear array of server uids and texture reference strings
- */
+--
+-- Return linear array of server uids and texture reference strings
+--/
 function MainMenu_SBGetRecommendedList()
     local a = {}
     return a
 end
 
-// Uncomment to use test data in browser
-//Script.Load("lua/ServerBrowser_Test.lua")
+-- Uncomment to use test data in browser
+--Script.Load("lua/ServerBrowser_Test.lua")

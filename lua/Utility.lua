@@ -1,16 +1,16 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\Utility.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\Utility.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
 Script.Load("lua/Constants.lua")
 Script.Load("lua/Table.lua")
 Script.Load("lua/ns2devslib.lua")
   
-// Splits string into array, along whitespace boundaries. First element indexed at 1.
+-- Splits string into array, along whitespace boundaries. First element indexed at 1.
 function StringToArray(instring)
 
     local thearray = {}
@@ -58,7 +58,7 @@ function GetSurfaceFromTrace(trace)
     
 end
 
-// Returns nil if it doesn't hit
+-- Returns nil if it doesn't hit
 function GetLinePlaneIntersection(planePoint, planeNormal, lineOrigin, lineDirection)
 
     local p = lineDirection:DotProduct(planeNormal)
@@ -80,7 +80,7 @@ function GetLinePlaneIntersection(planePoint, planeNormal, lineOrigin, lineDirec
     
 end
 
-// Returns the sign of a number (1, 0, -1)
+-- Returns the sign of a number (1, 0, -1)
 function signum(num)
 
     local sign = 1
@@ -100,19 +100,19 @@ function Hump(x)
 end
 
 function DebugBox(minPoint, maxPoint, lifetime, r, g, b, a)
-    // Bottom of cube
+    -- Bottom of cube
     DebugLine(Vector(minPoint.x, minPoint.y, minPoint.z), Vector(minPoint.x, minPoint.y, maxPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(minPoint.x, minPoint.y, minPoint.z), Vector(maxPoint.x, minPoint.y, minPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(maxPoint.x, minPoint.y, minPoint.z), Vector(maxPoint.x, minPoint.y, maxPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(minPoint.x, minPoint.y, maxPoint.z), Vector(maxPoint.x, minPoint.y, maxPoint.z), lifetime, r, g, b, a)
     
-    // Top of cube
+    -- Top of cube
     DebugLine(Vector(minPoint.x, maxPoint.y, minPoint.z), Vector(minPoint.x, maxPoint.y, maxPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(minPoint.x, maxPoint.y, minPoint.z), Vector(maxPoint.x, maxPoint.y, minPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(maxPoint.x, maxPoint.y, minPoint.z), Vector(maxPoint.x, maxPoint.y, maxPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(minPoint.x, maxPoint.y, maxPoint.z), Vector(maxPoint.x, maxPoint.y, maxPoint.z), lifetime, r, g, b, a)
     
-    // Sides
+    -- Sides
     DebugLine(Vector(minPoint.x, maxPoint.y, minPoint.z), Vector(minPoint.x, minPoint.y, minPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(maxPoint.x, maxPoint.y, minPoint.z), Vector(maxPoint.x, minPoint.y, minPoint.z), lifetime, r, g, b, a)
     DebugLine(Vector(maxPoint.x, maxPoint.y, maxPoint.z), Vector(maxPoint.x, minPoint.y, maxPoint.z), lifetime, r, g, b, a)
@@ -120,7 +120,7 @@ function DebugBox(minPoint, maxPoint, lifetime, r, g, b, a)
     
 end
 
-// rgba are normalized values (0-1)
+-- rgba are normalized values (0-1)
 function DebugLine(startPoint, endPoint, lifetime, r, g, b, a)
     if (Client and not Client.GetIsRunningPrediction()) then
         Client.DebugColor(r, g, b, a)
@@ -141,11 +141,11 @@ function DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifeti
     end
 end
 
-// Can print one argument (string or not), or a string and variable list of parameters passed to string.format()
-// Print formatted message to console:
-// Print("%s %.2f", "Animation fraction:", .5)
-// Print(intValue)
-// Doesn't print when predicting.
+-- Can print one argument (string or not), or a string and variable list of parameters passed to string.format()
+-- Print formatted message to console:
+-- Print("%s %.2f", "Animation fraction:", .5)
+-- Print(intValue)
+-- Doesn't print when predicting.
 function Print(formatString, ...)
 
     local result = string.format(formatString, ...)
@@ -165,10 +165,10 @@ function Print(formatString, ...)
     
 end
 
-// Print message with stamp showing if it is on client or server, along with timestamp. Good for time-sensitive
-// or client/server logging.
-// Print(4.5)
-// Print("%s", "testing")
+-- Print message with stamp showing if it is on client or server, along with timestamp. Good for time-sensitive
+-- or client/server logging.
+-- Print(4.5)
+-- Print("%s", "testing")
 function PrintDetailed(formatString, ...)
 
     local result = string.format(formatString, ...)
@@ -199,21 +199,13 @@ function CreatePickRay(player, xRes, yRes)
 
     local pickVec = Client.CreatePickingRayXY(xRes, yRes)
        
-    /* Extra code for debugging        
-    local viewOffset = player:GetViewOffset()
-
-    // Do traceline against world to see where it ends
-    local trace = Shared.TraceRay(player:GetOrigin(), pickVec * 1000, EntityFilterOne(player))
-    DebugLine(player:GetOrigin(), trace.endPoint, 3, 1, 1, 1, 1)   
-    */
-    
     return pickVec
     
 end
 
-// Trace until we hit the "inside" of the level or hit nothing. Returns nil if we hit nothing,
-// returns the world point of the surface we hit otherwise. Only hit surfaces that are facing 
-// towards us.
+-- Trace until we hit the "inside" of the level or hit nothing. Returns nil if we hit nothing,
+-- returns the world point of the surface we hit otherwise. Only hit surfaces that are facing 
+-- towards us.
 function GetCommanderPickTarget(player, pickVec)
 
     local done = false
@@ -225,7 +217,7 @@ function GetCommanderPickTarget(player, pickVec)
         trace = Shared.TraceRay(startPoint, pickVec * 1000, EntityFilterOne(player))
         local hitDistance = (startPoint - trace.endPoint):GetLength()
         
-        // Try again if we're inside the surface
+        -- Try again if we're inside the surface
         if(trace.fraction == 0 or hitDistance < .1) then
         
             startPoint = startPoint + pickVec
@@ -234,7 +226,7 @@ function GetCommanderPickTarget(player, pickVec)
         
             done = true
 
-        // Only hit a target that's facing us (skip surfaces facing away from us)            
+        -- Only hit a target that's facing us (skip surfaces facing away from us)            
         elseif(trace.normal:DotProduct(pickVec) < 0) then
         
             done = true
@@ -247,7 +239,7 @@ function GetCommanderPickTarget(player, pickVec)
                 
             else
             
-                // Trace again from what we hit
+                -- Trace again from what we hit
                 startPoint = trace.endPoint
                 
             end
@@ -280,12 +272,12 @@ function GetEnemyTeamNumber(entityTeamNumber)
     
 end
 
-// Returns true or false along with location (on ground, inside level) that has space for entity. 
-// Last parameter is length of box size that is used to make sure location is big enough (can be nil).
-// Returns point sitting on ground.
+-- Returns true or false along with location (on ground, inside level) that has space for entity. 
+-- Last parameter is length of box size that is used to make sure location is big enough (can be nil).
+-- Returns point sitting on ground.
 function GetRandomSpaceForEntity(basePoint, radius, boxSize)
    
-    // Find clear space at radius 
+    -- Find clear space at radius 
     for i = 0, 30 do
     
         local randomRadians = NetworkRandom()*2*math.pi
@@ -296,7 +288,7 @@ function GetRandomSpaceForEntity(basePoint, radius, boxSize)
         VectorCopy(testLocation, finalLocation)
         DropToFloor(finalLocation)
 
-        // Make sure we don't drop out of the world
+        -- Make sure we don't drop out of the world
         if((finalLocation - testLocation):GetLength() < 20) then
         
             finalLocation.y = finalLocation.y + .01
@@ -307,7 +299,7 @@ function GetRandomSpaceForEntity(basePoint, radius, boxSize)
                 
             else
             
-                // If extents specified, make sure there's enough room for object
+                -- If extents specified, make sure there's enough room for object
                 local boxOrigin = Vector(finalLocation.x, finalLocation.y + boxSize + kEpsilon, finalLocation.z)
                 local trace = Shared.TraceBox(Vector(boxSize, boxSize, boxSize), boxOrigin, Vector(boxOrigin.x, boxOrigin.y + .1, boxOrigin.z))
                 
@@ -327,25 +319,25 @@ function GetRandomSpaceForEntity(basePoint, radius, boxSize)
     
 end
 
-// Assumes input angles are in radians and will move angle towards target the shortest direction (CW or CCW). Speed must be positive.
+-- Assumes input angles are in radians and will move angle towards target the shortest direction (CW or CCW). Speed must be positive.
 function InterpolateAngle(currentAngle, desiredAngle, speed)
 
-    // current 1, desired 4, speed 2 => angleDiff 3, sign = +1, moveAmount = 2, return 1 + 2 = 3
-    // current -1, desired -3, speed 1 => angleDiff -2, sign = -1, moveAmount = -1, return -1 - 1 = -2
+    -- current 1, desired 4, speed 2 => angleDiff 3, sign = +1, moveAmount = 2, return 1 + 2 = 3
+    -- current -1, desired -3, speed 1 => angleDiff -2, sign = -1, moveAmount = -1, return -1 - 1 = -2
     local angleDiff = desiredAngle - currentAngle
     
     local angleDiffSign = GetSign(angleDiff)
     
-    // Don't move past angle
+    -- Don't move past angle
     local moveAmount = math.min(math.abs(angleDiff), math.abs(speed))*angleDiffSign
     
-    //return currentAngle + moveAmount
+    --return currentAngle + moveAmount
     
     return desiredAngle
 
 end
 
-// Moves value towards target by rate, regardless of sign of rate
+-- Moves value towards target by rate, regardless of sign of rate
 function Slerp(current, target, rate)
 
     if(rate < 0) then
@@ -360,13 +352,13 @@ function Slerp(current, target, rate)
     
 end
 
-// Trace position down to ground
+-- Trace position down to ground
 function DropToFloor(point)
 
     local done = false
     local numTraces = 0
     
-    // Keep tracing until we hit something, that's not an entity (world geometry)
+    -- Keep tracing until we hit something, that's not an entity (world geometry)
     local ignoreEntity = nil
     
     while not done do
@@ -381,7 +373,7 @@ function DropToFloor(point)
         
         numTraces = numTraces + 1
         
-        // Backup the end point by a small amount to avoid interpenetration.AcquireTarget
+        -- Backup the end point by a small amount to avoid interpenetration.AcquireTarget
         local newPoint = trace.endPoint - trace.normal * 0.01
         VectorCopy(newPoint, point)
         
@@ -397,14 +389,14 @@ end
 
 function GetNearestAvailableTechPoint(origin, teamType)
 
-    // Look for nearest empty tech point to use instead
+    -- Look for nearest empty tech point to use instead
     local nearestTechPoint = nil
     local nearestTechPointDistance = 0
 
     local techPoints = GetEntitiesIsa("TechPoint", -1)
     for index, techPoint in pairs(techPoints) do
     
-        // Only use unoccupied tech points that are neutral or marked for use with our team
+        -- Only use unoccupied tech points that are neutral or marked for use with our team
         local techPointTeamNumber = techPoint:GetTeamNumber()
         if( (techPoint:GetAttached() == nil) and ((techPointTeamNumber == kNeutralTeamType) or (teamType == techPointTeamNumber)) ) then
     
@@ -424,12 +416,12 @@ function GetNearestAvailableTechPoint(origin, teamType)
     
 end
 
-// Computes line of sight to entity
+-- Computes line of sight to entity
 function GetCanSeeEntity(seeingEntity, targetEntity)
 
     local seen = false
     
-    // See if line is in our view cone
+    -- See if line is in our view cone
     if(targetEntity:GetIsVisible()) then
     
         local eyePos = seeingEntity:GetEyePos()
@@ -442,7 +434,7 @@ function GetCanSeeEntity(seeingEntity, targetEntity)
         local s = math.acos(dotProduct)
         if(s < halfFov) then
 
-            // See if there's something blocking our view of entity
+            -- See if there's something blocking our view of entity
             local trace = Shared.TraceRay(eyePos, targetEntity:GetModelOrigin(), EntityFilterTwo(seeingEntity, targetEntity))
             if(trace.fraction == 1) then                
                 seen = true
@@ -450,7 +442,7 @@ function GetCanSeeEntity(seeingEntity, targetEntity)
             
         end
 
-        // Draw red or green line
+        -- Draw red or green line
         if(Client and Shared.GetDevMode()) then
             DebugLine(eyePos, targetEntity:GetOrigin(), 1, ConditionalValue(seen, 0, 1), ConditionalValue(seen, 1, 0), 0, 1)
         end
@@ -487,7 +479,7 @@ function GetAnglesDifference(startAngle, endAngle)
         diff = diff - GetSign(diff)*2*math.pi
     end
     
-    // Return shortest path around circle
+    -- Return shortest path around circle
     if(math.abs(diff) > math.pi) then
         diff = diff - GetSign(diff)*2*math.pi
     end
@@ -496,7 +488,7 @@ function GetAnglesDifference(startAngle, endAngle)
     
 end
 
-// Takes a normalized vector
+-- Takes a normalized vector
 function SetAnglesFromVector(entity, vec)
 
     local angles = Angles(entity:GetAngles())
@@ -534,7 +526,7 @@ function SetViewAnglesFromVector(entity, vec)
 
 end
 
-// Returns degrees between -360 and 360
+-- Returns degrees between -360 and 360
 function DegreesTo360(degrees)
 
     while(degrees < -360) do
@@ -551,7 +543,7 @@ end
 
 function DrawEntityAxes(entity)
 
-    // Draw x red, y green, z blue (like 3ds Max)
+    -- Draw x red, y green, z blue (like 3ds Max)
     local lineLength = 2
     local coords = entity:GetAngles():GetCoords()
     local p0 = entity:GetOrigin()
@@ -578,7 +570,7 @@ function GetSign(number)
     
 end
 
-// Pass no parameters for 0-1 random value, otherwise pass integers for random number between those numbers (inclusive).
+-- Pass no parameters for 0-1 random value, otherwise pass integers for random number between those numbers (inclusive).
 function NetworkRandom(minValue, maxValue)
 
     local random = 0
@@ -629,22 +621,22 @@ function DecodePointFromString(string)
     
 end
 
-// Allows us to send/receive strings without @ symbols
-// Convert @ to spaces
-// Make better later if needed
+-- Allows us to send/receive strings without @ symbols
+-- Convert @ to spaces
+-- Make better later if needed
 function EncodeStringForNetwork(inputString)
 
-    // Don't allow strings with @ in them
+    -- Don't allow strings with @ in them
     if(string.find(inputString, "@") ~= nil) then
         Shared.Message(string.format("EncodeStringForNetwork(%s) error - Strings can't contain '@' characters.", inputString))
     end
     
-    // Convert spaces to @
+    -- Convert spaces to @
     return string.gsub(inputString, " ", "@")
     
 end
 
-// Convert @ to space
+-- Convert @ to space
 function DecodeStringFromNetwork(inputString)
     if(inputString == nil) then
         return nil
@@ -666,11 +658,11 @@ function GetColorForPlayer(player)
     
 end
 
-// Generate unique name that isn't taken by another player on the server. If it is,
-// return number variant "NsPlayer (2)". Optionally pass a list of names for testing.
-// If not passing a list of names, this is on the server only.
+-- Generate unique name that isn't taken by another player on the server. If it is,
+-- return number variant "NsPlayer (2)". Optionally pass a list of names for testing.
+-- If not passing a list of names, this is on the server only.
 function GetUniqueNameForPlayer(name, nameList)
-    // Make sure name isn't in use
+    -- Make sure name isn't in use
     if(nameList == nil) then
     
         nameList = {}
@@ -686,7 +678,7 @@ function GetUniqueNameForPlayer(name, nameList)
 
     end
     
-    // Case-insensitive check for specified name in nameList
+    -- Case-insensitive check for specified name in nameList
     function nameInTable(name)
     
         for index, entryName in ipairs(nameList) do
@@ -707,7 +699,7 @@ function GetUniqueNameForPlayer(name, nameList)
     
         for i = 1, kMaxPlayers do
         
-            // NsPlayer (2)
+            -- NsPlayer (2)
             local newName = string.format("%s (%d)", name, i+1)
             
             if(not nameInTable(newName)) then
@@ -725,7 +717,7 @@ function GetUniqueNameForPlayer(name, nameList)
     
 end
 
-// http://lua-users.org/wiki/InfAndNanComparisons
+-- http:--lua-users.org/wiki/InfAndNanComparisons
 function IsValidValue(value)
 
     if(type(value) == "number") then
@@ -769,7 +761,7 @@ function ValidateValue(value, logMessage)
     
 end
 
-// Calls entity:SetTeamNumber(teamNumber) (if team number passed) and SetOrigin().
+-- Calls entity:SetTeamNumber(teamNumber) (if team number passed) and SetOrigin().
 function InitEntity(entity, className, origin, teamNumber)
 
     if(entity:isa("ScriptActor")) then
@@ -785,7 +777,7 @@ function InitEntity(entity, className, origin, teamNumber)
     
 end
 
-// teamNumber optional. Make sure to pass the mapName, not className.
+-- teamNumber optional. Make sure to pass the mapName, not className.
 function CreateEntity(mapName, origin, teamNumber)
 
     local entity = nil
@@ -814,7 +806,7 @@ function CreateEntity(mapName, origin, teamNumber)
     
 end
 
-// Here for completeness/orthogonality
+-- Here for completeness/orthogonality
 function DestroyEntity(entity)
     if(Server) then
         Server.DestroyEntity(entity)

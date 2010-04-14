@@ -23,10 +23,10 @@ PeaShooter.damage				 = 4
 PeaShooter.spread                = 0
 PeaShooter.range                 = 50
 PeaShooter.penetration           = 0
-PeaShooter.fireDelay             = 0.1   // Time between shots
-PeaShooter.reloadTime            = 1     // Time it takes to reload
-PeaShooter.drawTime              = 1.3   // Time it takes to draw the weapon
-PeaShooter.clipSize              = 60    // Number of bullets the clip holds
+PeaShooter.fireDelay             = 0.1   -- Time between shots
+PeaShooter.reloadTime            = 1     -- Time it takes to reload
+PeaShooter.drawTime              = 1.3   -- Time it takes to draw the weapon
+PeaShooter.clipSize              = 60    -- Number of bullets the clip holds
 PeaShooter.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(PeaShooter.viewModelName)
@@ -58,7 +58,7 @@ function PeaShooter:OnInit()
     self.numBulletsInReserve        = 1000
     self.numBulletsInClip           = self.clipSize
 
-    self.firingState                = 0 // Not firing
+    self.firingState                = 0 -- Not firing
 
 end
 
@@ -66,31 +66,31 @@ function PeaShooter:GetViewModelName()
     return PeaShooter.viewModelName
 end
 
-/**
- * Returns then amount of time it takes to reload the weapon.
- */
+--
+-- Returns then amount of time it takes to reload the weapon.
+--/
 function PeaShooter:GetReloadTime()
     return PeaShooter.reloadTime
 end
 
-/**
- * Returns then amount of time it takes to draw (unholster) the weapon.
- */
+--
+-- Returns then amount of time it takes to draw (unholster) the weapon.
+--/
 function PeaShooter:GetDrawTime()
     return PeaShooter.drawTime
 end
 
-/**
- * Returns the text that's prepended on the activity name to get the name of the
- * animation that the player should play.
- */
+--
+-- Returns the text that's prepended on the activity name to get the name of the
+-- animation that the player should play.
+--/
 function PeaShooter:GetAnimationPrefix()
     return PeaShooter.animationPrefix
 end
 
-/**
- * Unholsters the weapon.
- */
+--
+-- Unholsters the weapon.
+--/
 function PeaShooter:Draw(player)
     local viewModel = player:GetViewModelEntity()
     viewModel:SetAnimation( "draw" )
@@ -123,9 +123,9 @@ function PeaShooter:Idle(player)
 
 end
 
-/**
- * Fires the specified number of bullets in a cone from the player's current view.
- */
+--
+-- Fires the specified number of bullets in a cone from the player's current view.
+--/
 function PeaShooter:FireBullets(player)
 
     local viewModel = player:GetViewModelEntity()
@@ -138,8 +138,8 @@ function PeaShooter:FireBullets(player)
     local viewCoords = player:GetCameraViewCoords()
     local startPoint = viewCoords.origin
 
-    // Filter ourself out of the trace so that we don't hit the weapon or the
-    // player using it.
+    -- Filter ourself out of the trace so that we don't hit the weapon or the
+    -- player using it.
     local filter = EntityFilterTwo(player, self)
 
     local spreadDirection = viewCoords.zAxis
@@ -170,16 +170,16 @@ function PeaShooter:FireBullets(player)
     end
 
  
-    // Create the muzzle flash effect.
+    -- Create the muzzle flash effect.
     player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", PeaShooter.muzzleFlashCinematic)
 
-    // Create the shell casing ejecting effect.
+    -- Create the shell casing ejecting effect.
     player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflecasing", PeaShooter.shellCinematic)
 
-    // Play the sound effect. One the first bullet we fire we play the single
-    // shot sound effect. After that we start the looping firing sound effect.
-    // This gives us a clear sound if fire a single shot, but allows better sound
-    // quality and variation if we hold the trigger.
+    -- Play the sound effect. One the first bullet we fire we play the single
+    -- shot sound effect. After that we start the looping firing sound effect.
+    -- This gives us a clear sound if fire a single shot, but allows better sound
+    -- quality and variation if we hold the trigger.
     if (self.firingState == 0) then
         player:PlaySound(self.fireSound)
     elseif (self.firingState == 1) then
@@ -194,9 +194,9 @@ function PeaShooter:FireBullets(player)
 
 end
 
-/**
- * Returns true if the weapon successfully started a reload.
- */
+--
+-- Returns true if the weapon successfully started a reload.
+--/
 function PeaShooter:Reload(player)
     return false
 end
@@ -205,12 +205,12 @@ function PeaShooter:ReloadFinish(player)
         return true
 end
 
-/**
- * Creates the hit effect from firing the weapon.
- */
+--
+-- Creates the hit effect from firing the weapon.
+--/
 function PeaShooter:CreateHitEffect(player, trace)
 
-    // Create a coordinate frame where "up" is the normal of the surface we hit.
+    -- Create a coordinate frame where "up" is the normal of the surface we hit.
     local coords = Coords.GetOrthonormal(trace.normal)
     coords.origin = trace.endPoint
 
@@ -218,23 +218,23 @@ function PeaShooter:CreateHitEffect(player, trace)
 
 end
 
-/**
- * Returns the time between shots for the weapon.
- */
+--
+-- Returns the time between shots for the weapon.
+--/
 function PeaShooter:GetFireDelay()
     return self.fireDelay
 end
 
-/**
- * Returns the total amount of ammo in the weapon's reserve ammo.
- */
+--
+-- Returns the total amount of ammo in the weapon's reserve ammo.
+--/
 function PeaShooter:GetAmmo()
     return self.numBulletsInReserve
 end
 
-/**
- * Retursn the amount of ammo in the clip for the weapon.
- */
+--
+-- Retursn the amount of ammo in the clip for the weapon.
+--/
 function PeaShooter:GetClip()
     return self.numBulletsInClip
 end

@@ -207,7 +207,7 @@ end
     Topic: A Discussion On ipairs
     
     ipairs is defined in the lua documentation as... 
-    (Taken from <http://www.lua.org/manual/5.1/manual.html#pdf-ipairs>)
+    (Taken from <http:--www.lua.org/manual/5.1/manual.html#pdf-ipairs>)
     :for i,v in ipairs(t) do body end
     :will iterate over the pairs (1,t[1]), (2,t[2]), ..., up to the first integer key absent from the table.
     

@@ -1,16 +1,16 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\Table.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com) and
-//                  Max McGuire (max@unknownworlds.com)
-//
-// Table related utility functions. 
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\Table.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com) and
+--                  Max McGuire (max@unknownworlds.com)
+--
+-- Table related utility functions. 
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
-// Safe equality checking for tables and nested tables.
-//  Eg, elementEqualsElement( { {1}, {2} }, { {1}, {2} } returns true
+-- Safe equality checking for tables and nested tables.
+--  Eg, elementEqualsElement( { {1}, {2} }, { {1}, {2} } returns true
 function elementEqualsElement(i, j) 
 
     if(type(i) == "table" and type(j) == "table") then
@@ -70,11 +70,11 @@ function table.getElement(t, index, errorMsg)
     
 end
 
-/**
- * Searches a table for the specified value. If the value is in the table
- * the index of the (first) matching element is returned. If its not found
- * the function returns nil.
- */
+--
+-- Searches a table for the specified value. If the value is in the table
+-- the index of the (first) matching element is returned. If its not found
+-- the function returns nil.
+--/
 function table.find(table, value)
 
     for i,element in ipairs(table) do
@@ -87,9 +87,9 @@ function table.find(table, value)
 
 end
 
-/**
- * Returns random element in table.
- */
+--
+-- Returns random element in table.
+--/
 function table.random(t)
     local max = table.maxn(t)
     if max > 0 then
@@ -99,26 +99,26 @@ function table.random(t)
     end
 end
 
-/**
- * Choose random weighted index according. Pass in table of arrays where the first element in each
- * array is a float that indicates how often that index is chosen.
- *
- * {{.9, "chooseOften"}, {.1, "chooseLessOften"}, {.001, "chooseAlmostNever}}
- *
- * This returns 1 most often, 2 less often and 3 even less. It adds up all the numbers that are the 
- * first elements in the table to calculate the chance. Returns -1 on error.
- */
+--
+-- Choose random weighted index according. Pass in table of arrays where the first element in each
+-- array is a float that indicates how often that index is chosen.
+--
+-- {{.9, "chooseOften"}, {.1, "chooseLessOften"}, {.001, "chooseAlmostNever}}
+--
+-- This returns 1 most often, 2 less often and 3 even less. It adds up all the numbers that are the 
+-- first elements in the table to calculate the chance. Returns -1 on error.
+--/
 function table.chooseWeightedIndex(t)
 
     local weightedIndex = -1
     
-    // Calculate total weight
+    -- Calculate total weight
     local totalWeight = 0
     for i, element in ipairs(t) do
         totalWeight = totalWeight + element[1]
     end
     
-    // Choose random weighted index of input table data
+    -- Choose random weighted index of input table data
     local randomNumber = NetworkRandom()*totalWeight
     local total = 0
     
@@ -143,7 +143,7 @@ function table.chooseWeightedIndex(t)
     
 end
 
-// Helper function for table.chooseWeightedIndex
+-- Helper function for table.chooseWeightedIndex
 function chooseWeightedEntry(t)
 
     if(t ~= nil) then
@@ -176,9 +176,9 @@ function entryInTable(t, entry)
     
 end
 
-/**
- * Removes all elements from a table.
- */
+--
+-- Removes all elements from a table.
+--/
 function table.clear(t)
 
     if(t ~= nil) then
@@ -195,10 +195,10 @@ function table.clear(t)
     
 end
 
-/**
- * Removes the specified value from the table (note only the first occurance is
- * removed). Returns true if element was found and removed, false otherwise.
- */
+--
+-- Removes the specified value from the table (note only the first occurance is
+-- removed). Returns true if element was found and removed, false otherwise.
+--/
 function table.removevalue(t, v)
 
     local i = table.find(t, v)
@@ -227,9 +227,9 @@ function table.insertunique(t, v)
     
 end
 
-/**
- * Adds the contents of one table to another. Duplicate elements added.
- */
+--
+-- Adds the contents of one table to another. Duplicate elements added.
+--/
 function table.addtable(srcTable, destTable)
 
     for index, element in ipairs(srcTable) do
@@ -240,9 +240,9 @@ function table.addtable(srcTable, destTable)
     
 end
 
-/**
- * Adds the contents of onte table to another. Duplicate elements are not inserted.
- */
+--
+-- Adds the contents of onte table to another. Duplicate elements are not inserted.
+--/
 function table.adduniquetable(srcTable, destTable)
 
     for index, element in ipairs(srcTable) do
@@ -253,9 +253,9 @@ function table.adduniquetable(srcTable, destTable)
     
 end
 
-/**
- * Call specified functor with every element in the table.
- */
+--
+-- Call specified functor with every element in the table.
+--/
 function table.foreachfunctor(t, functor)
 
     if(table.maxn(t) > 0) then
@@ -279,9 +279,9 @@ function table.count(t)
     return 0
 end
 
-/**
- * Print the table to a string and returns it. Eg, "{ "element1", "element2", {1, 2} }".
- */
+--
+-- Print the table to a string and returns it. Eg, "{ "element1", "element2", {1, 2} }".
+--/
 function table.tostring(t)
 
     local buffer = {}
@@ -301,7 +301,7 @@ function table.tostring(t)
             
             elseif(type(value) == "number") then
 
-                /* For printing out lists of entity ids
+                --/* For printing out lists of entity ids
                 
                 local className = "unknown"
                 local entity = Shared.GetEntity(value)
@@ -310,7 +310,7 @@ function table.tostring(t)
                 end
                 
                 table.insert(buffer, string.format("%s (%s)", tostring(value), tostring(className)))
-                */
+                --*/
                 
                 table.insert(buffer, string.format("%s", tostring(value)))
                 
@@ -324,7 +324,7 @@ function table.tostring(t)
                 
             end
             
-            // Insert commas between elements
+            -- Insert commas between elements
             if(currentElement ~= numElements) then
             
                 table.insert(buffer, ",")

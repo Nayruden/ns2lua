@@ -1,16 +1,16 @@
-//=============================================================================
-//
-// RifleRange/Server.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
-//
-// This file is the entry point for the server code of the game. It's
-// automatically loaded by the engine when a game starts.
-//
-//=============================================================================
+--=============================================================================
+--
+-- RifleRange/Server.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
+--
+-- This file is the entry point for the server code of the game. It's
+-- automatically loaded by the engine when a game starts.
+--
+--=============================================================================
 
-// Set the name of the VM for debugging
+-- Set the name of the VM for debugging
 decoda_name = "Server"
 
 Script.Load("lua/Shared.lua")
@@ -22,12 +22,12 @@ Script.Load("lua/TeamJoin.lua")
 Server.targetsEnabled = false
 Server.instagib = false
 
-/**
- * Called when a player first connects to the server.
- */
+--
+-- Called when a player first connects to the server.
+--/
 function OnClientConnect(client)
 
-    // Get an unobstructured spawn point for the player.
+    -- Get an unobstructured spawn point for the player.
 
     local extents = Player.extents
     local offset  = Vector(0, extents.y + 0.01, 0)
@@ -36,7 +36,7 @@ function OnClientConnect(client)
         spawnPoint = Shared.FindEntityWithClassname("ready_room_start", spawnPoint)
     until spawnPoint == nil or not Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
 
-    // If there is not a ready room.
+    -- If there is not a ready room.
     if (spawnPoint == nil) then
         repeat
             spawnPoint = Shared.FindEntityWithClassname("player_start", spawnPoint)
@@ -47,12 +47,12 @@ function OnClientConnect(client)
 
     if (spawnPoint ~= nil) then
         spawnPos = Vector(spawnPoint:GetOrigin())
-        // Move the spawn position up a little bit so the player won't start
-        // embedded in the ground if the spawn point is positioned on the floor
+        -- Move the spawn position up a little bit so the player won't start
+        -- embedded in the ground if the spawn point is positioned on the floor
         spawnPos.y = spawnPos.y + 0.01
     end
 
-    // Create a new player for the client.
+    -- Create a new player for the client.
     local player = Server.CreateEntity("player", spawnPos)
     Server.SetControllingPlayer(client, player)
 
@@ -62,20 +62,20 @@ function OnClientConnect(client)
 
 end
 
-/**
- * Called when a player disconnects from the server
- */
+--
+-- Called when a player disconnects from the server
+--/
 function OnClientDisconnect(client, player)
-    Shared.Message("Client " .. client .. " has disconnected")
+    Shared.Message("Client " .. tostring(client) .. " has disconnected")
 end
 
-/**
- * Callback handler for when the map is finished loading.
- */
+--
+-- Callback handler for when the map is finished loading.
+--/
 function OnMapPostLoad()
 
-    // Create the game object. This is a networked object that manages the game
-    // state and logic.
+    -- Create the game object. This is a networked object that manages the game
+    -- state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
     Server.CreateEntity("kill", Vector(0, 0, 0))
 end
@@ -106,8 +106,8 @@ function OnConsoleStuck(player)
 
     if (spawnPoint ~= nil) then
         spawnPos = Vector(spawnPoint:GetOrigin())
-        // Move the spawn position up a little bit so the player won't start
-        // embedded in the ground if the spawn point is positioned on the floor
+        -- Move the spawn position up a little bit so the player won't start
+        -- embedded in the ground if the spawn point is positioned on the floor
         spawnPos.y = spawnPos.y + 0.01
     end
 
@@ -163,8 +163,8 @@ function OnConsoleReadyRoom(player)
     local spawnPos = Vector(0, 0, 0)
     if (spawnPoint ~= nil) then
         spawnPos = Vector(spawnPoint:GetOrigin())
-        // Move the spawn position up a little bit so the player won't start
-        // embedded in the ground if the spawn point is positioned on the floor
+        -- Move the spawn position up a little bit so the player won't start
+        -- embedded in the ground if the spawn point is positioned on the floor
         spawnPos.y = spawnPos.y + 0.01
     end
 
@@ -225,7 +225,7 @@ function OnCommandInstaGib( ply )
     end
 end
 
-// Hook the game methods.
+-- Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
 Event.Hook("MapPostLoad",           OnMapPostLoad)

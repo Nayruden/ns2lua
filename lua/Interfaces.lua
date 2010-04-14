@@ -1,13 +1,13 @@
-// ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
-//
-// lua\Flash.lua
-//
-//    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
-//
-// Place for all flash file names in the game. Allows Brian or artists to adjust or change
-// them without worrying about code per se.
-//
-// ========= For more information, visit us at http://www.unknownworlds.com =====================
+-- ======= Copyright © 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\Flash.lua
+--
+--    Created by:   Charlie Cleveland (charlie@unknownworlds.com)
+--
+-- Place for all flash file names in the game. Allows Brian or artists to adjust or change
+-- them without worrying about code per se.
+--
+-- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
 kArmoryBuyMenuFlash = "ui/armoryUI.swf"
 kArmoryBuyMenuTexture = "ui/marine_buymenu.dds"

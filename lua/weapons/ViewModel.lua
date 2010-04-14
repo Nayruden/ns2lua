@@ -1,19 +1,19 @@
-//=============================================================================
-//
-// lua/Weapons/ViewModel.lua
-//
-// Created by Max McGuire (max@unknownworlds.com)
-// Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
-//
-//=============================================================================
+--=============================================================================
+--
+-- lua/Weapons/ViewModel.lua
+--
+-- Created by Max McGuire (max@unknownworlds.com)
+-- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
+--
+--=============================================================================
 
-/**
- * ViewModel is the class which handles rendering and animating the view model
- * (i.e. weapon model) for a player. To use this class, create a 'view_model'
- * entity and set its parent to the player that it will belong to. There should
- * be one view model entity per player (the same view model entity is used for
- * all of the weapons).
- */
+
+--ViewModel is the class which handles rendering and animating the view model
+--(i.e. weapon model) for a player. To use this class, create a 'view_model'
+--entity and set its parent to the player that it will belong to. There should
+--be one view model entity per player (the same view model entity is used for
+--all of the weapons).
+
 class 'ViewModel' (Entity)
 
 ViewModel.mapName = "view_model"
@@ -34,7 +34,7 @@ function ViewModel:OnInit()
 
     Entity.OnInit(self)
     
-    // Use a custom propagation callback to only propagate to the owning player.
+    -- Use a custom propagation callback to only propagate to the owning player.
     self:SetPropagate(Entity.Propagate_Callback)
     
     self.modelIndex                 = 0
@@ -63,7 +63,7 @@ function ViewModel:OnDestroy()
 
     if (Client) then
     
-        // Destroy the view model if we have one
+        -- Destroy the view model if we have one
         if (self.model ~= nil) then
             Client.DestroyRenderViewModel(self.model)
             self.model = nil
@@ -73,11 +73,11 @@ function ViewModel:OnDestroy()
 
 end
 
-/**
- * Assigns the model for the view model. modelName is a string specifying the
- * file name of the model, which should have been precached by calling
- * Shared.PrecacheModel during load time.
- */
+
+--Assigns the model for the view model. modelName is a string specifying the
+--file name of the model, which should have been precached by calling
+--Shared.PrecacheModel during load time.
+
 function ViewModel:SetModel(modelName)
 
     self.modelIndex = Shared.GetModelIndex(modelName)
@@ -92,10 +92,10 @@ function ViewModel:SetModel(modelName)
 
 end
 
-/**
- * Sets the animation currently playing on the actor. The sequence name is the
- * name stored in the current model.
- */
+
+--Sets the animation currently playing on the actor. The sequence name is the
+--name stored in the current model.
+
 function ViewModel:SetAnimation(sequenceName)
 
     local model = Shared.GetModel(self.modelIndex, true)
@@ -108,7 +108,7 @@ function ViewModel:SetAnimation(sequenceName)
             self:GetClassName() .. ") with a nil model. The animation will not be played")
     end
 
-    // Only play the animation if it isn't already playing.
+    -- Only play the animation if it isn't already playing.
     if (animationSequence ~= self.animationSequence) then
         self.animationSequence = animationSequence
         self.animationStart    = Shared.GetTime()
@@ -116,14 +116,14 @@ function ViewModel:SetAnimation(sequenceName)
 
 end
 
-/**
- * Sets the primary animation, blending into it from the currently playing
- * animation. The blendLength specifies the time (in seconds) over which
- * the new animation will be blended in. Note the view model can only blend
- * between two animations at a time, so if an an animation is already being
- * blended in, there will be a pop. If nothing passed for blendLength, it
- * uses the default blend time.
- */
+
+--Sets the primary animation, blending into it from the currently playing
+--animation. The blendLength specifies the time (in seconds) over which
+--the new animation will be blended in. Note the view model can only blend
+--between two animations at a time, so if an an animation is already being
+--blended in, there will be a pop. If nothing passed for blendLength, it
+--uses the default blend time.
+
 function ViewModel:SetAnimationWithBlending( animationName, blendLength )
 
     self.prevAnimationSequence = self.animationSequence
@@ -137,11 +137,11 @@ function ViewModel:SetAnimationWithBlending( animationName, blendLength )
 
 end
 
-/**
- * Sets the animation which is played on top of the base animation for the view
- * model. The overlay animation is generally used to apply a different animation
- * to the gun model than to the hands.
- */
+
+--Sets the animation which is played on top of the base animation for the view
+--model. The overlay animation is generally used to apply a different animation
+--to the gun model than to the hands.
+
 function ViewModel:SetOverlayAnimation( sequenceName )
 
     local animationSequence = Model.invalidSequence
@@ -159,7 +159,7 @@ function ViewModel:SetOverlayAnimation( sequenceName )
 
     end
 
-    // Only play the animation if it isn't already playing.
+    -- Only play the animation if it isn't already playing.
     if (animationSequence ~= self.overlayAnimationSequence) then
         self.overlayAnimationSequence = animationSequence
         self.overlayAnimationStart    = Shared.GetTime()
@@ -167,17 +167,15 @@ function ViewModel:SetOverlayAnimation( sequenceName )
 
 end
 
-/* Sets default blend length when not otherwise specified */
 function ViewModel:SetBlendLength( blendLength )
     self.blendLength = blendLength
 end
 
-/**
- * Sets a parameter used to compute the final pose of an animation. These are
- * named in the actor's .model file and are usually things like the amount the
- * actor is moving, the pitch of the view, etc. This only applies to the currently
- * set model, so if the model is changed, the values will need to be reset.
- */
+
+--Sets a parameter used to compute the final pose of an animation. These are
+--named in the actor's .model file and are usually things like the amount the
+--actor is moving, the pitch of the view, etc. This only applies to the currently
+--set model, so if the model is changed, the values will need to be reset.
 function ViewModel:SetPoseParam(name, value)
 
     local paramIndex = self:GetPoseParamIndex(name)
@@ -192,11 +190,11 @@ function ViewModel:GetModelIndex()
     return self.modelIndex
 end
 
-/**
- * Returns the value of a parameter used to compute the final pose of an
- * animation. These are named in the view model's .model file and are usually
- * things like the pitch of the view, etc.
- */
+
+--Returns the value of a parameter used to compute the final pose of an
+--animation. These are named in the view model's .model file and are usually
+--things like the pitch of the view, etc.
+
 function ViewModel:GetPoseParam(name)
 
     local paramIndex = self:GetPoseParamIndex(name)
@@ -209,11 +207,11 @@ function ViewModel:GetPoseParam(name)
 
 end
 
-/**
- * Returns the index of the named pose parameter on the view model. If the
- * actor doesn't have a model set or the pose parameter doesn't exist, the
- * method returns -1
- */
+
+--Returns the index of the named pose parameter on the view model. If the
+--actor doesn't have a model set or the pose parameter doesn't exist, the
+--method returns -1
+
 function ViewModel:GetPoseParamIndex(name)
   
     local model = Shared.GetModel(self.modelIndex)
@@ -226,11 +224,11 @@ function ViewModel:GetPoseParamIndex(name)
         
 end
 
-/**
- * Called to build the final pose for the actor's bones. This may be overriden
- * to apply additional overlay animations, The base class implementation should
- * be called to play the base animation for the actor.
- */
+
+--Called to build the final pose for the actor's bones. This may be overriden
+--to apply additional overlay animations, The base class implementation should
+--be called to play the base animation for the actor.
+
 function ViewModel:BuildPose(poses)
     
     local model = Shared.GetModel(self.modelIndex)
@@ -240,7 +238,7 @@ function ViewModel:BuildPose(poses)
         self:AccumulateAnimation(poses, self.animationSequence, self.animationStart)
     end
     
-    // If we have a previous animation, blend it in.
+    -- If we have a previous animation, blend it in.
     if (self.prevAnimationSequence ~= Model.invalidSequence) then
 
         if(self.blendLength ~= nil and self.blendLength > 0) then
@@ -256,16 +254,16 @@ function ViewModel:BuildPose(poses)
     
     end
 
-    // Apply the overlay animation if we have one.
+    -- Apply the overlay animation if we have one.
     if (self.overlayAnimationSequence ~= Model.invalidSequence) then
         self:AccumulateAnimation(poses, self.overlayAnimationSequence, self.overlayAnimationStart)
     end
     
 end
 
-/**
- * Accmuluates the specified animation on the model into the poses.
- */
+
+--Accmuluates the specified animation on the model into the poses.
+
 function ViewModel:AccumulateAnimation(poses, animationIndex, animationStart)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -279,8 +277,8 @@ end
 
 function ViewModel:OnGetIsRelevant(player)
     
-    // Only propagate the view model if it belongs to the player (since they're
-    // the only one that can see it)
+    -- Only propagate the view model if it belongs to the player (since they're
+    -- the only one that can see it)
     return self:GetParent() == player
     
 end
@@ -295,7 +293,7 @@ function ViewModel:OnUpdate()
 
         if (model ~= nil) then
 
-            // Update the bones based on the currently playing animation.
+            -- Update the bones based on the currently playing animation.
             local poses = PosesArray()
             self:BuildPose(poses)
             
@@ -303,8 +301,8 @@ function ViewModel:OnUpdate()
 
             self.model:SetBoneCoords( self.boneCoords )
             
-            // If the view model has a camera embedded in it, use that as
-            // the camera for rendering the view model.
+            -- If the view model has a camera embedded in it, use that as
+            -- the camera for rendering the view model.
             if (model:GetNumCameras() > 0) then
 
                 local camera = model:GetCamera(0, self.boneCoords)
@@ -323,9 +321,9 @@ function ViewModel:OnUpdate()
     
 end
 
-/**
- * Blends an animation over the existing pose by the indicated fraction (0 to 1).
- */
+
+--Blends an animation over the existing pose by the indicated fraction (0 to 1).
+
 function ViewModel:BlendAnimation(poses, animationIndex, animationStart, fraction)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -344,9 +342,9 @@ function ViewModel:BlendAnimation(poses, animationIndex, animationStart, fractio
     
 end
 
-/**
- * Overriden from Entity.
- */
+
+--Overriden from Entity.
+
 function ViewModel:GetAttachPointIndex(attachPointName)
 
     local model = Shared.GetModel(self.modelIndex)
@@ -359,9 +357,9 @@ function ViewModel:GetAttachPointIndex(attachPointName)
 
 end
 
-/**
- * Overriden from Entity.
- */
+
+--Overriden from Entity.
+
 function ViewModel:GetAttachPointCoords(attachPointIndex)
 
     if (attachPointIndex ~= -1) then
@@ -370,7 +368,7 @@ function ViewModel:GetAttachPointCoords(attachPointIndex)
     
         if (model ~= nil) then
                 
-            // Make sure the bones are up to date;
+            -- Make sure the bones are up to date;
             local poses = PosesArray()
             local boneCoords = CoordsArray()
             model:GetReferencePose(poses)
@@ -378,7 +376,7 @@ function ViewModel:GetAttachPointCoords(attachPointIndex)
             model:GetBoneCoords(poses, boneCoords)
         
             local coords = self:GetCoords()
-            return coords * model:GetAttachPointCoords(attachPointIndex, boneCoords)
+            return coords--model:GetAttachPointCoords(attachPointIndex, boneCoords)
         end
 
     end
@@ -389,15 +387,15 @@ end
 
 if (Client) then
 
-    /** 
-     * Creates the rendering representation of the model if it doesn't match
-     * the currently set model index and update's it state to match the actor.
-     */
+
+    --Creates the rendering representation of the model if it doesn't match
+    --the currently set model index and update's it state to match the actor.
+
     function ViewModel:UpdateRenderModel()
     
         if (self.modelIndex ~= self.oldModelIndex) then
     
-            // Create/destroy the model as necessary.
+            -- Create/destroy the model as necessary.
             if (self.modelIndex == 0) then
                 Client.DestroyRenderViewModel(self.model)
                 self.model = nil
@@ -408,24 +406,24 @@ if (Client) then
                 self.model:SetModel(self.modelIndex)
             end
         
-            // Save off the model index so we can detect when it changes.
+            -- Save off the model index so we can detect when it changes.
             self.oldModelIndex = self.modelIndex
             
         end
         
         if (self.model ~= nil) then
-            // Show or hide the view model depending on whether or not the
-            // entity is visible. This allows the owner to show or hide it
-            // as needed.
+            -- Show or hide the view model depending on whether or not the
+            -- entity is visible. This allows the owner to show or hide it
+            -- as needed.
             self.model:SetIsVisible( self:GetIsVisible() )
         end
         
     end
         
-    /**
-     * Called when the network variables for the actor are updated from values
-     * from the server.
-     */
+
+    --Called when the network variables for the actor are updated from values
+    --from the server.
+
     function ViewModel:OnSynchronized()
     
         Entity.OnSynchronized(self)
@@ -454,7 +452,7 @@ function ViewModel:GetAnimationLength(sequenceName)
 end
 
 function ViewModel:SetAnimationSpeed(speed)
-    // Doesn't currently do anything.
+    -- Doesn't currently do anything.
 end
 
 
