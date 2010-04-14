@@ -130,10 +130,12 @@ function Player:OnInit()
 
     self:SetBaseAnimation("run")
     
-    for i, weapon in ipairs(self.WeaponLoadout) do
-        self:GiveWeapon(weapon)
-        Shared.Message("Giving "..weapon..".")
-    end
+	if (Server) then
+		for i, weapon in ipairs(self.WeaponLoadout) do
+			--Shared.Message("Giving "..weapon..".")
+			self:GiveWeapon(weapon)
+		end
+	end
 end
 
 function Player:SetController(client)
