@@ -324,13 +324,15 @@
         <parameter name="behaviorType" type="choice" label="Door Behavior" default="1">
             <choice label="Proximity" value="1"/>
             <choice label="Always Open" value="2"/>
-            <choice label="Always Shut" value="3"/>            
+            <choice label="Always Closed" value="3"/>            
         </parameter>
 
-		<parameter name="touchRadius" type="distance" label="Proximity radius" default="20.0" help="Players within this radius will cause the door to open."/>
+		<parameter name="touchRadius" type="distance" label="Proximity radius" default="3.0" help="Players within this radius will cause the door to open."/>
         <sphere>
 			<radius>touchRadius</radius>
 		</sphere>
+		
+		<parameter name="openTime" type="real" label="Hold open time" default="1.5"/>
     </class>
        
     <!-- Power grid -->

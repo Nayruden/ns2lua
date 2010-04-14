@@ -6,14 +6,18 @@ Shared.PrecacheModel(Door.modelName)
 Door.thinkInterval = 0.25
 Door.State = enum { 'Open', 'Closed' }
 Door.Activity = enum {'None', 'Animating', 'StayingOpen'}
-Door.animTime = 1
+Door.Behavior = enum {'Proximity', 'AlwaysOpen', 'AlwaysClosed'}
 
 function Door:OnInit()
 	Actor.OnInit(self)
 	self:SetModel(self.modelName)
 	self:SetIsVisible(true)
 	
-	if (Server) then		
+	if (Server) then	
+		self.state = Door.State.Closed
+		self.activity = Door.Activity.None
+		self.activityEnd = 0
+		
 		self:SetNextThink(Door.thinkInterval)
     end    
 end
@@ -24,9 +28,9 @@ function Door:OnLoad()
 
     self.behaviorType = tonumber(self.behaviorType)
     self.touchRadius  = tonumber(self.touchRadius)
+	self.openTime     = tonumber(self.openTime)
 end
 
-if (Server) then
 	function Door:Open() 
 		self.state = Door.State.Open
 		self.activity = Door.Activity.Animating
@@ -41,14 +45,6 @@ if (Server) then
 		self:SetAnimation( "close" )
 	end
 
-	function Door:Idle() 
-		if (self.state == Door.State.Closed) then
-			self:SetAnimation( "closed" )
-		else
-			self:SetAnimation( "opened" )
-		end
-	end
-
 	function Door:TestProximity() 
 		local player
 		player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.touchRadius, nil)
@@ -58,17 +54,35 @@ if (Server) then
 		return false
 	end
 	
+if (Server) then
 	function Door:OnThink()
 		Actor.OnThink(self)
     	
-		if (self:TestProximity()) then
-			self:Open()
-		else
-			self:Close()
+		local time = Shared.GetTime()    
+		if (time > self.activityEnd) then
+			if (self.activity == Door.Activity.Animating) then 				
+				if (self.state == Door.State.Open) then -- If we are open, we need to stay open for a bit.
+					self.activity = Door.Activity.StayingOpen
+					self.activityEnd = time + self.openTime
+				else
+					self.activity = Door.Activity.None
+				end				
+			elseif (self.activity == Door.Activity.StayingOpen) then
+				if (self:TestProximity()) then -- If someone is nearby, stay open longer
+					self.activityEnd = time + self.openTime
+				else
+					self:Close()
+				end
+			elseif (self.state == Door.State.Closed) then
+				if (self:TestProximity()) then
+					self:Open()
+				end
+			end
 		end
 		
         self:SetNextThink(self.thinkInterval)
     end
 end
 
+	
 Shared.LinkClassToMap("Door", "door")
