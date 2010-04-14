@@ -1,0 +1,12 @@
+sound/ns2.fev/alien/skulk/bite
+sound/ns2.fev/alien/skulk/bite_hit_marine
+sound/ns2.fev/alien/skulk/footstep_left
+sound/ns2.fev/alien/skulk/footstep_right
+sound/ns2.fev/alien/voiceovers/chuckle
+sound/ns2.fev/alien/voiceovers/now
+sound/ns2.fev/common/chat
+sound/ns2.fev/marine/common/footstep_left
+sound/ns2.fev/marine/common/footstep_right
+sound/ns2.fev/marine/common/health
+sound/ns2.fev/marine/voiceovers/taunt
+sound/ns2.fev/marine/voiceovers/robot_taunt
