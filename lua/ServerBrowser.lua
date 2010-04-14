@@ -95,7 +95,7 @@ function MainMenu_SBGetUpdateStatus()
 end
 
 function GetNumServers()
-    return numServers
+    return numServers + Main.GetNumServers()
 end
 
 --
@@ -148,10 +148,10 @@ function SortReturnServerList()
         table.sort(serverRecords, sortString)
     end
 end
-refresh = false
+local refresh = true
 function RefreshServerList()
     refresh = true
-    --MainMenu_SBGetServerList()
+    MainMenu_SBGetServerList()
 end
 
 -- Trim off unnecessary path and extension
@@ -173,7 +173,7 @@ end
 -- {servername, gametype, map, playercount, ping, serverUID}
 -- order
 --/
-local notupdated = true
+
 
 function split(str, delim)
     fields = {}
@@ -183,12 +183,13 @@ end
 
 function MainMenu_SBGetServerList()
     
-    if(notupdated) then
-        notupdated = false
+    if(refresh) then
+        refresh = false
+        --serverRecords = {}
         --local numServers = GetNumServers()
         updateStatus = string.format("Retrieving %d %s...", numServers, ConditionalValue(numServers == 1, "server", "servers"))
         local servers, headers, code = http.request("http://serverlist.devicenull.org/serverlist.php")
-        --servers = "127.0.0.1\t27015\tname\t5\t10\tmap\t\n127.0.0.2\t27015\tnadme\t5\t10\tmap\t\n"
+        numServers = tonumber(servers:sub(1,2))
         lines = split(servers,"\n")
         for key1,value1 in pairs(lines) do
             if (key1 ~= 1) then
@@ -223,20 +224,18 @@ function MainMenu_SBGetServerList()
             end
         end
 
-        --[[if(numServers > table.maxn(serverRecords)) then
         
-            hasNewData = true
+        --hasNewData = true
+        local numServer = Main.GetNumServers()
+        for serverIndex = 1, numServer - 1 do
+        
+            local serverRecord = GetServerRecord(serverIndex)
             
-            for serverIndex = table.maxn(serverRecords), numServers - 1 do
-            
-                local serverRecord = GetServerRecord(serverIndex)
-                
-                -- Build master list so we don't re-retrieve later
-                table.insert(serverRecords, serverRecord)
+            -- Build master list so we don't re-retrieve later
+            table.insert(serverRecords, serverRecord)
 
-            end
-            
-        end--]]
+        end
+
         
         SortReturnServerList()
         
@@ -250,7 +249,7 @@ function MainMenu_SBGetServerList()
             end
             
         end
-            
+        serverRecords = {}
     else
         updateStatus = ""
     end 
