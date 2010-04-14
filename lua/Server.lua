@@ -59,6 +59,7 @@ function OnClientConnect(client)
     -- Create a new player for the client.
     local player = Server.CreateEntity("player", spawnPos)
     Server.SetControllingPlayer(client, player)
+    player:SetController(client)
 
     Game.instance:StartGame()
 
@@ -182,7 +183,15 @@ function OnConsoleChangeClass(player,type)
         player:ChangeClass(Player.Classes.BuildBot)
         Shared.Message("You have become a BuildBot!")
     elseif (type == "skulk") then
-        player:ChangeClass(Player.Classes.Skulk)
+    
+    	local client = player:GetController()
+    	local spawnPos = Vector(player:GetOrigin())
+	    local newent = Server.CreateEntity("skulk", spawnPos)
+	    Server.SetControllingPlayer(client, newent)
+	    newent:SetController(client)
+    	Server.DestroyEntity(player)
+    
+        --player:ChangeClass(Player.Classes.Skulk)
         Shared.Message("You have become a Skulk!")
     elseif (type == "marine") then
         player:ChangeClass(Player.Classes.Marine)

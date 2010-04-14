@@ -1,6 +1,6 @@
 --=============================================================================
 --
--- RifleRange/Player.lua
+-- RifleRange/Skulk.lua
 --
 -- Created by Max McGuire (max@unknownworlds.com)
 -- Copyright (c) 2010, Unknown Worlds Entertainment, Inc.
@@ -9,9 +9,9 @@
 
 Script.Load("lua/Utility.lua")
 
-class 'Player' (Actor)
+class 'Skulk' (Player)
 
-Player.networkVars =
+Skulk.networkVars =
     {
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
@@ -36,37 +36,33 @@ Player.networkVars =
         gravity						= "float",
         sprinting					= "boolean"
     }
+  
+Skulk.modelName = "models/alien/skulk/skulk.model"
+Skulk.extents   = Vector(0.4064, 0.4064, 0.4064)
 
-Player.modelName = "models/marine/male/male.model"
-Player.extents   = Vector(0.4064, 0.7874, 0.4064)
+Skulk.moveAcceleration     =  4
+Skulk.stepHeight           =  0.2
+Skulk.jumpHeight           =  1
+Skulk.friction				=  6
+Skulk.maxWalkableNormal    =  math.cos(math.pi * 0.25)
 
-Player.moveAcceleration     =  4
-Player.stepHeight           =  0.2
-Player.jumpHeight           =  1
-Player.friction				=  6
-Player.maxWalkableNormal    =  math.cos(math.pi * 0.25)
+Skulk.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
+Skulk.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
+Skulk.Teams				= enum { 'Marines', 'Aliens' }
 
-Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
-Player.Classes              = enum { 'Marine', 'Skulk', 'BuildBot' }
-Player.Teams				= enum { 'Marines', 'Aliens' }
+Skulk.alienTauntSound = "sound/ns2.fev/alien/voiceovers/chuckle"
 
-Player.marineTauntSound = "sound/ns2.fev/marine/voiceovers/taunt"
-Player.alienTauntSound = "sound/ns2.fev/alien/voiceovers/chuckle"
-Player.robotTauntSound = "sound/ns2.fev/marine/voiceovers/robot_taunt"
-Shared.PrecacheModel("models/marine/male/male.model")
-Shared.PrecacheModel("models/marine/build_bot/build_bot.model")
 Shared.PrecacheModel("models/alien/skulk/skulk.model")
 Shared.PrecacheModel("models/alien/skulk/skulk_view.model")
 Shared.PrecacheModel("models/marine/rifle/rifle_view_shell.model")
-Shared.PrecacheSound(Player.marineTauntSound)
-Shared.PrecacheSound(Player.alienTauntSound)
-Shared.PrecacheSound(Player.robotTauntSound)
 
-function Player:OnInit()
+Shared.PrecacheSound(Skulk.alienTauntSound)
+
+function Skulk:OnInit()
 
     Actor.OnInit(self)
 
-    self:SetModel(Player.modelName)
+    self:SetModel(Skulk.modelName)
 
     self.canJump                    = 1
     self.viewPitch                  = 0
@@ -75,10 +71,10 @@ function Player:OnInit()
     self.velocity                   = Vector(0, 0, 0)
 
     self.activeWeaponId             = 0
-    self.activity                   = Player.Activity.None
+    self.activity                   = Skulk.Activity.None
     self.activityEnd                = 0
 
-    self.viewOffset                 = Vector(0, 1.6256, 0)
+    self.viewOffset                 = Vector(0, 0.6, 0)
 
     self.thirdPerson                = false
     self.sprinting					= false
@@ -90,14 +86,13 @@ function Player:OnInit()
     self.score                      = 0
     self.kills                      = 0
     self.deaths                     = 0
-    self.class                      = Player.Classes.Marine
+    self.class                      = Skulk.Classes.Skulk
     self.gravity                    = -9.81
-    self.moveSpeed                  = 7
+    self.moveSpeed                  = 14
     self.moveSpeedBackwards         = 4
     self.origSpeed					= self.moveSpeed
     self.invert_mouse               = 0
-    self.team						= Player.Teams.Marines
-    self.controller					= 0
+    self.team						= Skulk.Teams.Skulks
 
     -- Collide with everything except group 1. That group is reserved
     -- for things we don't want to collide with.
@@ -127,21 +122,13 @@ function Player:OnInit()
     end
 
     self:SetBaseAnimation("run")
-    --self:ChangeClass(Player.Classes.Marine)
+    --self:ChangeClass(Skulk.Classes.Skulk)
 
 end
 
-function Player:SetController(client)
-	self.controller = client
-end
-
-function Player:GetController()
-	return self.controller
-end
-
-function Player:ChangeClass(newClass)
+function Skulk:ChangeClass(newClass)
     self.class = newClass
-    if newClass == Player.Classes.Marine then
+    if newClass == Skulk.Classes.Skulk then
         self:SetModel("models/marine/male/male.model")
         self:GiveWeapon("weapon_rifle")
         self.viewOffset = Vector(0, 1.6256, 0)
@@ -157,7 +144,7 @@ function Player:ChangeClass(newClass)
         self.gravity = -9.81
 		self:SetBaseAnimation("run", true)
 
-    elseif newClass == Player.Classes.Skulk then
+    elseif newClass == Skulk.Classes.Skulk then
         self:SetModel("models/alien/skulk/skulk.model")
         self:GiveWeapon("weapon_bite")
         self.viewOffset = Vector(0, 0.6, 0)
@@ -167,7 +154,7 @@ function Player:ChangeClass(newClass)
         self.gravity = -9.81
 		self:SetBaseAnimation("run", true)
 
-    elseif newClass == Player.Classes.BuildBot then
+    elseif newClass == Skulk.Classes.BuildBot then
         self:SetModel("models/marine/build_bot/build_bot.model")
         self:GiveWeapon("weapon_peashooter")
         self.viewOffset = Vector(0, 0.6, 0)
@@ -181,7 +168,7 @@ function Player:ChangeClass(newClass)
     self.origSpeed = self.moveSpeed
 end
 
-function Player:ChangeTeam(newTeam)
+function Skulk:ChangeTeam(newTeam)
 	self.team = newTeam
 end
 
@@ -189,7 +176,7 @@ end
 -- Sets the view angles for the player. Note that setting the yaw of the
 -- view will also adjust the player's yaw.
 --
-function Player:SetViewAngles(viewAngles)
+function Skulk:SetViewAngles(viewAngles)
 
     self.viewPitch = viewAngles.pitch
     self.viewRoll  = viewAngles.roll
@@ -204,7 +191,7 @@ end
 --
 -- Gets the view angles for the player.
 --
-function Player:GetViewAngles(viewAngles)
+function Skulk:GetViewAngles(viewAngles)
     return Angles(self.viewPitch, self:GetAngles().yaw, self.viewRoll)
 end
 
@@ -213,7 +200,7 @@ end
 -- The overlay animation is typically used to combine an animation like an attack
 -- animation with the base movement animation.
 --
-function Player:SetOverlayAnimation( animationName )
+function Skulk:SetOverlayAnimation( animationName )
 
     if ( animationName ~= nil ) then
 
@@ -233,13 +220,13 @@ end
 --
 -- Sets the activity the player is currently performing.
 --
-function Player:SetBaseAnimation(activity)
+function Skulk:SetBaseAnimation(activity)
 
     local animationPrefix = ""
     local weapon = self:GetActiveWeapon()
 
     if (weapon) then
-        if (self.class == Player.Classes.Marine ) then
+        if (self.class == Skulk.Classes.Skulk ) then
             animationPrefix =  weapon:GetAnimationPrefix() .. "_"
             weapon:SetAnimation( activity )
         end
@@ -252,7 +239,7 @@ end
 --
 -- Called by the engine to construct the pose of the bones for the player's model.
 --
-function Player:BuildPose(poses)
+function Skulk:BuildPose(poses)
 
     Actor.BuildPose(self, poses)
 
@@ -266,7 +253,7 @@ end
 --
 -- Called to handle user input for the player.
 --
-function Player:OnProcessMove(input)
+function Skulk:OnProcessMove(input)
 
     if (Client) then
 
@@ -284,11 +271,11 @@ function Player:OnProcessMove(input)
     end
 
 	if(bit.band(input.commands, Move.Taunt) ~= 0) then
-		if(self.class == Player.Classes.Marine) then
+		if(self.class == Skulk.Classes.Skulk) then
 			self:PlaySound(self.marineTauntSound)
-		elseif(self.class == Player.Classes.Skulk) then
+		elseif(self.class == Skulk.Classes.Skulk) then
 			self:PlaySound(self.alienTauntSound)
-		elseif(self.class == Player.Classes.BuildBot) then
+		elseif(self.class == Skulk.Classes.BuildBot) then
 			self:PlaySound(self.robotTauntSound)
 		end
 	end
@@ -319,7 +306,7 @@ function Player:OnProcessMove(input)
     sideAxis:Normalize()
 
     -- Handle jumping
-    if (canMove and (ground or self.class == Player.Classes.BuildBot)) then
+    if (canMove and (ground or self.class == Skulk.Classes.BuildBot)) then
         if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
             self.canJump = 1
         elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
@@ -327,9 +314,9 @@ function Player:OnProcessMove(input)
 
             -- Compute the initial velocity to give us the desired jump
             -- height under the force of gravity.
-            self.velocity.y = math.sqrt(-2 * Player.jumpHeight * self.gravity)
+            self.velocity.y = math.sqrt(-2 * Skulk.jumpHeight * self.gravity)
             
-            if (self.class == Player.Classes.BuildBot) then
+            if (self.class == Skulk.Classes.BuildBot) then
             	self.velocity.x = self.velocity.x + forwardAxis.x*10
             	self.velocity.z = self.velocity.z + forwardAxis.z*10
 			end
@@ -344,7 +331,7 @@ function Player:OnProcessMove(input)
             --self:SetAnimation( "" ) -- Needs a crouch animation
             self.moveSpeed = math.floor( self.origSpeed * 0.5 )
 			self:SetPoseParam("crouch", 1.0)
-            if (not Client and self.class == Player.Classes.Marine) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
+            if (not Client and self.class == Skulk.Classes.Skulk) then -- Since viewOffset is a network var it looks very odd to execute this on both client and server
                 self.viewOffset = Vector(0, 0.9, 0)
             end
         end
@@ -356,7 +343,7 @@ function Player:OnProcessMove(input)
             self.crouching = nil
             self.moveSpeed = self.origSpeed
 			self:SetPoseParam("crouch", 0.0)
-            if (not Client and self.class == Player.Classes.Marine) then
+            if (not Client and self.class == Skulk.Classes.Skulk) then
                 self.viewOffset = Vector(0, 1.6256, 0)
             end
         end
@@ -389,7 +376,7 @@ function Player:OnProcessMove(input)
         local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
         
         local wishSpeed = nil
-        if (self.class == Player.Classes.Marine) then
+        if (self.class == Skulk.Classes.Skulk) then
            if (input.move.z >= 0) then
               wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed
            else
@@ -406,7 +393,7 @@ function Player:OnProcessMove(input)
         local addSpeed     = wishSpeed - currentSpeed
 
         if (addSpeed > 0) then
-            local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
+            local accelSpeed = math.min(addSpeed, Skulk.moveAcceleration * input.time * wishSpeed)
             self.velocity = self.velocity + wishDirection * accelSpeed
         end
 
@@ -416,7 +403,7 @@ function Player:OnProcessMove(input)
             -- First move the character upwards to allow them to go up stairs and
             -- over small obstacles.
             local start = Vector(self:GetOrigin())
-            offset = self:PerformMovement( Vector(0, Player.stepHeight, 0), 1 ) - start
+            offset = self:PerformMovement( Vector(0, Skulk.stepHeight, 0), 1 ) - start
         end
 
         -- Move the player with collision detection.
@@ -425,19 +412,19 @@ function Player:OnProcessMove(input)
         if (ground) then
             -- Finally, move the player back down to compensate for moving them up.
             -- We add in an additional step height for moving down steps/ramps.
-            offset.y = offset.y + Player.stepHeight
+            offset.y = offset.y + Skulk.stepHeight
             self:PerformMovement( -offset, 1 )
         end
 
         -- Handle the buttons.
 
-        if (self.activity ~= Player.Activity.Reloading) then
+        if (self.activity ~= Skulk.Activity.Reloading) then
             if (bit.band(input.commands, Move.Reload) ~= 0) then
 
-                if (self.activity == Player.Activity.Shooting) then
+                if (self.activity == Skulk.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
-                if (self.activity == Player.Activity.AltShooting) then
+                if (self.activity == Skulk.Activity.AltShooting) then
                     self:StopSecondaryAttack()
                 end
 
@@ -448,15 +435,15 @@ function Player:OnProcessMove(input)
                 -- Process attack
                 if (bit.band(input.commands, Move.PrimaryAttack) ~= 0) then
                     self:PrimaryAttack()
-                elseif (self.activity == Player.Activity.Shooting) then
+                elseif (self.activity == Skulk.Activity.Shooting) then
                     self:StopPrimaryAttack()
-                    if(self.class ~= Player.Classes.Skulk or Shared.GetTime() > self.activityEnd) then
+                    if(self.class ~= Skulk.Classes.Skulk or Shared.GetTime() > self.activityEnd) then
                        self:StopPrimaryAttack()
                     end
                 end
                 if (bit.band(input.commands, Move.SecondaryAttack) ~= 0) then
                     self:SecondaryAttack()
-                elseif (self.activity == Player.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
+                elseif (self.activity == Skulk.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
                     self:StopSecondaryAttack()
                 end
 
@@ -469,18 +456,18 @@ function Player:OnProcessMove(input)
 
     local time = Shared.GetTime()
     
-    if (time > self.activityEnd and self.activity == Player.Activity.PrimaryAttack) then
+    if (time > self.activityEnd and self.activity == Skulk.Activity.PrimaryAttack) then
         player:SetOverlayAnimation(nil)
     end
 
-    if (time > self.activityEnd and self.activity == Player.Activity.Reloading) then
+    if (time > self.activityEnd and self.activity == Skulk.Activity.Reloading) then
         local weapon = self:GetActiveWeapon()
         if (weapon ~= nil) then
             weapon:ReloadFinish()
         end
     end
 
-    if (time > self.activityEnd and self.activity ~= Player.Activity.None) then
+    if (time > self.activityEnd and self.activity ~= Skulk.Activity.None) then
         self:Idle()
     end
 
@@ -490,7 +477,7 @@ function Player:OnProcessMove(input)
 
 end
 
-function Player:ApplyFriction(input, ground)
+function Skulk:ApplyFriction(input, ground)
     local velocity = Vector(self.velocity)
   
     if (ground) then
@@ -501,9 +488,9 @@ function Player:ApplyFriction(input, ground)
 
     if (speed > 0) then
 
-        local drop = speed * Player.friction * input.time
+        local drop = speed * Skulk.friction * input.time
         
-        if (self.class == Player.Classes.BuildBot) then
+        if (self.class == Skulk.Classes.BuildBot) then
         	drop = drop * 0.25
         end
         
@@ -521,14 +508,14 @@ end
 -- Returns true if the player is allowed to move (this doesn't affect moving
 -- the view).
 --
-function Player:GetCanMove()
+function Skulk:GetCanMove()
     return Game.instance:GetHasGameStarted()
 end
 
 --
 -- Returns true if the player is standing on the ground.
 --
-function Player:GetIsOnGround()
+function Skulk:GetIsOnGround()
 
     if (self.velocity.y > 0) then
         -- If we are moving away from the ground, don't treat
@@ -549,7 +536,7 @@ function Player:GetIsOnGround()
 
     local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
 
-    if (trace.fraction < 1 and trace.normal.y < Player.maxWalkableNormal) then
+    if (trace.fraction < 1 and trace.normal.y < Skulk.maxWalkableNormal) then
         return false, nil
     end
 
@@ -560,7 +547,7 @@ end
 --
 -- Moves by the player by the specified offset, colliding and sliding with the world.
 --
-function Player:PerformMovement(offset, maxTraces)
+function Skulk:PerformMovement(offset, maxTraces)
 
     local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
@@ -605,14 +592,14 @@ end
 --
 -- Returns the view model entity.
 --
-function Player:GetViewModelEntity()
+function Skulk:GetViewModelEntity()
     return Shared.GetEntity(self.viewModelId)
 end
 
 --
 -- Sets the model currently displayed on the view model.
 --
-function Player:SetViewModel(viewModelName)
+function Skulk:SetViewModel(viewModelName)
     local viewModel = self:GetViewModelEntity()
     viewModel:SetModel(viewModelName)
 end
@@ -621,7 +608,7 @@ end
 -- Returns the currently selected weapon if there is one. If there isn't,
 -- returns nil.
 --
-function Player:GetActiveWeapon()
+function Skulk:GetActiveWeapon()
 
     if (self.activeWeaponId > 0) then
         return Shared.GetEntity(self.activeWeaponId)
@@ -631,7 +618,7 @@ function Player:GetActiveWeapon()
 
 end
 
-function Player:RetractWeapon()
+function Skulk:RetractWeapon()
 	local weaponID = self.activeWeaponId
 	if (weaponID and weaponID > 0) then
 		self:SetViewModel("")
@@ -643,13 +630,13 @@ function Player:RetractWeapon()
 	end
 end
 
-function Player:ChangeWeapon(weapon)
+function Skulk:ChangeWeapon(weapon)
 	local weaponID = weapon:GetId()
 	if (weaponID ~= self.activeWeaponId) then
 		self:RetractWeapon()
 
         weapon:SetParent(self)
-        if (self.class == Player.Classes.Marine) then
+        if (self.class == Skulk.Classes.Skulk) then
             weapon:SetAttachPoint("RHand_Weapon")
         end
 	    self.activeWeaponId = weaponID
@@ -660,7 +647,7 @@ end
 --
 -- Unholsters the active weapon.
 --
-function Player:DrawWeapon()
+function Skulk:DrawWeapon()
 
     local weapon = self:GetActiveWeapon()
 
@@ -669,7 +656,7 @@ function Player:DrawWeapon()
         self:SetViewModel(weapon:GetViewModelName())
         weapon:Draw(self)
 
-        self.activity    = Player.Activity.Drawing
+        self.activity    = Skulk.Activity.Drawing
         self.activityEnd = Shared.GetTime() + weapon:GetDrawTime()
 
     end
@@ -679,8 +666,8 @@ end
 --
 -- Reloads the current weapon.
 --
-function Player:Reload()
-	if (self.activity ~= Player.Activity.Reloading) then
+function Skulk:Reload()
+	if (self.activity ~= Skulk.Activity.Reloading) then
 		local weapon = self:GetActiveWeapon()
 		if (weapon ~= nil) then
 			local time = Shared.GetTime()
@@ -688,7 +675,7 @@ function Player:Reload()
 			if (time > self.activityEnd and weapon:Reload(self)) then
 				self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_reload" )
 				self.activityEnd = time + weapon:GetReloadTime()
-				self.activity    = Player.Activity.Reloading
+				self.activity    = Skulk.Activity.Reloading
 			end
 		end
 	end
@@ -697,7 +684,7 @@ end
 --
 -- Performs the primary attack for the current weapon
 --
-function Player:PrimaryAttack()
+function Skulk:PrimaryAttack()
 
     local weapon = self:GetActiveWeapon()
 
@@ -708,14 +695,14 @@ function Player:PrimaryAttack()
         if (time > self.activityEnd) then
 
            if (weapon:FireBullets(self)) then
-               if (self.class == Player.Classes.Marine ) then
+               if (self.class == Skulk.Classes.Skulk ) then
                    self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_fire")
                end
                 self.activityEnd = time + weapon:GetFireDelay()
-                self.activity    = Player.Activity.Shooting
+                self.activity    = Skulk.Activity.Shooting
             else
                 -- The weapon can't fire anymore (out of bullets, etc.)
-                if (self.activity == Player.Activity.Shooting) then
+                if (self.activity == Skulk.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
                 if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
@@ -733,9 +720,9 @@ end
 --
 -- Performs the secondary attack for the current weapon
 --
-function Player:SecondaryAttack()
+function Skulk:SecondaryAttack()
     -- Check if the current class is marine
-    if (self.class == Player.Classes.Marine) then
+    if (self.class == Skulk.Classes.Skulk) then
  
        local weapon = self:GetActiveWeapon()
  
@@ -748,10 +735,10 @@ function Player:SecondaryAttack()
                if (weapon:Melee(self)) then
                     -- self:SetOverlayAnimation( weapon:GetAnimationPrefix() .. "_alt" ) -- Melee animation for thirdperson
                     self.activityEnd = time + weapon:GetMeleeDelay()
-                    self.activity    = Player.Activity.AltShooting
+                    self.activity    = Skulk.Activity.AltShooting
                 else
                     -- The weapon can't fire anymore (out of bullets, etc.)
-                    if (self.activity == Player.Activity.AltShooting) then
+                    if (self.activity == Skulk.Activity.AltShooting) then
                         self:StopSecondaryAttack()
                     end
                     self:Idle()
@@ -763,7 +750,7 @@ function Player:SecondaryAttack()
 end  
 
 
-function Player:StopPrimaryAttack()
+function Skulk:StopPrimaryAttack()
 
     local weapon = self:GetActiveWeapon()
 
@@ -771,22 +758,22 @@ function Player:StopPrimaryAttack()
         weapon:StopPrimaryAttack(self)
     end
 
-    self.activity = Player.Activity.None
+    self.activity = Skulk.Activity.None
 
 end
 
-function Player:StopSecondaryAttack()
+function Skulk:StopSecondaryAttack()
     local weapon = self:GetActiveWeapon()
 
     if (weapon ~= nil) then
         weapon:StopSecondaryAttack(self)
     end
 
-    self.activity = Player.Activity.None
+    self.activity = Skulk.Activity.None
 
 end
 
-function Player:Idle()
+function Skulk:Idle()
 
     local weapon = self:GetActiveWeapon()
 
@@ -795,22 +782,22 @@ function Player:Idle()
     end
 
     self:SetOverlayAnimation(nil)
-    self.activity = Player.Activity.None
+    self.activity = Skulk.Activity.None
 
 end
 
-function Player:GetViewOffset()
+function Skulk:GetViewOffset()
     return self.viewOffset
 end
 
-function Player:GetVelocity()
+function Skulk:GetVelocity()
 	return self.velocity
 end
 
 --
 -- Retursn the amount of ammo in the clip for the active weapon.
 --
-function Player:GetWeaponClip()
+function Skulk:GetWeaponClip()
 
     local weapon = self:GetActiveWeapon()
 
@@ -825,7 +812,7 @@ end
 --
 -- Returns the total amount of ammo for the currently selected weapon.
 --
-function Player:GetWeaponAmmo()
+function Skulk:GetWeaponAmmo()
 
     local weapon = self:GetActiveWeapon()
 
@@ -837,18 +824,18 @@ function Player:GetWeaponAmmo()
 
 end
 
-function Player:UpdatePoseParameters()
+function Skulk:UpdatePoseParameters()
 
     local viewAngles = self:GetViewAngles()
     local pitch = -Math.Wrap( Math.Degrees(viewAngles.pitch), -180, 180 )
     
-    if (self.class == Player.Classes.Marine) then
+    if (self.class == Skulk.Classes.Skulk) then
         self:SetPoseParam("body_pitch", pitch)
-    elseif (self.class == Player.Classes.Skulk) then
+    elseif (self.class == Skulk.Classes.Skulk) then
         self:SetPoseParam("look_pitch", pitch)
     end
     
-    if(self.class == Player.Classes.Skulk) then
+    if(self.class == Skulk.Classes.Skulk) then
        local yaw = -Math.Wrap( Math.Degrees(viewAngles.yaw), -180, 180 )
        self:SetPoseParam("look_yaw", yaw)
     end
@@ -871,14 +858,14 @@ end
 --
 -- Returns true if the player is currently being viewed in 3rd person mode.
 --
-function Player:GetIsThirdPerson()
+function Skulk:GetIsThirdPerson()
     return self.thirdPerson
 end
 
 --
 -- Sets whether or not the player is being viewed in 3rd person mode.
 --
-function Player:SetIsThirdPerson(thirdPerson)
+function Skulk:SetIsThirdPerson(thirdPerson)
 
     self.thirdPerson = thirdPerson
 
@@ -894,7 +881,7 @@ end
 -- Called by the engine to get the object to world space transformation
 -- for the camera.
 --
-function Player:GetCameraViewCoords()
+function Skulk:GetCameraViewCoords()
 
     local viewCoords  = self:GetViewAngles():GetCoords()
 
@@ -911,20 +898,20 @@ end
 
 if (Server) then
 
-    function Player:GiveWeapon(className)
+    function Skulk:GiveWeapon(className)
         local weapon = Server.CreateEntity(className, self:GetOrigin())
 		-- TODO: Add inventory management here
         self:ChangeWeapon(weapon)
     end
 
-    function Player:TakeDamage(attacker, damage, doer, point, direction)
+    function Skulk:TakeDamage(attacker, damage, doer, point, direction)
         if Server.instagib == true then
             damage = 100
         end
         self.health = self.health - damage
         self.score = self.health
         if (self.health <= 0) then
-            local extents = Player.extents
+            local extents = Skulk.extents
             local offset  = Vector(0, extents.y + 0.01, 0)
 
             repeat
@@ -950,11 +937,11 @@ if (Server) then
 
     end
 
-    function Player:SetNick( nickname )
+    function Skulk:SetNick( nickname )
         self.nick = nickname
     end
 
-    function Player:GetNick()
+    function Skulk:GetNick()
         return self.nick
     end
 
@@ -963,9 +950,9 @@ end
 --
 -- Creates an effect at an attachment point for the active weapon.
 --
-function Player:CreateWeaponEffect(playerAttachPointName, entityAttachPointName, cinematicName)
+function Skulk:CreateWeaponEffect(playerAttachPointName, entityAttachPointName, cinematicName)
 
-    local viewEffect = Client and (Client.GetLocalPlayer() == self) and not self:GetIsThirdPerson()
+    local viewEffect = Client and (Client.GetLocalSkulk() == self) and not self:GetIsThirdPerson()
 
     if (viewEffect) then
 
@@ -997,7 +984,7 @@ if (Client) then
     --
     -- Sets the Flash movie that's displayed for the HUD.
     --
-    function Player:SetHud(hudFileName)
+    function Skulk:SetHud(hudFileName)
 
         local flashPlayer = Client.CreateFlashPlayer()
         Client.AddFlashPlayerToDisplay(flashPlayer)
@@ -1007,15 +994,15 @@ if (Client) then
 
     end
 
-    function Player:GetRenderFov()
+    function Skulk:GetRenderFov()
         return self.fov
     end
     
-    function Player:SetRenderFov(fov)
+    function Skulk:SetRenderFov(fov)
         self.fov = fov
     end
 
-    function Player:UpdateClientEffects(deltaTime)
+    function Skulk:UpdateClientEffects(deltaTime)
 
         Actor.UpdateClientEffects(self, deltaTime)
 
@@ -1033,7 +1020,7 @@ if (Client) then
 
     end
 
-    function Player:UpdateWeaponSwing(input)
+    function Skulk:UpdateWeaponSwing(input)
 
         -- Look at difference between previous and current angles to add "swing" to view model
         local kSwingSensitivity = .5
@@ -1078,4 +1065,4 @@ if (Client) then
 
 end
 
-Shared.LinkClassToMap("Player", "player", Player.networkVars )
+Shared.LinkClassToMap("Skulk", "skulk", Skulk.networkVars )
