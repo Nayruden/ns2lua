@@ -8,8 +8,8 @@
 --=============================================================================
 Script.Load("lua/Utility.lua")
 
-package.path  = ".\\ns2\\lua\\?.lua"
-package.cpath = ".\\ns2\\lua\\?.dll"
+package.path  = ".\\ns2\\lua\\?.lua;.\\ns2lua\\lua\\?.lua"
+package.cpath = ".\\ns2\\lua\\?.dll;.\\ns2lua\\lua\\?.dll"
 http = require("socket.http")
 
 local hasNewData = true
