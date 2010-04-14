@@ -8,62 +8,56 @@ Door.State = enum { 'Open', 'Closed' }
 Door.Activity = enum {'None', 'Animating', 'StayingOpen'}
 Door.Behavior = enum {'Proximity', 'AlwaysOpen', 'AlwaysClosed'}
 
-function Door:OnInit()
-	Actor.OnInit(self)
-	self:SetModel(self.modelName)
-	self:SetIsVisible(true)
-	
-	if (Client) then
-		self.physicsGroup = 2
-	end
-	if (Server) then	
+if (Server) then
+	function Door:OnInit()
+		Actor.OnInit(self)
+		self:SetModel(self.modelName)
+		self:SetIsVisible(true)
+		
 		self.state = Door.State.Closed
 		self.activity = Door.Activity.None
 		self.activityEnd = 0
 		
 		self:SetNextThink(Door.thinkInterval)
-		self:SetPhysicsActor()
-    end    
-end
-
-
-function Door:OnLoad()
-    Actor.OnLoad(self)
-
-    self.behaviorType = tonumber(self.behaviorType)
-    self.touchRadius  = tonumber(self.touchRadius)
-	self.openTime     = tonumber(self.openTime)
-end
-
-function Door:Open() 
-	self.state = Door.State.Open
-	self.activity = Door.Activity.Animating
-	self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "open" )
-	self:SetAnimation( "open" )
-end
-
-function Door:Close() 
-	self.state = Door.State.Closed
-	self.activity = Door.Activity.Animating
-	self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "close" )	
-	self:SetAnimation( "close" )
-end
-
-function Door:TestProximity() 
-	local player
-	for key, value in pairs(PlayerClasses) do
-		player = Server.FindEntityWithClassnameInRadius(value.mapName, self:GetOrigin(), self.touchRadius, nil)
-		if (player ~= nil) then
-			return true
-		end
 	end
-	return false
-end
 
-if (Server) then
+
+	function Door:OnLoad()
+		Actor.OnLoad(self)
+
+		self.behaviorType = tonumber(self.behaviorType)
+		self.touchRadius  = tonumber(self.touchRadius)
+		self.openTime     = tonumber(self.openTime)
+	end
+
+	function Door:Open() 
+		self.state = Door.State.Open
+		self.activity = Door.Activity.Animating
+		self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "open" )
+		self:SetAnimation( "open" )
+	end
+
+	function Door:Close() 
+		self.state = Door.State.Closed
+		self.activity = Door.Activity.Animating
+		self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "close" )	
+		self:SetAnimation( "close" )
+	end
+
+	function Door:TestProximity() 
+		local player
+		for key, value in pairs(PlayerClasses) do
+			player = Server.FindEntityWithClassnameInRadius(value.mapName, self:GetOrigin(), self.touchRadius, nil)
+			if (player ~= nil) then
+				return true
+			end
+		end
+		return false
+	end
+
 	function Door:OnThink()
 		Actor.OnThink(self)
-    	
+		
 		local time = Shared.GetTime()    
 		if (time > self.activityEnd) then
 			if (self.activity == Door.Activity.Animating) then 				
@@ -86,9 +80,8 @@ if (Server) then
 			end
 		end
 		
-        self:SetNextThink(self.thinkInterval)
-    end
+		self:SetNextThink(self.thinkInterval)
+	end
 end
-
 	
 Shared.LinkClassToMap("Door", "door")
