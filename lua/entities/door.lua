@@ -13,12 +13,16 @@ function Door:OnInit()
 	self:SetModel(self.modelName)
 	self:SetIsVisible(true)
 	
+	if (Client) then
+		self.physicsGroup = 2
+	end
 	if (Server) then	
 		self.state = Door.State.Closed
 		self.activity = Door.Activity.None
 		self.activityEnd = 0
 		
 		self:SetNextThink(Door.thinkInterval)
+		self:SetPhysicsActor()
     end    
 end
 
@@ -31,29 +35,31 @@ function Door:OnLoad()
 	self.openTime     = tonumber(self.openTime)
 end
 
-	function Door:Open() 
-		self.state = Door.State.Open
-		self.activity = Door.Activity.Animating
-		self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "open" )
-		self:SetAnimation( "open" )
-	end
+function Door:Open() 
+	self.state = Door.State.Open
+	self.activity = Door.Activity.Animating
+	self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "open" )
+	self:SetAnimation( "open" )
+end
 
-	function Door:Close() 
-		self.state = Door.State.Closed
-		self.activity = Door.Activity.Animating
-		self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "close" )	
-		self:SetAnimation( "close" )
-	end
+function Door:Close() 
+	self.state = Door.State.Closed
+	self.activity = Door.Activity.Animating
+	self.activityEnd = Shared.GetTime() + self:GetAnimationLength( "close" )	
+	self:SetAnimation( "close" )
+end
 
-	function Door:TestProximity() 
-		local player
-		player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.touchRadius, nil)
+function Door:TestProximity() 
+	local player
+	for key, value in pairs(PlayerClasses) do
+		player = Server.FindEntityWithClassnameInRadius(value.mapName, self:GetOrigin(), self.touchRadius, nil)
 		if (player ~= nil) then
 			return true
 		end
-		return false
 	end
-	
+	return false
+end
+
 if (Server) then
 	function Door:OnThink()
 		Actor.OnThink(self)
