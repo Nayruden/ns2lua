@@ -327,8 +327,10 @@
             <choice label="Always Shut" value="3"/>            
         </parameter>
 
-		<parameter name="touchRadius" type="distance" label="Proximity radius" default="150.0" help="Players within this radius will cause the door to open."/>
-        
+		<parameter name="touchRadius" type="distance" label="Proximity radius" default="20.0" help="Players within this radius will cause the door to open."/>
+        <sphere>
+			<radius>touchRadius</radius>
+		</sphere>
     </class>
        
     <!-- Power grid -->
