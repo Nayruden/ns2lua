@@ -248,7 +248,7 @@ function Rifle:FireBullets(player)
 
             if (target ~= nil and target.TakeDamage ~= nil) then
                 local direction = (trace.endPoint - startPoint):GetUnit()
-                target:TakeDamage(player, 8, self, trace.endPoint, direction)
+                target:TakeDamage(player, 10, self, trace.endPoint, direction)
             end
 
         end
