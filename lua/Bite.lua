@@ -19,9 +19,9 @@ Bite.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Bite.range                 = 3
 Bite.penetration           = 0
-Bite.fireDelay             = 1   // Time between shots
-Bite.reloadTime            = 3     // Time it takes to reload
-Bite.drawTime              = 1.3   // Time it takes to draw the weapon
+Bite.fireDelay             = 1   -- Time between shots
+Bite.reloadTime            = 3     -- Time it takes to reload
+Bite.drawTime              = 1.3   -- Time it takes to draw the weapon
 Bite.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(Bite.viewModelName)
@@ -51,7 +51,7 @@ function Bite:OnInit()
     self.prevAnimationStart         = 0
     self.blendLength                = 0.0
 
-    self.firingState                = 0 // Not firing
+    self.firingState                = 0 -- Not firing
 
 end
 
@@ -86,7 +86,7 @@ end
 --
 function Bite:Draw(player)
     local viewModel = player:GetViewModelEntity()
-    //viewModel:SetAnimation( "draw" )
+    --viewModel:SetAnimation( "draw" )
     player:PlaySound(self.drawSound)
 end
 
@@ -107,7 +107,7 @@ function Bite:Idle(player)
     local viewModel = player:GetViewModelEntity()
 
     viewModel:SetAnimationWithBlending( "bite_idle", 0.25 )
-    // There's more idle animations, not sure if we want to use them here though
+    -- There's more idle animations, not sure if we want to use them here though
     viewModel:SetOverlayAnimation( nil )
 
 end
@@ -122,16 +122,16 @@ function Bite:FireBullets(player)
     if (not self.firing) then
         local suffix = tostring( math.random( 4 ) ):gsub( "1", "" ) -- Nothing, 2, 3, or 4
         viewModel:SetAnimationWithBlending( "bite_attack" .. suffix, 0.01 )
-        player:SetOverlayAnimation(nil) // TEMP FIX
+        player:SetOverlayAnimation(nil) -- TEMP FIX
         player:SetOverlayAnimation("bite")
-        // viewModel:SetOverlayAnimation( "attack_gun_loop" )
+        -- viewModel:SetOverlayAnimation( "attack_gun_loop" )
     end
 
      local viewCoords = player:GetCameraViewCoords()
     local startPoint = viewCoords.origin
 
-    // Filter ourself out of the trace so that we don't hit the weapon or the
-    // player using it.
+    -- Filter ourself out of the trace so that we don't hit the weapon or the
+    -- player using it.
     local filter = EntityFilterTwo(player, self)
 
 
@@ -144,7 +144,7 @@ function Bite:FireBullets(player)
 
     if (trace.fraction < 1) then
 
-        // self:CreateHitEffect(player, trace) // Sparks, really weird looking since we're biting
+        -- self:CreateHitEffect(player, trace) -- Sparks, really weird looking since we're biting
 
         local target = trace.entity
 
@@ -176,7 +176,7 @@ end
 --
 function Bite:CreateHitEffect(player, trace)
 
-    // Create a coordinate frame where "up" is the normal of the surface we hit.
+    -- Create a coordinate frame where "up" is the normal of the surface we hit.
     local coords = Coords.GetOrthonormal(trace.normal)
     coords.origin = trace.endPoint
 
