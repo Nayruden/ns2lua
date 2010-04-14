@@ -77,7 +77,6 @@ function OnMapPostLoad()
     -- Create the game object. This is a networked object that manages the game
     -- state and logic.
     Server.CreateEntity("game", Vector(0, 0, 0))
-    Server.CreateEntity("kill", Vector(0, 0, 0))
 end
 
 function OnConsoleThirdPerson(player)
@@ -223,6 +222,13 @@ function OnCommandInstaGib( ply )
         Player.moveAcceleration     =  4
         Player.jumpHeight           =  1   
     end
+end
+
+function Server.SendKillMessage(killer, killed) 
+	Shared.Message("--Server--")	
+	Shared.Message("Killer: " .. killer)
+	Shared.Message("Killed: " .. killed)
+	Server.SendCommand(nil, string.format("kill %s %s",killer,killed))
 end
 
 -- Hook the game methods.

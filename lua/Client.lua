@@ -85,6 +85,14 @@ function OnConsoleClLua(userdata, ...)
     good()
 end
 
+function OnKillMessage(src, killer, killed)	
+	Shared.Message("--Client--")	
+	Shared.Message("Killer: " .. killer)
+	Shared.Message("Killed: " .. killed)
+	-- should use the src argument to find out if this was sent from server...
+	KillUI_AddKill(killer,killed)
+end
 
 Event.Hook("Console_help", OnCommandHelp)
 Event.Hook("Console_cllua",  OnConsoleClLua)
+Event.Hook("Console_kill",  OnKillMessage)

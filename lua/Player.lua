@@ -919,7 +919,7 @@ if (Server) then
             self.deaths = self.deaths + 1
             attacker.kills = attacker.kills + 1
 			
-			Kill.instance:AddKill(attacker:GetNick(), self:GetNick())
+			Server.SendKillMessage(attacker:GetNick(), self:GetNick())
         end
 
     end
