@@ -1,4 +1,4 @@
-class 'MarinePlayer' (Player, Actor)
+class 'MarinePlayer' (Player)
 
 PlayerClasses.marine = MarinePlayer
 
