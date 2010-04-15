@@ -120,11 +120,11 @@ function Player:OnInit()
 
     if (Client) then
 
-        self:SetHud("ui/hud.swf")
-		self:SetHud("ui/chat.swf")
+        self.hudFP = self:SetHud("ui/hud.swf")
+		self.chatFP = self:SetHud("ui/chat.swf")
         
         --23begin
-        self:SetHud("ui/health.swf")
+        self.healthFP = self:SetHud("ui/health.swf")
         --12end  
         
         self.horizontalSwing = 0
@@ -934,14 +934,18 @@ function Player:GetCameraViewCoords()
 
 end
 
-if (Server) then
-
-    function Player:OnDestroy()
-        if self.viewModel then
-            Server.DestroyEntity(self.viewModel)
-        end
-        Actor.OnDestroy(self)
+function Player:OnDestroy()
+    if Server and self.viewModel then
+        Server.DestroyEntity(self.viewModel)
+    elseif Client then
+        Client.DestroyFlashPlayer(self.hudFP)
+        Client.DestroyFlashPlayer(self.chatFP)
+        Client.DestroyFlashPlayer(self.healthFP)
     end
+    Actor.OnDestroy(self)
+end
+
+if (Server) then
 
     function Player:GiveWeapon(className)
         local weapon = Server.CreateEntity(className, self:GetOrigin())
@@ -1029,7 +1033,8 @@ if (Client) then
 
         flashPlayer:Load(hudFileName)
         flashPlayer:SetBackgroundOpacity(0)
-
+        
+        return flashPlayer
     end
 
     function Player:GetRenderFov()
