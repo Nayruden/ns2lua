@@ -1,3 +1,5 @@
+Script.Load("lua/Globals.lua")
+
 class 'Door' (Actor)
 
 Door.modelName = "models/misc/door/door.model"

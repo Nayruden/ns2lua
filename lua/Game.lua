@@ -99,7 +99,7 @@ if (Server) then
 
         -- Start the game in 5 seconds.
         if (self.startTime == 0) then
-            self.startTime = Shared.GetTime() + 5
+            self.startTime = Shared.GetTime()-- + 5
         end
 
 

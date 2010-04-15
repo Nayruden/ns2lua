@@ -1,3 +1,5 @@
+Script.Load("lua/Globals.lua")
+
 class 'TechPoint' (Actor)
 
 TechPoint.modelName = "models/misc/tech_point/tech_point.model"

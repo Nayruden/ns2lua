@@ -1,3 +1,5 @@
+Script.Load("lua/Globals.lua")
+
 class 'ResourceNozzle' (Actor)
 
 ResourceNozzle.modelName = "models/misc/resource_nozzle/resource_nozzle.model"
