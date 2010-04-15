@@ -21,11 +21,11 @@ for i = 1, #BuildBotPlayer.TauntSounds do
 end
 
 function BuildBotPlayer:OnInit()
-    Shared.Message(GetContextString() .. " Entering BuildBotPlayer:OnInit()")
+    Shared.Message("Entering BuildBotPlayer:OnInit()")
     Player.OnInit(self)
 	
     self:SetBaseAnimation("fly", true)
-	Shared.Message(GetContextString() .. " Exiting BuildBotPlayer:OnInit()")
+	Shared.Message("Exiting BuildBotPlayer:OnInit()")
 end
 
 function BuildBotPlayer:OnSetBaseAnimation(activity)

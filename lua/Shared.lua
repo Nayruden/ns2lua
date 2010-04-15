@@ -38,3 +38,8 @@ function GetContextString()
 		return "<Unknown>"
 	end
 end
+
+Shared.MessageNoContext = Shared.Message
+function Shared.Message(message)
+	Shared.MessageNoContext(GetContextString() .. " " .. message)
+end
