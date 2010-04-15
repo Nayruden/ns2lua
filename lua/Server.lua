@@ -36,12 +36,15 @@ function ChangePlayerClass(client, class, active, spawnPos)
     local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
 	if active then
 		player:SetNick(active:GetNick())
-        --spawnPos = client.active_controlee:GetOrigin()
-        Server.DestroyEntity(active)
     end
     
     Server.SetControllingPlayer(client, player)
     player:SetController(client)
+	
+	if active then
+        Server.DestroyEntity(active)
+    end
+    
     return player
 end
 

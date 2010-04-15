@@ -15,7 +15,7 @@ decoda_name = "Main"
 Script.Load("lua/Globals.lua")
 Script.Load("lua/MainMenu.lua")
 
-mods = { "Practice" }
+mods = { "ns2lua" }
 maps =
     {
         { name = "Range #1", fileName = "ns2_dm1.level" },
