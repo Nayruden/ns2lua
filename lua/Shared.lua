@@ -39,8 +39,16 @@ function GetContextString()
 	end
 end
 
+Shared.enableDebugMessages = false
+
 function DebugMessage(message)
-	if (Main.GetDevMode()) then
+	if (Shared.enableDebugMessages) then
 		Shared.Message("<" .. GetContextString() .. "> " .. message)
 	end
 end
+
+function OnConsoleDebugMode()
+	Shared.enableDebugMessages = not Shared.enableDebugMessages
+end
+
+Event.Hook("Console_debug", OnConsoleDebugMode)
