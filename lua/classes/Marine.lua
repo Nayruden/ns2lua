@@ -22,6 +22,7 @@ for i = 1, #MarinePlayer.TauntSounds do
 end
 
 function MarinePlayer:OnInit()
+	Shared.Message("Entering MarinePlayer:OnInit()")
     if (Server) then
         if Server.instagib then
             self.walkSpeed = self.instagib_walkSpeed
@@ -35,6 +36,7 @@ function MarinePlayer:OnInit()
     Player.OnInit(self)
 	
     self:SetBaseAnimation("run", true)
+	Shared.Message("Exiting MarinePlayer:OnInit()")
 end
 
 function MarinePlayer:OnChangeWeapon(weapon)

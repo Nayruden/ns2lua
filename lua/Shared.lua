@@ -28,3 +28,18 @@ Script.Load("lua/PropDynamic.lua")
 Script.Load("lua/classes/Skulk.lua")
 Script.Load("lua/classes/Marine.lua")
 Script.Load("lua/classes/BuildBot.lua")
+
+function GetContextString()
+	if (Server) then
+		return "<Server>"
+	elseif (Client) then
+		return "<Client>"
+	else
+		return "<Unknown>"
+	end
+end
+
+Shared.MessageNoContext = Shared.Message
+function Shared.Message(message)
+	Shared.MessageNoContext(GetContextString() .. " " .. message)
+end
