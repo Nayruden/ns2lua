@@ -15,7 +15,11 @@ decoda_name = "Server"
 
 package.path  = ".\\ns2\\lua\\?.lua;.\\ns2lua\\lua\\?.lua"
 package.cpath = ".\\ns2\\lua\\?.dll;.\\ns2lua\\lua\\?.dll"
-http = require("socket.http")
+local http
+local http_worked, http_res = pcall(require, "socket.http")
+if http_worked then
+    http = http_res
+end
 
 Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
@@ -114,7 +118,9 @@ function OnMapPostLoad()
     -- state and logic.
     
     Server.CreateEntity("game", Vector(0, 0, 0))
-    http.request("http://serverlist.devicenull.org/register.php?port=27015")
+	if http then
+		http.request("http://serverlist.devicenull.org/register.php?port=27015")
+	end
 end
 
 function OnConsoleThirdPerson(player)
