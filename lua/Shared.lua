@@ -7,6 +7,8 @@
 --
 --=============================================================================
 
+Script.Load("lua/Globals.lua")
+
 Script.Load("lua/Actor.lua")
 Script.Load("lua/weapons/ViewModel.lua")
 Script.Load("lua/Game.lua")
