@@ -36,16 +36,17 @@ function ChangePlayerClass(client, class, active, spawnPos)
     local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
 	if active then
 		player:SetNick(active:GetNick())
+        Server.DestroyEntityTimed(active,1)
     end
-    
+	
     Server.SetControllingPlayer(client, player)
     player:SetController(client)
-	
-	if active then
-        Server.DestroyEntity(active)
-    end
-    
+	    
     return player
+end
+
+function Server.DestroyEntityTimed(entity, delay) 
+	table.insert(Game.instance.delete_queue, {Entity = entity, DeleteTime = Shared.GetTime() + delay})
 end
 
 -- Get an unobstructured spawn point for the player.
