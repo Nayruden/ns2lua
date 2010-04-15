@@ -21,11 +21,11 @@ for i = 1, #SkulkPlayer.TauntSounds do
 end
 
 function SkulkPlayer:OnInit()
-	Shared.Message("Entering SkulkPlayer:OnInit()")
+	DebugMessage("Entering SkulkPlayer:OnInit()")
     Player.OnInit(self)
 	
     self:SetBaseAnimation("run", true)
-	Shared.Message("Exiting SkulkPlayer:OnInit()")
+	DebugMessage("Exiting SkulkPlayer:OnInit()")
 end
 
 function SkulkPlayer:OnSetBaseAnimation(activity)
