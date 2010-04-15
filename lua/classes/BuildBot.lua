@@ -1,7 +1,7 @@
 class 'BuildBotPlayer' (Player)
 
 PlayerClasses.buildbot = BuildBotPlayer
-SkulkPlayer.networkVars = {
+BuildBotPlayer.networkVars = {
     
 }
 

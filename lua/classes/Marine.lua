@@ -42,6 +42,21 @@ function MarinePlayer:OnInit()
     self:SetBaseAnimation("run", true)
 	DebugMessage("Exiting MarinePlayer:OnInit()")
     self.isFlashlightOn = false
+    if (Client) then
+        self.flashlightObject = Client.CreateRenderLight()
+        self.flashlightObject:SetIntensity(0)
+        self.flashlightObject:SetColor(Color(200, 200, 255, 255))
+        self.flashlightObject:SetRadius(10)
+        self.flashlightObject:SetInnerCone(0)
+    end
+end
+
+function MarinePlayer:OnDestroy()
+	DebugMessage("Entering MarinePlayer:OnDestroy()")
+    Player.OnDestroy(self)
+    self.flashlightObject:SetIntensity(0) -- Unfortunately, this is left to remain on class change!
+    self.flashlightObject = nil
+	DebugMessage("Exiting MarinePlayer:OnDestroy()")
 end
 
 function MarinePlayer:OnStartTaunt(input)
@@ -49,18 +64,13 @@ function MarinePlayer:OnStartTaunt(input)
         if (self.isFlashlightOn) then
             DebugMessage("FL off!")
             if (Client) then
-                DebugMessage("FL destroyed!")
-                self.flashlightObject = nil
+                self.flashlightObject:SetIntensity(0)
             end
             -- play off sound here
         else
             DebugMessage("FL on!")
             if (Client) then
-                DebugMessage("FL created!")
-                self.flashlightObject = Client.CreateRenderLight()
-                self.flashlightObject:SetIntensity(1)
-                self.flashlightObject:SetColor(Color(255, 255, 255, 255))
-                self.flashlightObject:SetRadius(3)
+                self.flashlightObject:SetIntensity(0.2)
             end
             -- play on sound here
         end
@@ -68,17 +78,6 @@ function MarinePlayer:OnStartTaunt(input)
         return false
     end
     return Player.OnStartTaunt(self, input)
-end
-
-function MarinePlayer:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
-    if (Client and self.flashlightObject) then
-        --local newCoords = viewCoords
-        --newCoords.origin = newCoords.origin + newCoords.zAxis * 0.2
-        viewCoords.origin = viewCoords.origin + viewCoords.zAxis * 1
-        self.flashlightObject:SetCoords(viewCoords)
-        --DebugMessage("FL moving!")
-    end
-    return Player.GetCanMove(self, input, viewCoords, forwardAxis, sideAxis)
 end
 
 function MarinePlayer:OnChangeWeapon(weapon)
@@ -95,6 +94,13 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
     Player.OnUpdatePoseParameters(self, viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     
     self:SetPoseParam("body_pitch", pitch)
+    
+    if (Client and self.flashlightObject) then
+        local coords = self:GetCameraViewCoords()
+        coords.origin = coords.origin + coords.zAxis * 0.2
+        self.flashlightObject:SetCoords(coords)
+        --DebugMessage("FL moving!")
+    end
 end
 
 function MarinePlayer:SecondaryAttack()

@@ -18,8 +18,9 @@ Script.Load("lua/MainMenu.lua")
 mods = { "ns2lua" }
 maps =
     {
-        { name = "Range #1", fileName = "ns2_dm1.level" },
-        { name = "Range #2", fileName = "ns2_dm2.level" },
+        { name = "Range #1",    fileName = "ns2_dm1.level"  },
+        { name = "Range #2",    fileName = "ns2_dm2.level"  },
+        { name = "Test Level",  fileName = "test.level"     },
     }
 
 --

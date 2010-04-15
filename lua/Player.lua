@@ -133,10 +133,9 @@ function Player:OnInit()
     
 	if (Server) then
 		for i, weapon in ipairs(self.WeaponLoadout) do
-			--Shared.Message("Giving "..weapon..".")
+			DebugMessage("Giving "..(tostring(self:GetNick()) or "<unknown player>").." a "..weapon..".")
 			self:GiveWeapon(weapon)
         end
-		end
 	end
 
 	DebugMessage("Exiting Player:OnInit()")
