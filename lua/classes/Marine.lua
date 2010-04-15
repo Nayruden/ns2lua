@@ -3,7 +3,7 @@ class 'MarinePlayer' (Player)
 PlayerClasses.marine = MarinePlayer
 
 MarinePlayer.networkVars = {
-    flashlightState              = "integer (0 or 1)",
+    flashlightState              = "predicted boolean",
 }
 
 MarinePlayer.modelName                  = "models/marine/male/male.model"
@@ -41,7 +41,7 @@ function MarinePlayer:OnInit()
 	
     self:SetBaseAnimation("run", true)
 	DebugMessage("Exiting MarinePlayer:OnInit()")
-    self.flashlightState = 0
+    self.flashlightState = false
     if (Client) then
         self.flashlightObject = Client.CreateRenderLight()
         self.flashlightObject:SetIntensity(0)
@@ -50,7 +50,6 @@ function MarinePlayer:OnInit()
         self.flashlightObject:SetInnerCone(0)
         self.flashlightObject:SetOuterCone(0.6)
         self.flashlightActive = false
-        self.localFlashlightState = nil
     end
 end
 
@@ -64,12 +63,8 @@ end
 
 function MarinePlayer:OnStartTaunt(input)
     if (bit.band(input.commands, Move.MovementModifier) ~= 0) then
-        self.flashlightState = 1-self.flashlightState
-        if not Client or Client.GetIsRunningPrediction() then
-            DebugMessage(self.flashlightState == 1 and "FL on!" or "FL off!")
-        else
-            self.localFlashlightState = self.flashlightState
-        end
+        self.flashlightState = not self.flashlightState
+        DebugMessage(self.flashlightState == 1 and "FL on!" or "FL off!")
         return false
     end
     return Player.OnStartTaunt(self, input)
@@ -91,20 +86,17 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
     self:SetPoseParam("body_pitch", pitch)
     
     if Client and self.flashlightObject then -- this should probably be somewhere else.. but this is good enough
-        if (not Client.GetIsRunningPrediction() and self.localFlashlightState or self.flashlightState) == 1 then
-            if self.flashlightActive == 0 then
+        if self.flashlightState then
+            if not self.flashlightActive then
                 self.flashlightObject:SetIntensity(0.2)
                 self.flashlightActive = true
             end
-            local coords =self:GetViewAngles():GetCoords()
+            local coords = self:GetViewAngles():GetCoords()
             coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
             self.flashlightObject:SetCoords(coords)
-            --DebugMessage("FL moving!")
-        elseif self.flashlightActive == 1 then
+        elseif self.flashlightActive then
             self.flashlightObject:SetIntensity(0)
             self.flashlightActive = false
-        elseif self.flashlightState == self.localFlashlightState then
-            self.localFlashlightState = nil
         end
     end
 end
