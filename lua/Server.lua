@@ -30,10 +30,10 @@ Server.targetsEnabled = false
 Server.instagib = false
 
 function ChangePlayerClass(client, class, active, spawnPos)
-	Shared.Message("Entering ChangePlayerClass(client, class, active, spawnPos)")
+	Shared.Message(GetContextString() .. " Entering ChangePlayerClass(client, class, active, spawnPos)")
     local class_table = (PlayerClasses[class] or PlayerClasses.Default)
 	
-    Shared.Message("Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
+    Shared.Message(GetContextString() .. " Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
     local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
 	if active then
 		player:SetNick(active:GetNick())
@@ -46,7 +46,7 @@ function ChangePlayerClass(client, class, active, spawnPos)
         Server.DestroyEntity(active)
     end
     
-	Shared.Message("Exiting ChangePlayerClass(client, class, active, spawnPos)")
+	Shared.Message(GetContextString() .. " Exiting ChangePlayerClass(client, class, active, spawnPos)")
     return player
 end
 
@@ -148,7 +148,7 @@ function OnCommandTargets( ply )
         Server.Broadcast( nil, "Targets OFF by " .. ply:GetNick() )
         Server.targetsEnabled = false
     else
-        Server.Broadcast( nil, "Tragets ON by " .. ply:GetNick() )
+        Server.Broadcast( nil, "Targets ON by " .. ply:GetNick() )
         Server.targetsEnabled = true  
     end
 end
@@ -179,7 +179,7 @@ function OnConsoleReadyRoom(player)
 end
 
 function OnConsoleChangeClass(player, type)
-	Shared.Message("Entering OnConsoleChangeClass(player, type)")
+	Shared.Message(GetContextString() .. " Entering OnConsoleChangeClass(player, type)")
     if type == "Default" then
         Shared.Message("You cannot use this class!")
     elseif PlayerClasses[type] then
@@ -198,7 +198,7 @@ function OnConsoleChangeClass(player, type)
         end
         Shared.Message("Your options for this command are "..table.concat(options, ", ")..".")
     end
-	Shared.Message("Exiting OnConsoleChangeClass(player, type)")
+	Shared.Message(GetContextString() .. " Exiting OnConsoleChangeClass(player, type)")
 end
 
 function OnConsoleLua(player, ...)
