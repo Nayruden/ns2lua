@@ -37,6 +37,7 @@ function ChangePlayerClass(client, class, active, spawnPos)
     local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
 	if active then
 		player:SetNick(active:GetNick())
+		active:ClearInventory()
         Server.DestroyEntity(active)
     end
 	

@@ -936,7 +936,12 @@ if (Server) then
 		-- TODO: Add inventory management here
         self:ChangeWeapon(weapon)
     end
-    
+
+	function Player:ClearInventory()
+		-- TODO: Add inventory management here
+		self:RetractWeapon()
+	end
+
     function Player:Respawn(overridePosition)
         self:SetOrigin(overridePosition or GetSpawnPos(self.extents) or Vector())
         self.health = self.defaultHealth

@@ -65,8 +65,9 @@ end
 
 function MarinePlayer:OnDestroy()
 	DebugMessage("Entering MarinePlayer:OnDestroy()")
-    self.flashlightObject:SetIntensity(0)
-    self.flashlightObject = nil-- Unfortunately, this is lost memory!
+	if (Client) then
+		Client.DestroyRenderLight(self.flashlightObject)
+	end
     Player.OnDestroy(self)
 	DebugMessage("Exiting MarinePlayer:OnDestroy()")
 end
