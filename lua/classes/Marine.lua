@@ -37,15 +37,6 @@ function MarinePlayer:OnInit()
     self:SetBaseAnimation("run", true)
 	DebugMessage("Exiting MarinePlayer:OnInit()")
     self.flashlightState = false
-    if (Client) then
-        self.flashlightObject = Client.CreateRenderLight()
-        self.flashlightObject:SetIntensity(0)
-        self.flashlightObject:SetColor(Color(200, 200, 255, 255))
-        self.flashlightObject:SetRadius(10)
-        self.flashlightObject:SetInnerCone(0)
-        self.flashlightObject:SetOuterCone(0.6)
-        self.flashlightActive = false
-    end
     MarinePlayer:SuperchargeWithInstagibMagic(Game.instance.instagib)
 end
 
@@ -65,16 +56,19 @@ end
 
 function MarinePlayer:OnDestroy()
 	DebugMessage("Entering MarinePlayer:OnDestroy()")
-    self.flashlightObject:SetIntensity(0)
-    self.flashlightObject = nil-- Unfortunately, this is lost memory!
+    if (Client) then
+        self.flashlightObject:SetIntensity(0)
+        self.flashlightObject = nil-- Unfortunately, this is lost memory!
+    end
     Player.OnDestroy(self)
 	DebugMessage("Exiting MarinePlayer:OnDestroy()")
 end
 
 function MarinePlayer:OnStartTaunt(input)
+    DMsg("TAUNT")
     if (bit.band(input.commands, Move.MovementModifier) ~= 0) then
         self.flashlightState = not self.flashlightState
-        DebugMessage(self.flashlightState == 1 and "FL on!" or "FL off!")
+        DebugMessage(self.flashlightState and "FL on!" or "FL off!")
         return false
     end
     return Player.OnStartTaunt(self, input)
@@ -95,19 +89,21 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
     
     self:SetPoseParam("body_pitch", pitch)
     
-    if Client and self.flashlightObject then -- this should probably be somewhere else.. but this is good enough
-        if self.flashlightState then
-            if not self.flashlightActive then
-                self.flashlightObject:SetIntensity(0.2)
-                self.flashlightActive = true
-            end
-            local coords = self:GetViewAngles():GetCoords()
-            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
-            self.flashlightObject:SetCoords(coords)
-        elseif self.flashlightActive then
-            self.flashlightObject:SetIntensity(0)
-            self.flashlightActive = false
+    if Client and self.flashlightState then -- this should probably be somewhere else.. but this is good enough
+        if not self.flashlightObject then
+            self.flashlightObject = Client.CreateRenderLight()
+            self.flashlightObject:SetColor(Color(200, 200, 255, 255))
+            self.flashlightObject:SetRadius(10)
+            self.flashlightObject:SetInnerCone(0)
+            self.flashlightObject:SetOuterCone(0.6)
+            self.flashlightObject:SetIntensity(0.2)
         end
+        local coords = self:GetViewAngles():GetCoords()
+        coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
+        self.flashlightObject:SetCoords(coords)
+    elseif self.flashlightObject then
+        Client.DestroyRenderLight(self.flashlightObject)
+        self.flashlightObject = nil
     end
 end
 

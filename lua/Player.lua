@@ -37,6 +37,7 @@ Player.networkVars =
         gravity						= "float",
         sprinting                   = "predicted boolean",
         crouching                   = "predicted integer (0 to 3)",
+        taunting                    = "predicted boolean",
 		walkSpeed                   = "float",
         sprintSpeed                 = "float",
 		backSpeedScale              = "float",
@@ -339,14 +340,18 @@ function Player:OnProcessMove(input)
     end
 
     if(bit.band(input.commands, Move.Taunt) ~= 0 and self:GetCanTaunt(input)) then
-        if not (self.taunting) then
+        if (not self.taunting) then
             self:OnStartTaunt(input)
-            self.taunting = true
         end
-	elseif (self.taunting) then
+        self.taunting = 3
+    elseif (self.taunting) then
+        self.taunting = self.taunting - 1
+        if (self.taunting <= 0) then
+            self.taunting = nil
         self:OnEndTaunt(input)
-        self.taunting = false
+        end
     end
+    
     -- Update the view angles based on the input.
     local angles
     if (self.invert_mouse == 1) then

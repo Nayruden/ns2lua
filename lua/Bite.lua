@@ -6,8 +6,8 @@ Bite.networkVars =
     }
 
 Bite.viewModelName         = "models/alien/skulk/skulk_view.model"
-Bite.worldModelName        = "models/alien/skulk/skulk.model"
-Bite.drawSound             = "sound/ns2.fev/marine/rifle/draw"
+Bite.worldModelName        = ""
+Bite.drawSound             = "sound/ns2.fev/alien/voiceovers/chuckle"
 Bite.fireSound             = "sound/ns2.fev/alien/skulk/bite"
 Bite.hitSound              = "sound/ns2.fev/alien/skulk/bite_hit_marine"
 Bite.fireLoopSound         = "sound/ns2.fev/marine/rifle/fire_14_sec_loop"
@@ -25,7 +25,7 @@ Bite.drawTime              = 1.3   -- Time it takes to draw the weapon
 Bite.animationPrefix       = "rifle"
 
 Shared.PrecacheModel(Bite.viewModelName)
-Shared.PrecacheModel(Bite.worldModelName)
+--Shared.PrecacheModel(Bite.worldModelName)
 
 Shared.PrecacheCinematic(Bite.hitCinematic)
 Shared.PrecacheCinematic(Bite.muzzleFlashCinematic)
