@@ -160,8 +160,9 @@ function Rifle:Melee(player)
         player:SetOverlayAnimation(self:GetAnimationPrefix() .. "_alt")
     end
 
-     local viewCoords = player:GetCameraViewCoords()
-     local startPoint = viewCoords.origin
+    local viewCoords = player:GetViewAngles():GetCoords()
+    viewCoords.origin = self:GetOrigin() + self.viewOffset
+    local startPoint = viewCoords.origin
 
     -- Filter ourself out of the trace so that we don't hit the weapon or the
     -- player using it.
@@ -211,7 +212,8 @@ function Rifle:FireBullets(player)
 
     self.numBulletsInClip = self.numBulletsInClip - bulletsToShoot
 
-    local viewCoords = player:GetCameraViewCoords()
+    local viewCoords = player:GetViewAngles():GetCoords()
+    viewCoords.origin = self:GetOrigin() + self.viewOffset
     local startPoint = viewCoords.origin
 
     -- Filter ourself out of the trace so that we don't hit the weapon or the
