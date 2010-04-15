@@ -31,15 +31,16 @@ Script.Load("lua/classes/BuildBot.lua")
 
 function GetContextString()
 	if (Server) then
-		return "<Server>"
+		return "Server"
 	elseif (Client) then
-		return "<Client>"
+		return "Client"
 	else
-		return "<Unknown>"
+		return "Unknown"
 	end
 end
 
-Shared.MessageNoContext = Shared.Message
-function Shared.Message(message)
-	Shared.MessageNoContext(GetContextString() .. " " .. message)
+function DebugMessage(message)
+	if (Main.GetDevMode()) then
+		Shared.Message("<" .. GetContextString() .. "> " .. message)
+	end
 end
