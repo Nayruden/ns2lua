@@ -936,6 +936,13 @@ end
 
 if (Server) then
 
+    function Player:OnDestroy()
+        if self.viewModel then
+            Server.DestroyEntity(self.viewModel)
+        end
+        Actor.OnDestroy(self)
+    end
+
     function Player:GiveWeapon(className)
         local weapon = Server.CreateEntity(className, self:GetOrigin())
 		-- TODO: Add inventory management here
