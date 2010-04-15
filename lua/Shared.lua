@@ -70,11 +70,41 @@ function debug.getparams(f)
 	return params
 end
 
+function Msg(...) -- example usage: Msg("The values are ", a, " and ", b, "!")
+    local arg = arg or {...} -- use of auto-arg is deprecated, but we need arg.n
+    local s = ""
+    for i = 1, arg.n or #arg do
+        local v = arg[i]
+        if type(v) == "table" then
+            s = s..tostring(v).."[# = "..#v.."]"
+        elseif type(v) == "userdata" then
+            if v.mapName then
+                if v.mapName == "player" then
+                    s = s.."<player: "..tostring(v.GetNick and v:GetNick() or "unamed")..">"
+                    s = s.."<userdata: "..tostring(v.mapName)..">"
+                end
+            else
+                s = s.."<userdata: unknown>"
+            end
+        elseif type(v) == "function" then
+            local what = debug.getinfo(v, "S").what
+            if what == "Lua" then
+                s = s..tostring(v).."<Lua>("..table.concat(debug.getparams(v))..")"
+            else
+                s = s..tostring(v).."<"..what..">(?)"
+            end
+        else -- string, number, boolean, nil
+            s = s..tostring(v)
+        end
+    end
+    Shared.Message("<" .. GetContextString() .. "> " .. s)
+end
+
 function DMsg(...) -- example usage: Msg("The values are ", a, " and ", b, "!")
 	if (Shared.enableDebugMessages) then
-        --local arg = {...} -- use of auto-arg is deprecated, but we need arg.n
+        local arg = arg or {...} -- use of auto-arg is deprecated, but we need arg.n
         local s = ""
-        for i = 1, arg.n do
+        for i = 1, arg.n or #arg do
             local v = arg[i]
             if type(v) == "table" then
                 s = s..tostring(v).."[# = "..#v.."]"
