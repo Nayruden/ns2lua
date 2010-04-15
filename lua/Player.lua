@@ -67,7 +67,7 @@ Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting',
 Player.Teams				= enum { 'Marines', 'Aliens' }
 
 function Player:OnInit()
-
+	Shared.Message("Entering Player:OnInit()")
     Actor.OnInit(self)
 
     self:SetModel(self.modelName)
@@ -136,6 +136,8 @@ function Player:OnInit()
 			self:GiveWeapon(weapon)
 		end
 	end
+
+	Shared.Message("Exiting Player:OnInit()")
 end
 
 function Player:SetController(client)

@@ -30,6 +30,7 @@ Server.targetsEnabled = false
 Server.instagib = false
 
 function ChangePlayerClass(client, class, active, spawnPos)
+	Shared.Message("Entering ChangePlayerClass(client, class, active, spawnPos)")
     local class_table = (PlayerClasses[class] or PlayerClasses.Default)
 	
     Shared.Message("Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
@@ -45,6 +46,7 @@ function ChangePlayerClass(client, class, active, spawnPos)
         Server.DestroyEntity(active)
     end
     
+	Shared.Message("Exiting ChangePlayerClass(client, class, active, spawnPos)")
     return player
 end
 
@@ -176,7 +178,8 @@ function OnConsoleReadyRoom(player)
 	end
 end
 
-function OnConsoleChangeClass(player,type)
+function OnConsoleChangeClass(player, type)
+	Shared.Message("Entering OnConsoleChangeClass(player, type)")
     if type == "Default" then
         Shared.Message("You cannot use this class!")
     elseif PlayerClasses[type] then
@@ -195,6 +198,7 @@ function OnConsoleChangeClass(player,type)
         end
         Shared.Message("Your options for this command are "..table.concat(options, ", ")..".")
     end
+	Shared.Message("Exiting OnConsoleChangeClass(player, type)")
 end
 
 function OnConsoleLua(player, ...)
