@@ -7,7 +7,7 @@ Bite.networkVars =
 
 Bite.viewModelName         = "models/alien/skulk/skulk_view.model"
 Bite.worldModelName        = ""
-Bite.drawSound             = "sound/ns2.fev/marine/rifle/draw"
+Bite.drawSound             = "sound/ns2.fev/alien/voiceovers/chuckle"
 Bite.fireSound             = "sound/ns2.fev/alien/skulk/bite"
 Bite.hitSound              = "sound/ns2.fev/alien/skulk/bite_hit_marine"
 Bite.fireLoopSound         = "sound/ns2.fev/marine/rifle/fire_14_sec_loop"

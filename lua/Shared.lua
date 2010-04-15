@@ -130,6 +130,7 @@ function DMsg(...) -- example usage: Msg("The values are ", a, " and ", b, "!")
         end
         Shared.Message("<" .. GetContextString() .. "> " .. s)
     end
+    return true -- so_we_can_use_it and DMsg('LOL') and "like this." or "no?"
 end
 
 function OnConsoleDebugMode()
