@@ -59,10 +59,10 @@ function PlayerUI_GetStatus()
                 PlayerUI_Notifications[1].startTime = Shared.GetTime()
             end
         else
-            if notification.startTime+notification.time < t then
-                notification.text = notification.text:sub(1, -2) -- cool little (untimed) fade away thing
+            if notification.time < t then
+                notification.text = notification.text:sub(2) -- cool little (untimed) fade away thing
             end
-            s = s..notification.text
+            s = s..notification.text.."    "
         end
         i = i+1
     end
@@ -74,11 +74,8 @@ PlayerUI_Notifications = {}
 function PlayerUI_AddNotification(text, time)
     table.insert(PlayerUI_Notifications, {
         text = string.upper(tostring(text)),
-        time = time or 4
+        time = (time or 4)+Shared.GetTime()
     })
-    if #PlayerUI_Notifications == 1 then
-        PlayerUI_Notifications[1].startTime = Shared.GetTime()
-    end
     DMsg("Adding notification  \"",text,"\" for ",time or 4)
 end
 

@@ -206,6 +206,7 @@ function OnConsoleChangeClass(player, type)
 end
 
 function OnConsoleLua(player, ...)
+    ME = player
     local str = table.concat( { ... }, " " )
     Shared.Message( "(Server) Running lua: " .. str )
     local good, err = loadstring(str)
@@ -213,7 +214,11 @@ function OnConsoleLua(player, ...)
         Shared.Message( err )
         return
     end
-    good()
+    local worked, err = pcall(good)
+    ME = nil
+    if not worked then
+        error(err)
+    end
 end
 
 function OnCommandNick( ply, ... )

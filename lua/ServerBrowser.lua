@@ -10,7 +10,11 @@ Script.Load("lua/Utility.lua")
 
 package.path  = ".\\ns2\\lua\\?.lua;.\\ns2lua\\lua\\?.lua"
 package.cpath = ".\\ns2\\lua\\?.dll;.\\ns2lua\\lua\\?.dll"
-http = require("socket.http")
+local http
+local http_worked, http_res = pcall(require, "socket.http")
+if http_worked then
+    http = http_res
+end
 
 local hasNewData = true
 local updateStatus = ""
@@ -34,7 +38,7 @@ local sortType = kSortTypePing
 local ascending = true
 local justSorted = false
 
-numServers = tonumber(http.request("http://serverlist.devicenull.org/serverlist.php?get=servercount"), 10)
+numServers = http and tonumber(http.request("http://serverlist.devicenull.org/serverlist.php?get=servercount"), 10) or 0
 
 --
 -- Sort option for the name field in order specified by ascending boolean
@@ -188,39 +192,41 @@ function MainMenu_SBGetServerList()
         --serverRecords = {}
         --local numServers = GetNumServers()
         updateStatus = string.format("Retrieving %d %s...", numServers, ConditionalValue(numServers == 1, "server", "servers"))
-        local servers, headers, code = http.request("http://serverlist.devicenull.org/serverlist.php")
-        numServers = tonumber(servers:sub(1,2))
-        lines = split(servers,"\n")
-        for key1,value1 in pairs(lines) do
-            if (key1 ~= 1) then
-                
-                rows = split(value1,"\t")
-                name = ""
-                ip = ""
-                map = ""
-                players = ""
-                gametype = ""
-                for key,value in pairs(rows) do
-                    if (key == 1) then
-                        ip = value
+        if http then
+            local servers, headers, code = http.request("http://serverlist.devicenull.org/serverlist.php")
+            numServers = tonumber(servers:sub(1,2))
+            lines = split(servers,"\n")
+            for key1,value1 in pairs(lines) do
+                if (key1 ~= 1) then
+                    
+                    rows = split(value1,"\t")
+                    name = ""
+                    ip = ""
+                    map = ""
+                    players = ""
+                    gametype = ""
+                    for key,value in pairs(rows) do
+                        if (key == 1) then
+                            ip = value
+                        end
+                        if (key == 2) then
+                            port = value
+                        end
+                        if (key == 3) then
+                            name = value
+                        end
+                        if (key == 4) then
+                            players = value
+                        end
+                        if (key == 6) then
+                            map = value
+                        end
+                        if (key == 7) then
+                            gametype = value
+                        end
                     end
-                    if (key == 2) then
-                        port = value
-                    end
-                    if (key == 3) then
-                        name = value
-                    end
-                    if (key == 4) then
-                        players = value
-                    end
-                    if (key == 6) then
-                        map = value
-                    end
-                    if (key == 7) then
-                        gametype = value
-                    end
+                    table.insert(serverRecords, {name, gametype, map, players, "10", ip})
                 end
-                table.insert(serverRecords, {name, gametype, map, players, "10", ip})
             end
         end
 
@@ -276,3 +282,8 @@ end
 
 -- Uncomment to use test data in browser
 --Script.Load("lua/ServerBrowser_Test.lua")
+
+if not http_worked then
+    error("To get a working serverlist, please install the HTTP module into your ns2 directory.")
+end
+

@@ -83,6 +83,7 @@ function Msg(...) -- example usage: Msg("The values are ", a, " and ", b, "!")
             if v.mapName then
                 if v.mapName == "player" then
                     s = s.."<player: "..tostring(v.GetNick and v:GetNick() or "unamed")..">"
+                else
                     s = s.."<userdata: "..tostring(v.mapName)..">"
                 end
             else
@@ -114,6 +115,7 @@ function DMsg(...) -- example usage: Msg("The values are ", a, " and ", b, "!")
                 if v.mapName then
                     if v.mapName == "player" then
                         s = s.."<player: "..tostring(v.GetNick and v:GetNick() or "unamed")..">"
+                    else
                         s = s.."<userdata: "..tostring(v.mapName)..">"
                     end
                 else
