@@ -9,4 +9,4 @@ function ResourceNozzle:OnInit()
 	self:SetIsVisible(true)
 end
 
-Shared.LinkClassToMap("ResourceNozzle", "resource_point")
+Shared.LinkClassToMap("ResourceNozzle", kResourcePointMapName)

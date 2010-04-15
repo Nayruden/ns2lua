@@ -91,4 +91,4 @@ function Door:OnThink()
 	self:SetNextThink(self.thinkInterval)
 end
 
-Shared.LinkClassToMap("Door", "door")
+Shared.LinkClassToMap("Door", kDoorMapName)

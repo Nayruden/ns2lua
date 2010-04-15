@@ -9,4 +9,4 @@ function TechPoint:OnInit()
 	self:SetIsVisible(true)
 end
 
-Shared.LinkClassToMap("TechPoint", "tech_point")
+Shared.LinkClassToMap("TechPoint", kTechPointMapName)
