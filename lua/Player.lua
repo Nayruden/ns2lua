@@ -397,7 +397,8 @@ function Player:OnProcessMove(input)
     -- Handle crouching
     -- From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
     if (bit.band(input.commands, Move.Crouch) ~= 0 and self:GetCanCrouch(input, ground, groundNormal)) then
-        if (Client and not Client.GetIsRunningPrediction() and self.localCrouchState or self.crouchingState) == -1 then
+        if (Client and not Client.GetIsRunningPrediction() and self.localCrouchingState or self.crouchingState) == -1 then
+            DMsg("crouching: ",Client and not Client.GetIsRunningPrediction()," s1 ",self.crouchingState,self.localCrouchingState)
             --self:SetAnimation( "" ) -- Needs a crouch animation
             self.moveSpeed = self.crouchSpeed or self.moveSpeed
 			self:SetPoseParam("crouch", 1.0)
@@ -408,13 +409,15 @@ function Player:OnProcessMove(input)
             self.localCrouchState  = 3
         end
         self.crouchingState = 3
-    elseif (Client and not Client.GetIsRunningPrediction() and self.localCrouchState or self.crouchingState) > -1 then
+    elseif (Client and not Client.GetIsRunningPrediction() and self.localCrouchingState or self.crouchingState) > -1 then
         if Client and not Client.GetIsRunningPrediction() then
             self.localCrouchState  = self.localCrouchState-1
         end
         self.crouchingState = self.crouchingState - 1
-        if (Client and not Client.GetIsRunningPrediction() and self.localCrouchState or self.crouchingState) < 1 then
+        DMsg("crouching: ",Client and not Client.GetIsRunningPrediction()," s2 ",self.crouchingState,self.localCrouchingState)
+        if (Client and not Client.GetIsRunningPrediction() and self.localCrouchingState or self.crouchingState) < 1 then
             self.crouchingState = -1
+            DMsg("crouching: ",Client and not Client.GetIsRunningPrediction()," s3 ",self.crouchingState,self.localCrouchingState)
             self.localCrouchState = -1
             self.curSpeed = self.moveSpeed
 			self:SetPoseParam("crouch", 0.0)
