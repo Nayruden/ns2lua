@@ -2,6 +2,10 @@ class 'MarinePlayer' (Player)
 
 PlayerClasses.marine = MarinePlayer
 
+MarinePlayer.networkVars = {
+    isFlashlightOn              = "boolean",
+}
+
 MarinePlayer.modelName                  = "models/marine/male/male.model"
 Shared.PrecacheModel(MarinePlayer.modelName)
 MarinePlayer.extents                    = Vector(0.4064, 0.7874, 0.4064)
@@ -35,6 +39,45 @@ function MarinePlayer:OnInit()
     Player.OnInit(self)
 	
     self:SetBaseAnimation("run", true)
+    
+    self.isFlashlightOn = false
+end
+
+function MarinePlayer:OnStartTaunt(input)
+    if (bit.band(input.commands, Move.MovementModifier) ~= 0 and not (Client and Client.GetIsRunningPrediction())) then
+        if (self.isFlashlightOn) then
+            DebugMessage("FL off!")
+            if (Client) then
+                DebugMessage("FL destroyed!")
+                self.flashlightObject = nil
+            end
+            -- play off sound here
+        else
+            DebugMessage("FL on!")
+            if (Client) then
+                DebugMessage("FL created!")
+                self.flashlightObject = Client.CreateRenderLight()
+                self.flashlightObject:SetIntensity(1)
+                self.flashlightObject:SetColor(Color(255, 255, 255, 255))
+                self.flashlightObject:SetRadius(3)
+            end
+            -- play on sound here
+        end
+        self.isFlashlightOn = not self.isFlashlightOn
+        return false
+    end
+    return Player.OnStartTaunt(self, input)
+end
+
+function MarinePlayer:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
+    if (Client and self.flashlightObject) then
+        --local newCoords = viewCoords
+        --newCoords.origin = newCoords.origin + newCoords.zAxis * 0.2
+        viewCoords.origin = viewCoords.origin + viewCoords.zAxis * 1
+        self.flashlightObject:SetCoords(viewCoords)
+        --DebugMessage("FL moving!")
+    end
+    return Player.GetCanMove(self, input, viewCoords, forwardAxis, sideAxis)
 end
 
 function MarinePlayer:OnChangeWeapon(weapon)

@@ -2,6 +2,10 @@ class 'SkulkPlayer' (Player)
 
 PlayerClasses.skulk = SkulkPlayer
 
+SkulkPlayer.networkVars = {
+    
+}
+
 SkulkPlayer.modelName           = "models/alien/skulk/skulk.model"
 Shared.PrecacheModel(SkulkPlayer.modelName)
 Shared.PrecacheModel(SkulkPlayer.modelName)

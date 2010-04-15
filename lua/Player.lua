@@ -98,6 +98,7 @@ function Player:OnInit()
     self.team						= Player.Teams.Marines
     self.controller					= 0
     self.inAir                      = false
+    self.isTaunting                 = false
     
     self.viewOffset                 = self.stoodViewOffset
 
@@ -130,9 +131,11 @@ function Player:OnInit()
 
     self:SetBaseAnimation("run")
     
-    for i, weapon in ipairs(self.WeaponLoadout) do
-        self:GiveWeapon(weapon)
-        Shared.Message("Giving "..weapon..".")
+    if (Server) then
+        for i, weapon in ipairs(self.WeaponLoadout) do
+            self:GiveWeapon(weapon)
+            --Shared.Message("Giving "..weapon..".")
+        end
     end
 end
 
@@ -288,13 +291,26 @@ function Player:OnStopSecondaryAttack(input)
     
 end
 
-function Player:GetCanReload(input) -- do not use this for checks!
+function Player:GetCanReload(input) -- do not use this for specific weapon related checks!
     return true
 end
 function Player:OnStartReload(input) -- do not use this for animations!
     
 end
 function Player:OnStopReload(input)
+    
+end
+
+function Player:GetCanTaunt(input)
+    return true
+end
+function Player:OnStartTaunt(input)
+    local sound = table.random(self.TauntSounds)
+    if sound then
+        self:PlaySound(sound)
+    end
+end
+function Player:OnEndTaunt(input)
     
 end
 
@@ -318,15 +334,15 @@ function Player:OnProcessMove(input)
 
     end
 
-	if(bit.band(input.commands, Move.Taunt) ~= 0) then
-        local sound = table.random(self.TauntSounds)
-        if sound then
-			self:PlaySound(sound)
+	if(bit.band(input.commands, Move.Taunt) ~= 0 and self:GetCanTaunt(input)) then
+        if not (self.taunting) then
+            self:OnStartTaunt(input)
+            self.taunting = true
         end
-	end
-	
-    local canMove = self:GetCanMove()
-
+	elseif (self.taunting) then
+        self:OnEndTaunt(input)
+        self.taunting = false
+    end
     -- Update the view angles based on the input.
     local angles
     if (self.invert_mouse == 1) then
@@ -347,6 +363,8 @@ function Player:OnProcessMove(input)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
+	
+    local canMove = self:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     
     local ground, groundNormal = self:GetIsOnGround()
     if (ground and self.inAir) then
@@ -544,7 +562,7 @@ end
 -- Returns true if the player is allowed to move (this doesn't affect moving
 -- the view).
 --
-function Player:GetCanMove()
+function Player:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     return Game.instance:GetHasGameStarted()
 end
 

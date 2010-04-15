@@ -1,6 +1,9 @@
 class 'BuildBotPlayer' (Player)
 
 PlayerClasses.buildbot = BuildBotPlayer
+SkulkPlayer.networkVars = {
+    
+}
 
 BuildBotPlayer.modelName              = "models/marine/build_bot/build_bot.model"
 Shared.PrecacheModel(BuildBotPlayer.modelName)
