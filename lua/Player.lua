@@ -35,7 +35,8 @@ Player.networkVars =
         moveSpeedBackwards          = "integer",
         invert_mouse                = "integer (0 to 1)",
         gravity						= "float",
-        sprinting					= "boolean",
+        sprintingState              = "integer (0 to 1)",
+        crouchingState              = "integer (-1 to 3)",
 		walkSpeed                   = "float",
         sprintSpeed                 = "float",
 		backSpeedScale              = "float",
@@ -83,7 +84,10 @@ function Player:OnInit()
     self.activityEnd                = 0
 
     self.thirdPerson                = false
-    self.sprinting					= false
+    self.sprintingState             = 0
+    self.crouchingState             = 0
+    self.localSprintingState        = 0
+    self.localCrouchingState        = 0
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
@@ -253,7 +257,7 @@ function Player:OnLand(input, forwardAxis, sideAxis)
 end
 
 function Player:GetCanCrouch(input, ground, groundNormal)
-    return ground
+    return true--ground
 end
 
 function Player:OnCrouch(input, forwardAxis, sideAxis)
@@ -393,37 +397,48 @@ function Player:OnProcessMove(input)
     -- Handle crouching
     -- From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
     if (bit.band(input.commands, Move.Crouch) ~= 0 and self:GetCanCrouch(input, ground, groundNormal)) then
-        if (not self.crouching) then
+        if (Client and not Client.GetIsRunningPrediction() and self.localCrouchState or self.crouchingState) == -1 then
             --self:SetAnimation( "" ) -- Needs a crouch animation
             self.moveSpeed = self.crouchSpeed or self.moveSpeed
 			self:SetPoseParam("crouch", 1.0)
             self.viewOffset = self.crouchedViewOffset
             self:OnCrouch(input, forwardAxis, sideAxis)
         end
-        self.crouching = 3
-    elseif (self.crouching) then
-        self.crouching = self.crouching - 1
-        if (self.crouching <= 0) then
-            self.crouching = nil
+        if Client and not Client.GetIsRunningPrediction() then
+            self.localCrouchState  = 3
+        end
+        self.crouchingState = 3
+    elseif (Client and not Client.GetIsRunningPrediction() and self.localCrouchState or self.crouchingState) > -1 then
+        if Client and not Client.GetIsRunningPrediction() then
+            self.localCrouchState  = self.localCrouchState-1
+        end
+        self.crouchingState = self.crouchingState - 1
+        if (Client and not Client.GetIsRunningPrediction() and self.localCrouchState or self.crouchingState) < 1 then
+            self.crouchingState = -1
+            self.localCrouchState = -1
             self.curSpeed = self.moveSpeed
 			self:SetPoseParam("crouch", 0.0)
             self.viewOffset = self.stoodViewOffset
             self:OnStand(input, forwardAxis, sideAxis)
         end
+    --elseif Client and self.crouchingState == self.localCrouchingState then
+    --    self.localCrouchingState = nil
     end
 
     if (bit.band(input.commands, Move.MovementModifier) ~= 0 and self:GetCanSprint(input, ground, groundNormal)) then
-        if (not self.sprinting) then
-            self.sprinting = true
+        if (Client and not Client.GetIsRunningPrediction() and self.localSprintingState or self.sprintingState) == 0 then
+            self.sprintingState = 1
             self.moveSpeed = self.moveSpeed*self.sprintSpeedScale
             self:SetPoseParam("sprint", 1.0)
             self:OnSprint(input, forwardAxis, sideAxis)
         end
-    elseif (self.sprinting) then
-    	self.sprinting = false
+    elseif (Client and not Client.GetIsRunningPrediction() and self.localSprintingState or self.sprintingState) == 1 then
+    	self.sprintingState = 0
     	self.moveSpeed = self.walkSpeed
     	self:SetPoseParam("sprint", 0.0)
         self:OnWalk(input, forwardAxis, sideAxis)
+    --elseif Client and self.sprintingState == self.localSprintingState then
+    --    self.localSprintingState = nil
     end
     
     

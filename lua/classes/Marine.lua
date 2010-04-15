@@ -3,7 +3,7 @@ class 'MarinePlayer' (Player)
 PlayerClasses.marine = MarinePlayer
 
 MarinePlayer.networkVars = {
-    isFlashlightOn              = "boolean",
+    flashlightState              = "integer (0 or 1)",
 }
 
 MarinePlayer.modelName                  = "models/marine/male/male.model"
@@ -41,7 +41,7 @@ function MarinePlayer:OnInit()
 	
     self:SetBaseAnimation("run", true)
 	DebugMessage("Exiting MarinePlayer:OnInit()")
-    self.isFlashlightOn = false
+    self.flashlightState = 0
     if (Client) then
         self.flashlightObject = Client.CreateRenderLight()
         self.flashlightObject:SetIntensity(0)
@@ -50,6 +50,7 @@ function MarinePlayer:OnInit()
         self.flashlightObject:SetInnerCone(0)
         self.flashlightObject:SetOuterCone(0.6)
         self.flashlightActive = false
+        self.localFlashlightState = nil
     end
 end
 
@@ -62,9 +63,13 @@ function MarinePlayer:OnDestroy()
 end
 
 function MarinePlayer:OnStartTaunt(input)
-    if (bit.band(input.commands, Move.MovementModifier) ~= 0 and not (Client and Client.GetIsRunningPrediction())) then
-        self.isFlashlightOn = not self.isFlashlightOn
-        DebugMessage(self.isFlashlightOn and "FL on!" or "FL off!")
+    if (bit.band(input.commands, Move.MovementModifier) ~= 0) then
+        self.flashlightState = 1-self.flashlightState
+        if not Client or Client.GetIsRunningPrediction() then
+            DebugMessage(self.flashlightState == 1 and "FL on!" or "FL off!")
+        else
+            self.localFlashlightState = self.flashlightState
+        end
         return false
     end
     return Player.OnStartTaunt(self, input)
@@ -86,8 +91,8 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
     self:SetPoseParam("body_pitch", pitch)
     
     if Client and self.flashlightObject then -- this should probably be somewhere else.. but this is good enough
-        if self.isFlashlightOn then
-            if not self.flashlightActive then
+        if (not Client.GetIsRunningPrediction() and self.localFlashlightState or self.flashlightState) == 1 then
+            if self.flashlightActive == 0 then
                 self.flashlightObject:SetIntensity(0.2)
                 self.flashlightActive = true
             end
@@ -95,9 +100,11 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
             coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
             self.flashlightObject:SetCoords(coords)
             --DebugMessage("FL moving!")
-        elseif self.flashlightActive then
+        elseif self.flashlightActive == 1 then
             self.flashlightObject:SetIntensity(0)
             self.flashlightActive = false
+        elseif self.flashlightState == self.localFlashlightState then
+            self.localFlashlightState = nil
         end
     end
 end
