@@ -15,11 +15,11 @@ class 'Actor' (Entity)
 Actor.networkVars = 
     {
         modelIndex          = "resource",
-        animationSequence   = "integer (-1 to 100)",
-        animationStart      = "float",
-        animationLastTime   = "float",
-        animationComplete   = "boolean",
-        physicsActor        = "boolean",
+        animationSequence   = "predicted integer (-1 to 100)",
+        animationStart      = "predicted float",
+        animationLastTime   = "predicted float",
+        animationComplete   = "predicted boolean",
+        physicsActor        = "predicted boolean",
     }
     
 function Actor:OnInit()
