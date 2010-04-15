@@ -131,7 +131,7 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
                 self.flashlightObject:SetIntensity  (self.flashlightIntensity)
             end
             local coords = self:GetViewAngles():GetCoords()
-            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
+            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 0.5
             self.flashlightObject:SetCoords(coords)
         end
         self.energy = math.max(self.energy-self.flashlightEnergyDrainPerSecond*dt, 0)

@@ -161,7 +161,7 @@ function Rifle:Melee(player)
     end
 
     local viewCoords = player:GetViewAngles():GetCoords()
-    viewCoords.origin = self:GetOrigin() + self.viewOffset
+    viewCoords.origin = player:GetOrigin() + player.viewOffset
     local startPoint = viewCoords.origin
 
     -- Filter ourself out of the trace so that we don't hit the weapon or the
@@ -213,7 +213,7 @@ function Rifle:FireBullets(player)
     self.numBulletsInClip = self.numBulletsInClip - bulletsToShoot
 
     local viewCoords = player:GetViewAngles():GetCoords()
-    viewCoords.origin = self:GetOrigin() + self.viewOffset
+    viewCoords.origin = player:GetOrigin() + player.viewOffset
     local startPoint = viewCoords.origin
 
     -- Filter ourself out of the trace so that we don't hit the weapon or the
