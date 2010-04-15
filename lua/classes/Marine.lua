@@ -13,8 +13,12 @@ MarinePlayer.jumpHeight                 = 1
 MarinePlayer.gravity                    = -9.81
 MarinePlayer.normal_walkSpeed           = 7
 MarinePlayer.normal_sprintSpeedScale    = 2
+MarinePlayer.normal_moveAcceleration    = 5
+MarinePlayer.normal_jumpHeight          = 0.7
 MarinePlayer.instagib_walkSpeed         = 12
 MarinePlayer.instagib_sprintSpeedScale  = 24
+MarinePlayer.instagib_moveAcceleration  = 4
+MarinePlayer.instagib_jumpHeight        = 1
 MarinePlayer.backSpeedScale             = 0.5
 MarinePlayer.defaultHealth              = 100
 MarinePlayer.stoodViewOffset            = Vector(0, 1.6256, 0)
@@ -27,15 +31,6 @@ end
 
 function MarinePlayer:OnInit()
 	DebugMessage("Entering MarinePlayer:OnInit()")
-    if (Server) then
-        if Server.instagib then
-            self.walkSpeed = self.instagib_walkSpeed
-            self.sprintSpeedScale = self.instagib_sprintSpeedScale
-        else
-            self.walkSpeed = self.normal_walkSpeed
-            self.sprintSpeedScale = self.normal_sprintSpeedScale
-        end
-    end
     
     Player.OnInit(self)
 	
@@ -50,6 +45,21 @@ function MarinePlayer:OnInit()
         self.flashlightObject:SetInnerCone(0)
         self.flashlightObject:SetOuterCone(0.6)
         self.flashlightActive = false
+    end
+    MarinePlayer:SuperchargeWithInstagibMagic(Game.instance.instagib)
+end
+
+function MarinePlayer:SuperchargeWithInstagibMagic(instagib)
+    if instagib then
+        self.moveAcceleration   = self.instagib_moveAcceleration
+        self.jumpHeight         = self.instagib_jumpHeight
+        self.walkSpeed          = self.instagib_walkSpeed
+        self.sprintSpeedScale   = self.instagib_sprintSpeedScale
+    else
+        self.moveAcceleration   = self.normal_walkSpeed
+        self.jumpHeight         = self.normal_sprintSpeedScale
+        self.walkSpeed          = self.normal_walkSpeed
+        self.sprintSpeedScale   = self.normal_sprintSpeedScale
     end
 end
 

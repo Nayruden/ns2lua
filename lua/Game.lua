@@ -16,7 +16,8 @@ class 'Game' (Entity)
 Game.updateInterval = 1
 Game.networkVars =
     {
-        startTime = "float",
+        startTime   = "float",
+        instagib    = "boolean",
     }
 
 --
@@ -47,6 +48,8 @@ function Game:OnInit()
 
     Game.instance = self
 	self.delete_queue = {}
+    
+    self.instagib = false
 	
     if (Server) then
 

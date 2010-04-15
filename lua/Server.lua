@@ -221,20 +221,20 @@ function OnCommandNick( ply, ... )
     ply:SetNick( nickname )
 end
 
-
 function OnCommandInstaGib( ply )
-    if Server.instagib ~= true then
-        Server.Broadcast( nil, "Game changed to instagib mode by " .. ply:GetNick() )
-        Server.instagib = true
-        Rifle.clipSize              =  1
-        Marine.moveAcceleration     =  5
-        Marine.jumpHeight           =  0.7   
-    else
+    if Game.instagib then
         Server.Broadcast( nil, "Game changed to normal mode by " .. ply:GetNick() )
-        Server.instagib = false
+        Game.instagib = false
         Rifle.clipSize              =  30
-        Marine.moveAcceleration     =  4
-        Marine.jumpHeight           =  1   
+    else
+        Server.Broadcast( nil, "Game changed to instagib mode by " .. ply:GetNick() )
+        Game.instagib = true
+        Rifle.clipSize              =  1
+    end
+	for k, class in pairs(PlayerClasses) do
+		for k2, player in ipairs(GetEntitiesWithClassname(class.mapName)) do
+            player:Respawn()
+        end
     end
 end
 
