@@ -165,9 +165,12 @@ function OnConsoleRandomTeam(player)
 end
 
 function OnConsoleReadyRoom(player)
-
-    player:SetOrigin(GetSpawnPos("ready_room_start"))
-    player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
+--ChangePlayerClass(player.controller, "Default", player, GetSpawnPos(Player.extents, "ready_room_start") or GetSpawnPos(Player.extents) or Vector())
+	pos = GetSpawnPos(Player.extents, "ready_room_start")
+	if (pos ~= nil) then
+		player:SetOrigin(pos)
+		player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
+	end
 end
 
 function OnConsoleChangeClass(player,type)
@@ -247,7 +250,7 @@ Event.Hook("Console_stuck",         OnConsoleStuck)
 Event.Hook("Console_target",        OnConsoleTarget)
 Event.Hook("Console_turret",        OnConsoleTurret)
 Event.Hook("Console_targets",       OnCommandTargets)
---Event.Hook("Console_readyroom",     OnConsoleReadyRoom)
+Event.Hook("Console_readyroom",     OnConsoleReadyRoom)
 --Event.Hook("Console_marineteam",    OnConsoleMarineTeam)
 --Event.Hook("Console_alienteam",     OnConsoleAlienTeam)
 --Event.Hook("Console_randomteam",    OnConsoleRandomTeam)
