@@ -2,10 +2,6 @@ class 'MarinePlayer' (Player)
 
 PlayerClasses.marine = MarinePlayer
 
-MarinePlayer.networkVars = {
-    flashlightState              = "predicted boolean",
-}
-
 MarinePlayer.modelName                  = "models/marine/male/male.model"
 Shared.PrecacheModel(MarinePlayer.modelName)
 MarinePlayer.extents                    = Vector(0.4064, 0.7874, 0.4064)
@@ -28,6 +24,21 @@ MarinePlayer.TauntSounds                = { "sound/ns2.fev/marine/voiceovers/tau
 for i = 1, #MarinePlayer.TauntSounds do
     Shared.PrecacheSound(MarinePlayer.TauntSounds[i])
 end
+MarinePlayer.flashlightColor            = Color(200, 200, 255, 255)
+MarinePlayer.flashlightRadius           = 10
+MarinePlayer.flashlightInnerCone        = 0
+MarinePlayer.flashlightOuterCone        = 0.6
+MarinePlayer.flashlightIntensity        = 0.2
+
+MarinePlayer.maxEnergy                  = 100
+MarinePlayer.energyGainPerSecond        = 10
+MarinePlayer.flashlightEnergyDrainPerSecond = 12
+MarinePlayer.sprintEnergyDrainPerSecond     = 20
+
+MarinePlayer.networkVars = {
+    flashlightState              = "predicted boolean",
+    energy                       = "predicted integer (0 to "..MarinePlayer.maxEnergy..")",
+}
 
 function MarinePlayer:OnInit()
 	DebugMessage("Entering MarinePlayer:OnInit()")
@@ -38,6 +49,10 @@ function MarinePlayer:OnInit()
 	DebugMessage("Exiting MarinePlayer:OnInit()")
     self.flashlightState = false
     MarinePlayer:SuperchargeWithInstagibMagic(Game.instance.instagib)
+    
+    self.energy = self.maxEnergy
+    
+    self.lastDrainTime = Shared.GetTime()
 end
 
 function MarinePlayer:SuperchargeWithInstagibMagic(instagib)
@@ -63,11 +78,19 @@ function MarinePlayer:OnDestroy()
 	DebugMessage("Exiting MarinePlayer:OnDestroy()")
 end
 
+function MarinePlayer:Respawn(overridePosition)
+    Player.Respawn(self, overridePosition)
+    
+    self.energy = self.maxEnergy
+end
+
 function MarinePlayer:OnStartTaunt(input)
     DMsg("TAUNT")
     if (bit.band(input.commands, Move.MovementModifier) ~= 0) then
-        self.flashlightState = not self.flashlightState
-        DebugMessage(self.flashlightState and "FL on!" or "FL off!")
+        if self.energy > 10 then
+            self.flashlightState = not self.flashlightState
+            DebugMessage(self.flashlightState and "FL on!" or "FL off!")
+        end
         return false
     end
     return Player.OnStartTaunt(self, input)
@@ -83,27 +106,50 @@ function MarinePlayer:OnStopPrimaryAttack(input)
     end
 end
 
+function MarinePlayer:GetCanStartSprint(input, ground, groundNormal)
+    return  self.energy > 20
+end
+
+function MarinePlayer:GetCanSprint(input, ground, groundNormal)
+    return self.energy > 5 and Player.GetCanSprint(self)
+end
+
 function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
+    local dt = Shared.GetTime()-self.lastDrainTime
     Player.OnUpdatePoseParameters(self, viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     
     self:SetPoseParam("body_pitch", pitch)
     
-    if Client and self.flashlightState then -- this should probably be somewhere else.. but this is good enough
-        if not self.flashlightObject then
-            self.flashlightObject = Client.CreateRenderLight()
-            self.flashlightObject:SetColor(Color(200, 200, 255, 255))
-            self.flashlightObject:SetRadius(10)
-            self.flashlightObject:SetInnerCone(0)
-            self.flashlightObject:SetOuterCone(0.6)
-            self.flashlightObject:SetIntensity(0.2)
+    if self.flashlightState then -- this should probably be somewhere else.. but this is good enough
+        if Client then
+            if not self.flashlightObject then
+                self.flashlightObject = Client.CreateRenderLight()
+                self.flashlightObject:SetColor      (self.flashlightColor    )
+                self.flashlightObject:SetRadius     (self.flashlightRadius   )
+                self.flashlightObject:SetInnerCone  (self.flashlightInnerCone)
+                self.flashlightObject:SetOuterCone  (self.flashlightOuterCone)
+                self.flashlightObject:SetIntensity  (self.flashlightIntensity)
+            end
+            local coords = self:GetViewAngles():GetCoords()
+            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
+            self.flashlightObject:SetCoords(coords)
         end
-        local coords = self:GetViewAngles():GetCoords()
-        coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
-        self.flashlightObject:SetCoords(coords)
-    elseif self.flashlightObject then
+        self.energy = math.max(self.energy-self.flashlightEnergyDrainPerSecond*dt, 0)
+        if self.energy == 0 then
+            self.flashlightState = false
+        end
+    elseif Client and self.flashlightObject then
         Client.DestroyRenderLight(self.flashlightObject)
         self.flashlightObject = nil
     end
+    if self.sprinting then -- this /definately/ shouldn't go here, but meh
+        self.energy = math.max(
+            self.energy-self.sprintEnergyDrainPerSecond*dt*horizontalVelocity:GetLength()/self.walkSpeed/self.sprintSpeedScale*2,
+            0
+        )
+    end
+    self.energy = math.min(self.energy+self.energyGainPerSecond*dt, self.maxEnergy)
+    self.lastDrainTime = Shared.GetTime()
 end
 
 function MarinePlayer:SecondaryAttack()

@@ -1,3 +1,5 @@
+Script.Load("lua/Globals.lua")
+
 class 'Door' (Actor)
 
 Door.modelName = "models/misc/door/door.model"
@@ -91,4 +93,4 @@ function Door:OnThink()
 	self:SetNextThink(self.thinkInterval)
 end
 
-Shared.LinkClassToMap("Door", "door")
+Shared.LinkClassToMap("Door", kDoorMapName)

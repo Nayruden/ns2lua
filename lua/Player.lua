@@ -269,6 +269,9 @@ end
 function Player:GetCanSprint(input, ground, groundNormal)
     return true and not self.crouching
 end
+function Player:GetCanStartSprint(input, ground, groundNormal)
+    return true
+end
 function Player:OnSprint(input, forwardAxis, sideAxis)
     
 end
@@ -420,7 +423,7 @@ function Player:OnProcessMove(input)
     end
 
     if (bit.band(input.commands, Move.MovementModifier) ~= 0 and self:GetCanSprint(input, ground, groundNormal)) then
-        if (not self.sprinting) then
+        if (not self.sprinting and self:GetCanStartSprint(input, ground, groundNormal)) then
             self.sprinting = true
             self.moveSpeed = self.moveSpeed*self.sprintSpeedScale
             self:SetPoseParam("sprint", 1.0)
@@ -961,6 +964,10 @@ if (Server) then
     function Player:Respawn(overridePosition)
         self:SetOrigin(overridePosition or GetSpawnPos(self.extents) or Vector())
         self.health = self.defaultHealth
+        local weapon = self:GetActiveWeapon()
+        if weapon then
+            weapon.numBulletsInClip = weapon.clipSize
+        end
     end
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)

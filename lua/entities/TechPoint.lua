@@ -1,3 +1,5 @@
+Script.Load("lua/Globals.lua")
+
 class 'TechPoint' (Actor)
 
 TechPoint.modelName = "models/misc/tech_point/tech_point.model"
@@ -9,4 +11,4 @@ function TechPoint:OnInit()
 	self:SetIsVisible(true)
 end
 
-Shared.LinkClassToMap("TechPoint", "tech_point")
+Shared.LinkClassToMap("TechPoint", kTechPointMapName)

@@ -1,3 +1,5 @@
+Script.Load("lua/Globals.lua")
+
 class 'ResourceNozzle' (Actor)
 
 ResourceNozzle.modelName = "models/misc/resource_nozzle/resource_nozzle.model"
@@ -9,4 +11,4 @@ function ResourceNozzle:OnInit()
 	self:SetIsVisible(true)
 end
 
-Shared.LinkClassToMap("ResourceNozzle", "resource_point")
+Shared.LinkClassToMap("ResourceNozzle", kResourcePointMapName)

@@ -28,7 +28,7 @@ end
 function PlayerUI_GetWeaponAmmo()
     
     local player = Client.GetLocalPlayer()
-    return player:GetWeaponAmmo()
+    return PlayerUI_GetEnergy()/(player.maxEnergy or 1)*120--player:GetWeaponAmmo()
     
 end
 
@@ -71,6 +71,15 @@ function PlayerUI_GetHealth()
     local player = Client.GetLocalPlayer()
 	if (player) then
 		return player.health
+	else
+		return 0
+	end
+end
+
+function PlayerUI_GetEnergy()
+    local player = Client.GetLocalPlayer()
+	if (player) then
+		return player.energy or 0 -- 0 to 100
 	else
 		return 0
 	end
