@@ -67,7 +67,7 @@ Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting',
 Player.Teams				= enum { 'Marines', 'Aliens' }
 
 function Player:OnInit()
-
+	DebugMessage("Entering Player:OnInit()")
     Actor.OnInit(self)
 
     self:SetModel(self.modelName)
@@ -131,12 +131,15 @@ function Player:OnInit()
 
     self:SetBaseAnimation("run")
     
-    if (Server) then
-        for i, weapon in ipairs(self.WeaponLoadout) do
-            self:GiveWeapon(weapon)
-            --Shared.Message("Giving "..weapon..".")
+	if (Server) then
+		for i, weapon in ipairs(self.WeaponLoadout) do
+			--Shared.Message("Giving "..weapon..".")
+			self:GiveWeapon(weapon)
         end
-    end
+		end
+	end
+
+	DebugMessage("Exiting Player:OnInit()")
 end
 
 function Player:SetController(client)
@@ -334,7 +337,7 @@ function Player:OnProcessMove(input)
 
     end
 
-	if(bit.band(input.commands, Move.Taunt) ~= 0 and self:GetCanTaunt(input)) then
+    if(bit.band(input.commands, Move.Taunt) ~= 0 and self:GetCanTaunt(input)) then
         if not (self.taunting) then
             self:OnStartTaunt(input)
             self.taunting = true

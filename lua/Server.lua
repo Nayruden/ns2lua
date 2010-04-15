@@ -20,23 +20,37 @@ http = require("socket.http")
 Script.Load("lua/Shared.lua")
 Script.Load("lua/PlayerSpawn.lua")
 Script.Load("lua/TargetSpawn.lua")
-Script.Load("lua/ReadyRoomStart.lua")
+Script.Load("lua/entities/ReadyRoomStart.lua")
+Script.Load("lua/entities/ResourceNozzle.lua")
+Script.Load("lua/entities/TechPoint.lua")
+Script.Load("lua/entities/Door.lua")
 Script.Load("lua/TeamJoin.lua")
 
 Server.targetsEnabled = false
 Server.instagib = false
 
 function ChangePlayerClass(client, class, active, spawnPos)
+	DebugMessage("Entering ChangePlayerClass(client, class, active, spawnPos)")
     local class_table = (PlayerClasses[class] or PlayerClasses.Default)
-    Shared.Message("Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
-    if active then
-        --spawnPos = client.active_controlee:GetOrigin()
+	
+    DebugMessage("Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
+    local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
+	if active then
+		player:SetNick(active:GetNick())
         Server.DestroyEntity(active)
     end
-    local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
+	
     Server.SetControllingPlayer(client, player)
     player:SetController(client)
+
+	DebugMessage("Exiting ChangePlayerClass(client, class, active, spawnPos)")
     return player
+end
+
+function Server.DestroyEntityTimed(entity, delay)
+	entity:SetIsVisible(false)
+	entity.moveGroupMask = 0
+	table.insert(Game.instance.delete_queue, {Entity = entity, DeleteTime = Shared.GetTime() + delay})
 end
 
 -- Get an unobstructured spawn point for the player.
@@ -159,12 +173,16 @@ function OnConsoleRandomTeam(player)
 end
 
 function OnConsoleReadyRoom(player)
-
-    player:SetOrigin(GetSpawnPos("ready_room_start"))
-    player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
+--ChangePlayerClass(player.controller, "Default", player, GetSpawnPos(Player.extents, "ready_room_start") or GetSpawnPos(Player.extents) or Vector())
+	pos = GetSpawnPos(Player.extents, "ready_room_start")
+	if (pos ~= nil) then
+		player:SetOrigin(pos)
+		player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
+	end
 end
 
-function OnConsoleChangeClass(player,type)
+function OnConsoleChangeClass(player, type)
+	DebugMessage("Entering OnConsoleChangeClass(player, type)")
     if type == "Default" then
         Shared.Message("You cannot use this class!")
     elseif PlayerClasses[type] then
@@ -183,6 +201,7 @@ function OnConsoleChangeClass(player,type)
         end
         Shared.Message("Your options for this command are "..table.concat(options, ", ")..".")
     end
+	DebugMessage("Exiting OnConsoleChangeClass(player, type)")
 end
 
 function OnConsoleLua(player, ...)
@@ -242,9 +261,9 @@ Event.Hook("Console_target",        OnConsoleTarget)
 Event.Hook("Console_turret",        OnConsoleTurret)
 Event.Hook("Console_targets",       OnCommandTargets)
 Event.Hook("Console_readyroom",     OnConsoleReadyRoom)
-//Event.Hook("Console_marineteam",    OnConsoleMarineTeam)
-//Event.Hook("Console_alienteam",     OnConsoleAlienTeam)
-//Event.Hook("Console_randomteam",    OnConsoleRandomTeam)
+--Event.Hook("Console_marineteam",    OnConsoleMarineTeam)
+--Event.Hook("Console_alienteam",     OnConsoleAlienTeam)
+--Event.Hook("Console_randomteam",    OnConsoleRandomTeam)
 Event.Hook("Console_changeclass",   OnConsoleChangeClass)
 Event.Hook("Console_lua",           OnConsoleLua)
 Event.Hook("Console_nick",          OnCommandNick)

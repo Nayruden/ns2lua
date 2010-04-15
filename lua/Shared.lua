@@ -28,3 +28,27 @@ Script.Load("lua/PropDynamic.lua")
 Script.Load("lua/classes/Skulk.lua")
 Script.Load("lua/classes/Marine.lua")
 Script.Load("lua/classes/BuildBot.lua")
+
+function GetContextString()
+	if (Server) then
+		return "Server"
+	elseif (Client) then
+		return "Client"
+	else
+		return "Unknown"
+	end
+end
+
+Shared.enableDebugMessages = false
+
+function DebugMessage(message)
+	if (Shared.enableDebugMessages) then
+		Shared.Message("<" .. GetContextString() .. "> " .. message)
+	end
+end
+
+function OnConsoleDebugMode()
+	Shared.enableDebugMessages = not Shared.enableDebugMessages
+end
+
+Event.Hook("Console_debug", OnConsoleDebugMode)

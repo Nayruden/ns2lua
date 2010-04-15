@@ -35,7 +35,11 @@ end
 function PlayerUI_GetScore()
 
     local player = Client.GetLocalPlayer()
-    return "K/D: " .. player.kills .. "/".. player.deaths
+	if (player) then
+		return "K/D: " .. player.kills .. "/".. player.deaths
+	else
+		return "local player is nil"
+	end
     
 end
 
@@ -65,7 +69,11 @@ stringID = 0
 
 function PlayerUI_GetHealth()
     local player = Client.GetLocalPlayer()
-    return player.health
+	if (player) then
+		return player.health
+	else
+		return 0
+	end
 end
 
 function PlayerUI_GetStringID()

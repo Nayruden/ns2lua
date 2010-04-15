@@ -46,7 +46,8 @@ function Game:OnInit()
     Entity.OnInit(self)
 
     Game.instance = self
-
+	self.delete_queue = {}
+	
     if (Server) then
 
         -- Make the game always propagate to all clients (no visibility checks).
@@ -126,7 +127,16 @@ if (Server) then
             end
 
         end
-
+		
+		--Destroy any queued entities
+		local time = Shared.GetTime()
+		for i = #self.delete_queue,1,-1 do
+			if (time > self.delete_queue[i].DeleteTime) then
+				Server.DestroyEntity(self.delete_queue[i].Entity)
+				table.remove(self.delete_queue, i)
+			end
+		end
+	
         self:SetNextThink(self.updateInterval)
 
     end

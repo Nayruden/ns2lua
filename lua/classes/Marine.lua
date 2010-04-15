@@ -26,6 +26,7 @@ for i = 1, #MarinePlayer.TauntSounds do
 end
 
 function MarinePlayer:OnInit()
+	DebugMessage("Entering MarinePlayer:OnInit()")
     if (Server) then
         if Server.instagib then
             self.walkSpeed = self.instagib_walkSpeed
@@ -39,7 +40,7 @@ function MarinePlayer:OnInit()
     Player.OnInit(self)
 	
     self:SetBaseAnimation("run", true)
-    
+	DebugMessage("Exiting MarinePlayer:OnInit()")
     self.isFlashlightOn = false
 end
 
