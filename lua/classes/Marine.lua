@@ -59,7 +59,6 @@ function MarinePlayer:OnDestroy()
 	if (Client) then
 		Client.DestroyRenderLight(self.flashlightObject)
 	end
-    end
     Player.OnDestroy(self)
 	DebugMessage("Exiting MarinePlayer:OnDestroy()")
 end
