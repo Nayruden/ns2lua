@@ -1,6 +1,9 @@
 class 'BuildBotPlayer' (Player)
 
 PlayerClasses.buildbot = BuildBotPlayer
+BuildBotPlayer.networkVars = {
+    
+}
 
 BuildBotPlayer.modelName              = "models/marine/build_bot/build_bot.model"
 Shared.PrecacheModel(BuildBotPlayer.modelName)
@@ -21,11 +24,11 @@ for i = 1, #BuildBotPlayer.TauntSounds do
 end
 
 function BuildBotPlayer:OnInit()
-    Shared.Message("Entering BuildBotPlayer:OnInit()")
+    DebugMessage("Entering BuildBotPlayer:OnInit()")
     Player.OnInit(self)
 	
     self:SetBaseAnimation("fly", true)
-	Shared.Message("Exiting BuildBotPlayer:OnInit()")
+	DebugMessage("Exiting BuildBotPlayer:OnInit()")
 end
 
 function BuildBotPlayer:OnSetBaseAnimation(activity)

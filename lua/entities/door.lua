@@ -18,7 +18,6 @@ Door.networkVars =
 	activityEnd = "predicted float"
 }
 
-
 function Door:OnInit()
 	Actor.OnInit(self)
 	self:SetModel(self.modelName)

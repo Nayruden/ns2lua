@@ -2,6 +2,10 @@ class 'SkulkPlayer' (Player)
 
 PlayerClasses.skulk = SkulkPlayer
 
+SkulkPlayer.networkVars = {
+    
+}
+
 SkulkPlayer.modelName           = "models/alien/skulk/skulk.model"
 Shared.PrecacheModel(SkulkPlayer.modelName)
 Shared.PrecacheModel(SkulkPlayer.modelName)
@@ -21,11 +25,11 @@ for i = 1, #SkulkPlayer.TauntSounds do
 end
 
 function SkulkPlayer:OnInit()
-	Shared.Message("Entering SkulkPlayer:OnInit()")
+	DebugMessage("Entering SkulkPlayer:OnInit()")
     Player.OnInit(self)
 	
     self:SetBaseAnimation("run", true)
-	Shared.Message("Exiting SkulkPlayer:OnInit()")
+	DebugMessage("Exiting SkulkPlayer:OnInit()")
 end
 
 function SkulkPlayer:OnSetBaseAnimation(activity)

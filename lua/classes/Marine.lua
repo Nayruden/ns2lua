@@ -1,6 +1,10 @@
-class 'MarinePlayer' (Player, Actor)
+class 'MarinePlayer' (Player)
 
 PlayerClasses.marine = MarinePlayer
+
+MarinePlayer.networkVars = {
+    flashlightState              = "integer (0 or 1)",
+}
 
 MarinePlayer.modelName                  = "models/marine/male/male.model"
 Shared.PrecacheModel(MarinePlayer.modelName)
@@ -22,7 +26,7 @@ for i = 1, #MarinePlayer.TauntSounds do
 end
 
 function MarinePlayer:OnInit()
-	Shared.Message("Entering MarinePlayer:OnInit()")
+	DebugMessage("Entering MarinePlayer:OnInit()")
     if (Server) then
         if Server.instagib then
             self.walkSpeed = self.instagib_walkSpeed
@@ -36,7 +40,39 @@ function MarinePlayer:OnInit()
     Player.OnInit(self)
 	
     self:SetBaseAnimation("run", true)
-	Shared.Message("Exiting MarinePlayer:OnInit()")
+	DebugMessage("Exiting MarinePlayer:OnInit()")
+    self.flashlightState = 0
+    if (Client) then
+        self.flashlightObject = Client.CreateRenderLight()
+        self.flashlightObject:SetIntensity(0)
+        self.flashlightObject:SetColor(Color(200, 200, 255, 255))
+        self.flashlightObject:SetRadius(10)
+        self.flashlightObject:SetInnerCone(0)
+        self.flashlightObject:SetOuterCone(0.6)
+        self.flashlightActive = false
+        self.localFlashlightState = nil
+    end
+end
+
+function MarinePlayer:OnDestroy()
+	DebugMessage("Entering MarinePlayer:OnDestroy()")
+    self.flashlightObject:SetIntensity(0)
+    self.flashlightObject = nil-- Unfortunately, this is lost memory!
+    Player.OnDestroy(self)
+	DebugMessage("Exiting MarinePlayer:OnDestroy()")
+end
+
+function MarinePlayer:OnStartTaunt(input)
+    if (bit.band(input.commands, Move.MovementModifier) ~= 0) then
+        self.flashlightState = 1-self.flashlightState
+        if not Client or Client.GetIsRunningPrediction() then
+            DebugMessage(self.flashlightState == 1 and "FL on!" or "FL off!")
+        else
+            self.localFlashlightState = self.flashlightState
+        end
+        return false
+    end
+    return Player.OnStartTaunt(self, input)
 end
 
 function MarinePlayer:OnChangeWeapon(weapon)
@@ -53,6 +89,24 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
     Player.OnUpdatePoseParameters(self, viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     
     self:SetPoseParam("body_pitch", pitch)
+    
+    if Client and self.flashlightObject then -- this should probably be somewhere else.. but this is good enough
+        if (not Client.GetIsRunningPrediction() and self.localFlashlightState or self.flashlightState) == 1 then
+            if self.flashlightActive == 0 then
+                self.flashlightObject:SetIntensity(0.2)
+                self.flashlightActive = true
+            end
+            local coords =self:GetViewAngles():GetCoords()
+            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
+            self.flashlightObject:SetCoords(coords)
+            --DebugMessage("FL moving!")
+        elseif self.flashlightActive == 1 then
+            self.flashlightObject:SetIntensity(0)
+            self.flashlightActive = false
+        elseif self.flashlightState == self.localFlashlightState then
+            self.localFlashlightState = nil
+        end
+    end
 end
 
 function MarinePlayer:SecondaryAttack()
