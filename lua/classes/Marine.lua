@@ -48,33 +48,23 @@ function MarinePlayer:OnInit()
         self.flashlightObject:SetColor(Color(200, 200, 255, 255))
         self.flashlightObject:SetRadius(10)
         self.flashlightObject:SetInnerCone(0)
+        self.flashlightObject:SetOuterCone(0.6)
+        self.flashlightActive = false
     end
 end
 
 function MarinePlayer:OnDestroy()
 	DebugMessage("Entering MarinePlayer:OnDestroy()")
+    self.flashlightObject:SetIntensity(0)
+    self.flashlightObject = nil-- Unfortunately, this is lost memory!
     Player.OnDestroy(self)
-    self.flashlightObject:SetIntensity(0) -- Unfortunately, this is left to remain on class change!
-    self.flashlightObject = nil
 	DebugMessage("Exiting MarinePlayer:OnDestroy()")
 end
 
 function MarinePlayer:OnStartTaunt(input)
     if (bit.band(input.commands, Move.MovementModifier) ~= 0 and not (Client and Client.GetIsRunningPrediction())) then
-        if (self.isFlashlightOn) then
-            DebugMessage("FL off!")
-            if (Client) then
-                self.flashlightObject:SetIntensity(0)
-            end
-            -- play off sound here
-        else
-            DebugMessage("FL on!")
-            if (Client) then
-                self.flashlightObject:SetIntensity(0.2)
-            end
-            -- play on sound here
-        end
         self.isFlashlightOn = not self.isFlashlightOn
+        DebugMessage(self.isFlashlightOn and "FL on!" or "FL off!")
         return false
     end
     return Player.OnStartTaunt(self, input)
@@ -95,11 +85,20 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
     
     self:SetPoseParam("body_pitch", pitch)
     
-    if (Client and self.flashlightObject) then
-        local coords = self:GetCameraViewCoords()
-        coords.origin = coords.origin + coords.zAxis * 0.2
-        self.flashlightObject:SetCoords(coords)
-        --DebugMessage("FL moving!")
+    if Client and self.flashlightObject then -- this should probably be somewhere else.. but this is good enough
+        if self.isFlashlightOn then
+            if not self.flashlightActive then
+                self.flashlightObject:SetIntensity(0.2)
+                self.flashlightActive = true
+            end
+            local coords =self:GetViewAngles():GetCoords()
+            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
+            self.flashlightObject:SetCoords(coords)
+            --DebugMessage("FL moving!")
+        elseif self.flashlightActive then
+            self.flashlightObject:SetIntensity(0)
+            self.flashlightActive = false
+        end
     end
 end
 

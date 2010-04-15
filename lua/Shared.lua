@@ -49,6 +49,7 @@ end
 
 function OnConsoleDebugMode()
 	Shared.enableDebugMessages = not Shared.enableDebugMessages
+    Shared.Message("<" .. GetContextString() .. "> Debug mode " .. (Shared.enableDebugMessages and "enabled." or "disabled."))
 end
 
 Event.Hook("Console_debug", OnConsoleDebugMode)
