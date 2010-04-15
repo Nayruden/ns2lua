@@ -22,13 +22,13 @@ if http_worked then
 end
 
 Script.Load("lua/Shared.lua")
-Script.Load("lua/PlayerSpawn.lua")
-Script.Load("lua/TargetSpawn.lua")
+Script.Load("lua/entities/PlayerSpawn.lua")
+Script.Load("lua/entities/TargetSpawn.lua")
 Script.Load("lua/entities/ReadyRoomStart.lua")
 Script.Load("lua/entities/ResourceNozzle.lua")
 Script.Load("lua/entities/TechPoint.lua")
 Script.Load("lua/entities/Door.lua")
-Script.Load("lua/TeamJoin.lua")
+Script.Load("lua/entities/TeamJoin.lua")
 
 Server.targetsEnabled = false
 Server.instagib = false

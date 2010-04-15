@@ -14,9 +14,9 @@
 decoda_name = "Client"
 
 Script.Load("lua/Shared.lua")
-Script.Load("lua/PlayerUI.lua")
-Script.Load("lua/ChatUI.lua")
-Script.Load("lua/KillUI.lua")
+Script.Load("lua/ui/PlayerUI.lua")
+Script.Load("lua/ui/ChatUI.lua")
+Script.Load("lua/ui/KillUI.lua")
 
 Client.SetMouseVisible(false)
 Client.SetMouseCaptured(true)
