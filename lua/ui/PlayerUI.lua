@@ -28,7 +28,7 @@ end
 function PlayerUI_GetWeaponAmmo()
     
     local player = Client.GetLocalPlayer()
-    return PlayerUI_GetEnergy()/(player.maxEnergy or 1)*120--player:GetWeaponAmmo()
+    return player:GetWeaponAmmo()--PlayerUI_GetEnergy()/(player.maxEnergy or 1)*120
     
 end
 

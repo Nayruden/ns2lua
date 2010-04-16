@@ -28,15 +28,13 @@ Player.networkVars =
         activityEnd                 = "predicted float",
         score                       = "integer",
         health                      = "integer",
-        canJump                     = "integer (0 to 1)",
         kills                       = "integer",
         deaths                      = "integer",
-        moveSpeed                   = "integer",
-        moveSpeedBackwards          = "integer",
+        moveSpeed                   = "predicted float",
         invert_mouse                = "integer (0 to 1)",
         gravity						= "float",
         sprinting                   = "predicted boolean",
-        crouching                   = "predicted integer (0 to 3)",
+        crouching                   = "predicted boolean",
         taunting                    = "predicted boolean",
 		walkSpeed                   = "float",
         sprintSpeed                 = "float",
@@ -54,11 +52,14 @@ Player.moveAcceleration     = 4
 Player.jumpHeight           = 1
 Player.gravity              = -9.81
 Player.walkSpeed            = 10
-Player.sprintSpeedScale     = 5
+Player.sprintSpeedScale     = 2
+Player.crouchSpeedScale     = 0.5
 Player.backSpeedScale       = 1
 Player.defaultHealth        = 100
 Player.stoodViewOffset      = Vector(0, 1.6256, 0)
 Player.crouchedViewOffset   = Vector(0, 0.9, 0)
+Player.crouchAnimationTime  = 0.5
+Player.sprintAnimationTime  = 0.5
 Player.WeaponLoadout        = { }
 Player.TauntSounds          = { }
 for i = 1, #Player.TauntSounds do
@@ -74,7 +75,6 @@ function Player:OnInit()
 
     self:SetModel(self.modelName)
 
-    self.canJump                    = 1
     self.viewPitch                  = 0
     self.viewRoll                   = 0
 
@@ -86,7 +86,11 @@ function Player:OnInit()
 
     self.thirdPerson                = false
     self.sprinting                  = false
-    self.crouching                  = 0
+    self.sprintFade                 = 0
+    self.sprintStartTime            = 0
+    self.crouching                  = false
+    self.crouchFade                 = 0
+    self.crouchStartTime            = 0
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
@@ -244,114 +248,154 @@ function Player:BuildPose(poses)
 
 end
 
-function Player:GetCanJump(input, ground, groundNormal)
-    return ground
-end
-
-function Player:OnJump(input, forwardAxis, sideAxis)
-    
-end
 function Player:OnLand(input, forwardAxis, sideAxis)
     
 end
 
-function Player:GetCanCrouch(input, ground, groundNormal)
-    return true--ground
+function Player:OnPressExit(input)
+    ShowInGameMenu()
 end
-
-function Player:OnCrouch(input, forwardAxis, sideAxis)
-    
-end
-function Player:OnStand(input, forwardAxis, sideAxis)
-    
-end
-
-function Player:GetCanSprint(input, ground, groundNormal)
-    return true and not self.crouching
-end
-function Player:GetCanStartSprint(input, ground, groundNormal)
-    return true
-end
-function Player:OnSprint(input, forwardAxis, sideAxis)
-    
-end
-function Player:OnWalk(input, forwardAxis, sideAxis)
-    
-end
-
-function Player:GetCanPrimaryAttack(input) -- do not use this for ammo checks!
-    return true
-end
-function Player:OnStartPrimaryAttack(input) -- do not use this for animations!
-    
-end
-function Player:OnStopPrimaryAttack(input)
-    
-end
-
-function Player:GetCanSecondaryAttack(input) -- do not use this for ammo checks!
-    return true
-end
-function Player:OnStartSecondaryAttack(input) -- do not use this for animations!
-    
-end
-function Player:OnStopSecondaryAttack(input)
-    
-end
-
-function Player:GetCanReload(input) -- do not use this for specific weapon related checks!
-    return true
-end
-function Player:OnStartReload(input) -- do not use this for animations!
-    
-end
-function Player:OnStopReload(input)
-    
-end
-
-function Player:GetCanTaunt(input)
-    return true
-end
-function Player:OnStartTaunt(input)
+function Player:OnPressTaunt(input)
     local sound = table.random(self.TauntSounds)
     if sound then
         self:PlaySound(sound)
     end
 end
-function Player:OnEndTaunt(input)
-    
+function Player:CanPressJump(input)
+    return self.ground
+end
+function Player:OnPressJump(input)
+    self.velocity.y = math.sqrt(-2 * self.jumpHeight * self.gravity)
+    self.ground = false
+end
+function Player:OnPressCrouch(input)
+    --self:SetAnimation( "" ) -- Needs a crouch animation (pose param manually tweened for now)
+    self.crouching = true
+    self.crouchStartTime = Shared.GetTime()-self.crouchAnimationTime*self.crouchFade
+end
+function Player:OnReleaseCrouch(input)
+    self.crouching = false
+    self.crouchStartTime = Shared.GetTime()-self.crouchAnimationTime*(1-self.crouchFade)
+end
+function Player:OnPressMovementModifier(input)
+    self.sprinting = true
+    self.sprintStartTime = Shared.GetTime()-self.sprintAnimationTime*self.sprintFade
+end
+function Player:OnReleaseMovementModifier(input)
+    self.sprinting = false
+    self.sprintStartTime = Shared.GetTime()-self.sprintAnimationTime*(1-self.sprintFade)
+end
+function Player:OnPressReload(input)
+    if self.activity == Player.Activity.Shooting then
+        self:StopPrimaryAttack()
+    end
+    if self.activity == Player.Activity.AltShooting then
+        self:StopSecondaryAttack()
+    end
+    self:Reload()
+end
+function Player:CanPressPrimaryAttack(input)
+    return self.activity ~= Player.Activity.Reloading
+end
+function Player:OnPressPrimaryAttack(input)
+    self:PrimaryAttack()
+end
+function Player:CanHoldPrimaryAttack(input)
+    if self.activity == Player.Activity.Reloading then
+        return false
+    end
+    self:PrimaryAttack()
+    return true
+end
+function Player:OnReleasePrimaryAttack(input)
+    self:StopPrimaryAttack()
+end
+function Player:OnNotHeldPrimaryAttack(input)
+    if self.activity == Player.Activity.Shooting then
+        self:StopPrimaryAttack()
+    end
+end
+function Player:CanPressSecondaryAttack(input)
+    return self.activity ~= Player.Activity.Reloading
+end
+function Player:OnPressSecondaryAttack(input)
+    self:SecondaryAttack()
+end
+function Player:CanHoldSecondaryAttack(input)
+    if self.activity ~= Player.Activity.Reloading then
+        return false
+    end
+    self:SecondaryAttack()
+    return true
+end
+function Player:OnReleaseSecondaryAttack(input)
+    self:StopSecondaryAttack()
+end
+function Player:OnNotHeldSecondaryAttack(input)
+    if self.activity == Player.Activity.AltShooting then
+        self:StopSecondaryAttack()
+    end
 end
 
+Player.Keys = { -- "n" postfix means they are networked and predicted
+    Exit                = "press",
+    ToggleFlashlight    = "pressn",
+    Buy                 = "press",
+    Taunt               = "press",
+    ToggleSayings1      = "press",
+    ToggleSayings2      = "press",
+    Drop                = "press",
+    Weapon1             = "press",
+    Weapon2             = "press",
+    Weapon3             = "press",
+    Weapon4             = "press",
+    Weapon5             = "press",
+    Use                 = "hold",
+    Scoreboard          = "holdn",
+    NextWeapon          = "hold",
+    PrevWeapon          = "hold",
+    Jump                = "holdn",
+    Crouch              = "holdn",
+    MovementModifier    = "holdn",
+    Reload              = "holdn",
+    PrimaryAttack       = "holdn",
+    SecondaryAttack     = "holdn",
+    ScrollLeft          = "holdn",
+    ScrollRight         = "holdn",
+    ScrollForward       = "holdn",
+    ScrollBackward      = "holdn",
+    Minimap             = "holdn",
+}
+for k,v in pairs(Player.Keys) do
+    if v == "holdn" or v == "pressn" then
+        Player.networkVars["key_"..k] = "predicted boolean"
+    end
+end
 --
 -- Called to handle user input for the player.
 --
+local lds
 function Player:OnProcessMove(input)
-
     if (Client) then
-
         self:UpdateWeaponSwing(input)
-
-        if (Client.GetIsRunningPrediction()) then
-
-            -- When exit hit, bring up menu
-            if(bit.band(input.commands, Move.Exit) ~= 0) then
-                ShowInGameMenu()
+    elseif Shared.enableDebugMessages then
+        local ds, ks = "", ""
+        for i = 0, 35 do
+            local v = 2^i
+            local down = bit.band(input.commands, v) > 0
+            ds = ds..(down and 1 or 0)
+            if down then
+                for k,v in pairs(self.Keys) do
+                    if Move[k] == v then
+                        ks = ks.." "..k
+                        break
+                    end
+                end
             end
-
         end
-
-    end
-
-    if(bit.band(input.commands, Move.Taunt) ~= 0 and self:GetCanTaunt(input)) then
-        if (not self.taunting) then
-            self:OnStartTaunt(input)
-        end
-        self.taunting = 3
-    elseif (self.taunting) then
-        self.taunting = self.taunting - 1
-        if (self.taunting <= 0) then
-            self.taunting = nil
-        self:OnEndTaunt(input)
+        if ds ~= lds then
+            DMsg(ds..ks)
+            lds = ds
         end
     end
     
@@ -375,67 +419,71 @@ function Player:OnProcessMove(input)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
-	
+    
     local canMove = self:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     
-    local ground, groundNormal = self:GetIsOnGround()
-    if (ground and self.inAir) then
+    self.ground, self.groundNormal = self:GetIsOnGround()
+    if (self.ground and self.inAir) then
         self:OnLand(input, forwardAxis, sideAxis)
     end
-    self.inAir = ground
-
-    -- Handle jumping
-    if (canMove and self:GetCanJump(input, ground, groundNormal)) then
-        if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
-            self.canJump = 1
-        elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
-            self.canJump = 0
-
-            -- Compute the initial velocity to give us the desired jump
-            -- height under the force of gravity.
-            self.velocity.y = math.sqrt(-2 * self.jumpHeight * self.gravity)
-            
-            self:OnJump(input, forwardAxis, sideAxis)
-            ground = false
+    self.inAir = self.ground
+    
+    self.moveSpeed = self.walkSpeed
+    
+    for key, keyType in pairs(self.Keys) do
+        local bval = Move[key]
+        if keyType == "hold" or keyType == "holdn" then
+            local canHold = self["CanHold"..key] -- safe to use this as an "OnHold" hook
+            if bit.band(input.commands, bval) ~= 0 and (not canHold or canHold(self, input, angles, forwardAxis, sideAxis)) then
+                --Msg(self["key_"..key],":CanHold"..key)
+                local canPress = self["CanPress"..key]
+                if not self["key_"..key] and (not canPress or canPress(self, input, angles, forwardAxis, sideAxis)) then
+                    --Msg(self["key_"..key],":CanPress"..key)
+                    self["key_"..key] = true
+                    local func = self["OnPress"..key]
+                    --Msg(self["key_"..key],":OnPress"..key)
+                    if func then
+                        func(self, input, angles, forwardAxis, sideAxis)
+                    end
+                end
+            elseif self["key_"..key] then
+                self["key_"..key] = false
+                local func = self["OnRelease"..key]
+                --Msg(self["key_"..key],":OnRelease"..key)
+                if func then
+                    func(self, input, angles, forwardAxis, sideAxis)
+                end
+            else
+                local notHeld = self["OnNotHeld"..key]
+                if notHeld then -- I only added this for a primary/secondary attack bug, be cautious
+                    notHeld(self, input, angles, forwardAxis, sideAxis)
+                end
+            end
+        elseif keyType == "press" or keyType == "pressn" then
+            if self["key_"..key] and bit.band(input.commands, bval) == 0 then
+                self["key_"..key] = false
+                local func = self["OnRelease"..key]
+                --Msg("OnRelease"..key)
+                if func then
+                    func(self, input, angles, forwardAxis, sideAxis)
+                end
+            elseif not self["key_"..key] and bit.band(input.commands, bval) ~= 0 then
+                local canPress = self["CanPress"..key]
+                if not self["key_"..key] and (not canPress or canPress(self, input, angles, forwardAxis, sideAxis)) then
+                    --Msg("CanPress"..key)
+                    self["key_"..key] = true
+                    local func = self["OnPress"..key]
+                    --Msg("OnPress"..key)
+                    if func then
+                        func(self, input, angles, forwardAxis, sideAxis)
+                    end
+                end
+            end
         end
-    end
-
-    -- Handle crouching
-    -- From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
-    if (bit.band(input.commands, Move.Crouch) ~= 0 and self:GetCanCrouch(input, ground, groundNormal)) then
-        if (not self.crouching) then
-            --self:SetAnimation( "" ) -- Needs a crouch animation
-            self.moveSpeed = self.crouchSpeed or self.moveSpeed
-			self:SetPoseParam("crouch", 1.0)
-            self.viewOffset = self.crouchedViewOffset
-            self:OnCrouch(input, forwardAxis, sideAxis)
-        end
-        self.crouching = 3
-    elseif (self.crouching) then
-        self.crouching = self.crouching - 1
-        if (self.crouching <= 0) then
-            self.crouching = nil
-            self.curSpeed = self.moveSpeed
-			self:SetPoseParam("crouch", 0.0)
-            self.viewOffset = self.stoodViewOffset
-            self:OnStand(input, forwardAxis, sideAxis)
-        end
-    end
-
-    if (bit.band(input.commands, Move.MovementModifier) ~= 0 and self:GetCanSprint(input, ground, groundNormal)) then
-        if (not self.sprinting and self:GetCanStartSprint(input, ground, groundNormal)) then
-            self.sprinting = true
-            self.moveSpeed = self.moveSpeed*self.sprintSpeedScale
-            self:SetPoseParam("sprint", 1.0)
-            self:OnSprint(input, forwardAxis, sideAxis)
-        end
-    elseif (self.sprinting) then
-    	self.sprinting = false
-    	self.moveSpeed = self.walkSpeed
-    	self:SetPoseParam("sprint", 0.0)
-        self:OnWalk(input, forwardAxis, sideAxis)
     end
     
+    self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
+    self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
     
     if (ground) then
         -- Since we're standing on the ground, remove any downward velocity.
@@ -445,7 +493,7 @@ function Player:OnProcessMove(input)
         self.velocity.y = self.velocity.y + self.gravity * input.time
     end
 
-    self:ApplyFriction(input, ground)
+    self:ApplyFriction(input, self.ground)
 
     if (canMove) then
 
@@ -466,7 +514,7 @@ function Player:OnProcessMove(input)
 
         local offset = nil
 
-        if (ground) then
+        if (self.ground) then
             -- First move the character upwards to allow them to go up stairs and
             -- over small obstacles.
             local start = Vector(self:GetOrigin())
@@ -476,47 +524,11 @@ function Player:OnProcessMove(input)
         -- Move the player with collision detection.
         self:PerformMovement( self.velocity * input.time, 5 )
 
-        if (ground) then
+        if (self.ground) then
             -- Finally, move the player back down to compensate for moving them up.
             -- We add in an additional step height for moving down steps/ramps.
             offset.y = offset.y + self.stepHeight
             self:PerformMovement( -offset, 1 )
-        end
-
-        -- Handle the buttons.
-
-        if (self.activity ~= Player.Activity.Reloading and self:GetCanReload(input)) then
-            if (bit.band(input.commands, Move.Reload) ~= 0) then
-
-                if (self.activity == Player.Activity.Shooting) then
-                    self:StopPrimaryAttack()
-                end
-                if (self.activity == Player.Activity.AltShooting) then
-                    self:StopSecondaryAttack()
-                end
-
-                self:Reload()
-                self:OnStartReload(input)
-
-            else
-
-                -- Process attack
-                if (bit.band(input.commands, Move.PrimaryAttack) ~= 0 and self:GetCanPrimaryAttack(input)) then
-                    self:PrimaryAttack()
-                    self:OnStartPrimaryAttack(input)
-                elseif (self.activity == Player.Activity.Shooting) then
-                    self:StopPrimaryAttack()
-                    self:OnStopPrimaryAttack(input)
-                end
-                if (bit.band(input.commands, Move.SecondaryAttack) ~= 0 and self:GetCanSecondaryAttack(input)) then
-                    self:SecondaryAttack()
-                    self:OnStartSecondaryAttack(input)
-                elseif (self.activity == Player.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
-                    self:StopSecondaryAttack()
-                    self:OnStopSecondaryAttack(input)
-                end
-
-            end
         end
 
     end
@@ -533,7 +545,6 @@ function Player:OnProcessMove(input)
         local weapon = self:GetActiveWeapon()
         if (weapon ~= nil) then
             weapon:ReloadFinish()
-            self:OnStopReload(input)
         end
     end
 
@@ -877,6 +888,19 @@ end
 function Player:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     self:SetPoseParam("move_yaw",   moveYaw)
     self:SetPoseParam("move_speed", horizontalVelocity:GetLength() * 0.25)
+    if self.crouching then
+        self.crouchFade = math.min((Shared.GetTime()-self.crouchStartTime)/self.crouchAnimationTime, 1)
+    else
+        self.crouchFade = 1-math.min((Shared.GetTime()-self.crouchStartTime)/self.crouchAnimationTime, 1)
+    end
+    self:SetPoseParam("crouch", self.crouchFade)
+    self.viewOffset = self.stoodViewOffset+(self.crouchedViewOffset-self.stoodViewOffset)*self.crouchFade
+    if self.sprinting then
+        self.sprintFade = math.min((Shared.GetTime()-self.sprintStartTime)/self.sprintAnimationTime, 1)
+    else
+        self.sprintFade = 1-math.min((Shared.GetTime()-self.sprintStartTime)/self.sprintAnimationTime, 1)
+    end
+    self:SetPoseParam("sprint", self.sprintFade)
 end
 
 function Player:UpdatePoseParameters()

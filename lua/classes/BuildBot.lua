@@ -5,18 +5,19 @@ BuildBotPlayer.networkVars = {
     
 }
 
-BuildBotPlayer.modelName              = "models/marine/build_bot/build_bot.model"
+BuildBotPlayer.modelName                = "models/marine/build_bot/build_bot.model"
 Shared.PrecacheModel(BuildBotPlayer.modelName)
 Shared.PrecacheModel(BuildBotPlayer.modelName)
-BuildBotPlayer.extents                = Vector(0.4064, 0.7874, 0.4064)
-BuildBotPlayer.jumpHeight             =  1.5
-BuildBotPlayer.gravity                = -4.4
-BuildBotPlayer.normal_walkSpeed       = 7
-BuildBotPlayer.normal_sprintSpeed     = 14
-BuildBotPlayer.backSpeedScale         = 1
-BuildBotPlayer.defaultHealth          = 100
-BuildBotPlayer.WeaponLoadout          = { "weapon_peashooter" }
-BuildBotPlayer.TauntSounds            = { "sound/ns2.fev/marine/voiceovers/robot_taunt" }
+BuildBotPlayer.extents                  = Vector(0.4064, 0.7874, 0.4064)
+BuildBotPlayer.jumpHeight               = 1.5
+BuildBotPlayer.gravity                  = -4.4
+BuildBotPlayer.walkSpeed                = 7
+BuildBotPlayer.sprintSpeedScale         = 2
+BuildBotPlayer.backSpeedScale           = 1
+BuildBotPlayer.crouchSpeedScale         = 1
+BuildBotPlayer.defaultHealth            = 100
+BuildBotPlayer.WeaponLoadout            = { "weapon_peashooter" }
+BuildBotPlayer.TauntSounds              = { "sound/ns2.fev/marine/voiceovers/robot_taunt" }
 BuildBotPlayer.stoodViewOffset          = Vector(0, 0.6, 0)
 BuildBotPlayer.crouchedViewOffset       = Vector(0, 0.6, 0)
 for i = 1, #BuildBotPlayer.TauntSounds do
@@ -36,11 +37,11 @@ function BuildBotPlayer:OnSetBaseAnimation(activity)
             false
 end
 
-function BuildBotPlayer:GetCanJump(input, ground, groundNormal)
+function BuildBotPlayer:CanPressJump(input)
     return true
 end
-
-function BuildBotPlayer:OnJump(input, forwardAxis, sideAxis)
+function BuildBotPlayer:OnPressJump(input, forwardAxis, sideAxis)
+    Player.OnPressJump(self, input)
     self.velocity.x = self.velocity.x + forwardAxis.x*10
     self.velocity.z = self.velocity.z + forwardAxis.z*10
 end

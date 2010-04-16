@@ -14,6 +14,7 @@ SkulkPlayer.gravity             = -9.81
 SkulkPlayer.walkSpeed           = 14
 SkulkPlayer.sprintSpeedScale    = 2
 SkulkPlayer.backSpeedScale      = 1
+SkulkPlayer.crouchSpeedScale    = 1
 SkulkPlayer.defaultHealth       = 75
 SkulkPlayer.WeaponLoadout       = { "weapon_bite" }
 SkulkPlayer.TauntSounds         = { "sound/ns2.fev/alien/voiceovers/chuckle" }
@@ -45,7 +46,7 @@ function SkulkPlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z
     self:SetPoseParam("look_yaw", yaw)
 end
 
-function SkulkPlayer:OnStopPrimaryAttack(input)
+function SkulkPlayer:OnReleasePrimaryAttack(input)
     if (Shared.GetTime() > self.activityEnd) then
         self:StopPrimaryAttack()
     end

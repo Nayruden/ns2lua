@@ -174,6 +174,11 @@ function DMsg(...) -- example usage: Msg("The values are ", a, " and ", b, "!")
     end
     return true -- so_we_can_use_it and DMsg('LOL') and "like this." or "no?"
 end
+function SMsg(...)
+    if Server then
+        Msg(...)
+    end
+end
 
 function OnConsoleDebugMode()
 	Shared.enableDebugMessages = not Shared.enableDebugMessages
