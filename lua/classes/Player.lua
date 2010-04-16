@@ -992,7 +992,7 @@ if (Server) then
         self.score = self.health
         if (self.health <= 0) then
 			if attacker and type(attacker) == "userdata" and attacker.GetNick then
-				attacker.kills = attacker.kills + 1
+				attacker.kills = (attacker.kills or 0) + 1
 				Server.SendKillMessage(attacker:GetNick(), self:GetNick())
 			end
             self.deaths = self.deaths + 1
