@@ -10,8 +10,8 @@
 -------------------------------------------------------------------------------
 local socket = require("socket")
 local url = require("socket.url")
-local ltn12 = require("socket.ltn12")
-local mime = require("mime.mime")
+local ltn12 = require("ltn12")
+local mime = require("mime")
 local string = require("string")
 local base = _G
 local table = require("table")
