@@ -11,7 +11,7 @@ Shared.PrecacheSound(Turret.dieSound)
 
 Turret.State = enum { 'Idle', 'Firing' }
 
-Turret.thinkInterval = 0.25
+Turret.thinkInterval = 0.1
 Turret.attackRadius = 10
 
 function Turret:OnInit()
@@ -27,10 +27,15 @@ function Turret:OnInit()
         self:SetNextThink(Turret.thinkInterval)
     end
     
+    self.attackRadius = tonumber(self.attackRadius) or 10
+    
 end
 
 function Turret:OnLoad()
     Actor.OnLoad(self)
+    self.attackRadius = tonumber(self.attackRadius) or 10
+    self:SetModel(self.modelName)
+    self:SetAnimation( "popup" )
 end
 
 function Turret:Popup()
@@ -46,9 +51,10 @@ if (Server) then
     function Turret:OnThink()
         Actor.OnThink(self)
         
-        local player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.attackRadius, nil)
+        local player_info = Shared.FindEntities(GetPlayerClassMapNames(), self:GetOrigin(), self.attackRadius, true)[1]
         
-        if (player ~= nil) then
+        if (player_info ~= nil) then
+            local player = player_info.ent
         	-- Trigger a popup in the future (with the mean being the specfied delay).
             --self.popupTime = time + Shared.GetRandomFloat(0, self.popupDelay * 2)
             

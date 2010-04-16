@@ -45,17 +45,26 @@ Script.Load("lua/entities/TechPoint.lua")
 Script.Load("lua/entities/Door.lua")
 Script.Load("lua/entities/TeamJoin.lua")
 
-function Shared.FindEntities(classes, origin, radius) -- origin and radius can be left nil
+function Shared.FindEntities(classes, origin, radius, store_distance_and_sort) -- origin and radius can be left nil
 	if type(classes) == "string" then classes = {classes} end
 	local entities = {}
 	for k, mapName in ipairs(classes) do
 		local ent = Shared.FindEntityWithClassname(mapName, nil)
         while ent do
 			if not (origin and radius) or (ent:GetOrigin()-origin):GetLength() < radius then
-				table.insert(entities, ent)
+				table.insert(entities,
+					store_distance_and_sort and {
+						dist = (ent:GetOrigin()-origin):GetLength(),
+						ent = ent
+					}
+					or ent
+				)
 			end
 			ent = Shared.FindEntityWithClassname(mapName, ent)
         end
+	end
+	if store_distance_and_sort then
+		table.sort(entities, function(a, b) return a.dist < b.dist end)
 	end
 	return entities
 end
