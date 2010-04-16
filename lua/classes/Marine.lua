@@ -63,7 +63,7 @@ function MarinePlayer:SuperchargeWithInstagibMagic(instagib)
         self.sprintSpeedScale   = self.instagib_sprintSpeedScale
     else
         self.moveAcceleration   = self.normal_walkSpeed
-        self.jumpHeight         = self.normal_sprintSpeedScale
+        self.jumpHeight         = self.normal_jumpHeight
         self.walkSpeed          = self.normal_walkSpeed
         self.sprintSpeedScale   = self.normal_sprintSpeedScale
     end

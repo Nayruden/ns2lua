@@ -560,10 +560,10 @@ end
 
 function Player:ApplyFriction(input, ground)
     local velocity = Vector(self.velocity)
-  
-    if (ground) then
-        velocity.y = 0
-    end
+	velocity.y = 0
+    --if (self.ground) then
+        --velocity.y = 0
+    --end
 
     local speed = velocity:GetLength()
 

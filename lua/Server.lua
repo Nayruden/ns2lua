@@ -181,6 +181,7 @@ end
 function OnConsoleChangeClass(player, type)
 	DebugMessage("Entering OnConsoleChangeClass(player, type)")
     if type == "Default" then
+      --ChangePlayerClass(player.controller, type, player, player:GetOrigin())	
         Shared.Message("You cannot use this class!")
     elseif PlayerClasses[type] then
         ChangePlayerClass(player.controller, type, player, player:GetOrigin())
