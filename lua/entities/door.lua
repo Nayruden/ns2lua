@@ -14,9 +14,9 @@ Door.networkVars =
 {
 	touchRadius = "float",
 	openTime 	= "float",
-    behavior 	= "integer(1 to 3)",
-	state 		= "predicted integer(1 to 2)",	
-	activity 	= "predicted integer(1 to 3)",
+    behavior 	= "integer (1 to 3)",
+	state 		= "predicted integer (1 to 2)",	
+	activity 	= "predicted integer (1 to 3)",
 	activityEnd = "predicted float"
 }
 
@@ -28,6 +28,10 @@ function Door:OnInit()
 	self.state = Door.State.Closed
 	self.activity = Door.Activity.None
 	self.activityEnd = 0
+
+	self.behaviorType = tonumber(self.behaviorType) or Door.Behavior.Proximity
+	self.touchRadius  = tonumber(self.touchRadius) or 10
+	self.openTime     = tonumber(self.openTime) or 0
 	
 	self:SetNextThink(Door.thinkInterval)
 end
@@ -35,9 +39,9 @@ end
 function Door:OnLoad()
 	Actor.OnLoad(self)
 
-	self.behaviorType = tonumber(self.behaviorType)
-	self.touchRadius  = tonumber(self.touchRadius)
-	self.openTime     = tonumber(self.openTime)
+	self.behavior	 = tonumber(self.behaviorType) or Door.Behaviour.Proximity
+	self.touchRadius  = tonumber(self.touchRadius) or 10
+	self.openTime     = tonumber(self.openTime) or 0
 end
 
 function Door:Open() 
@@ -55,14 +59,7 @@ function Door:Close()
 end
 
 function Door:TestProximity() 
-	local player
-	for key, value in pairs(PlayerClasses) do
-		player = Server.FindEntityWithClassnameInRadius(value.mapName, self:GetOrigin(), self.touchRadius, nil)
-		if (player ~= nil) then
-			return true
-		end
-	end
-	return false
+	return #Shared.FindEntities(GetPlayerClassMapNames(), self:GetOrigin(), self.touchRadius) > 0
 end
 
 function Door:OnThink()
@@ -93,4 +90,4 @@ function Door:OnThink()
 	self:SetNextThink(self.thinkInterval)
 end
 
-Shared.LinkClassToMap("Door", kDoorMapName)
+Shared.LinkClassToMap("Door", kDoorMapName, Door.networkVars)

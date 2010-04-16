@@ -9,6 +9,8 @@ function TechPoint:OnInit()
 	Actor.OnInit(self)
 	self:SetModel(self.modelName)
 	self:SetIsVisible(true)
+	self.physicsGroup = 4
+	self:SetPhysicsActor()
 end
 
 Shared.LinkClassToMap("TechPoint", kTechPointMapName)

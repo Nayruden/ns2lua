@@ -22,13 +22,6 @@ if http_worked then
 end
 
 Script.Load("lua/Shared.lua")
-Script.Load("lua/entities/PlayerSpawn.lua")
-Script.Load("lua/entities/TargetSpawn.lua")
-Script.Load("lua/entities/ReadyRoomStart.lua")
-Script.Load("lua/entities/ResourceNozzle.lua")
-Script.Load("lua/entities/TechPoint.lua")
-Script.Load("lua/entities/Door.lua")
-Script.Load("lua/entities/TeamJoin.lua")
 
 Server.targetsEnabled = false
 Server.instagib = false
@@ -72,19 +65,20 @@ function GetSpawnPos(extents, ...)
             spawnPoint = Shared.FindEntityWithClassname(spawnClass, spawnPoint)
         end
     end
+	local offset = extents and Vector(0, extents.y + 0.01, 0)
     local spawnPoint
     for i = 1, 100 do
         spawnPoint = table.random(spawnPoints)
         if  not SpawnPoint
          or not extents
-         or Shared.CollideBox(extents, spawnPoint:GetOrigin() + Vector(0, extents.y + 0.01, 0))
+         or Shared.CollideBox(extents, spawnPoint:GetOrigin() + offset)
         then
             break
         end
     end
     if spawnPoint then
         local spawnPos = Vector(spawnPoint:GetOrigin())
-        return spawnPos+Vector(0, 0.01, 0)
+        return spawnPos+Vector(0, 0.01, 0)--, spawnPoint:GetAngles()
     end
 end
 
@@ -180,12 +174,8 @@ function OnConsoleRandomTeam(player)
 end
 
 function OnConsoleReadyRoom(player)
---ChangePlayerClass(player.controller, "Default", player, GetSpawnPos(Player.extents, "ready_room_start") or GetSpawnPos(Player.extents) or Vector())
-	pos = GetSpawnPos(Player.extents, "ready_room_start")
-	if (pos ~= nil) then
-		player:SetOrigin(pos)
-		player:RetractWeapon() -- NO FIGHTING IN THE WAR ROOM!
-	end
+	local player = ChangePlayerClass(player.controller, "Default", player, GetSpawnPos(Player.extents, "ready_room_start") or GetSpawnPos(Player.extents) or Vector())
+	player.godMode = true
 end
 
 function OnConsoleChangeClass(player, type)

@@ -631,6 +631,8 @@ function Player:PerformMovement(offset, maxTraces)
         local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
 
         if (trace.fraction < 1) then
+			
+			--DMsg("collide")
 
             -- Remove the amount of the offset we've already moved.
             offset = offset * (1 - trace.fraction)
@@ -969,18 +971,31 @@ if (Server) then
             weapon.numBulletsInClip = weapon.clipSize
         end
     end
+	
+	function Player:GetCanTakeDamage(attacker, damage, doer, point, direction)
+		if self.godMode then
+			return false
+		end
+	end
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)
+		local o_damage = self:GetCanTakeDamage(attacker, damage, doer, point, direction)
+		if o_damage == false then
+			return
+		elseif o_damage then
+			damage = o_damage
+		end
         if Server.instagib == true then
             damage = 100
         end
         self.health = self.health - damage
         self.score = self.health
         if (self.health <= 0) then
-			Server.SendKillMessage(attacker:GetNick(), self:GetNick())
+			if attacker and type(attacker) == "userdata" and attacker.GetNick then
+				attacker.kills = attacker.kills + 1
+				Server.SendKillMessage(attacker:GetNick(), self:GetNick())
+			end
             self.deaths = self.deaths + 1
-            attacker.kills = attacker.kills + 1
-            
             self:Respawn()
         end
 

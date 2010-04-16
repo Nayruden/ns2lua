@@ -18,6 +18,13 @@ Script.Load("lua/weapons/Bite.lua")
 Script.Load("lua/weapons/PeaShooter.lua")
 
 PlayerClasses = {}
+function GetPlayerClassMapNames()
+	local t = {}
+	for k,v in pairs(PlayerClasses) do
+		table.insert(t, v.mapName)
+	end
+	return t
+end
 
 Script.Load("lua/classes/Player.lua")
 Script.Load("lua/entities/Target.lua")
@@ -29,6 +36,29 @@ Script.Load("lua/PropDynamic.lua")
 Script.Load("lua/classes/Skulk.lua")
 Script.Load("lua/classes/Marine.lua")
 Script.Load("lua/classes/BuildBot.lua")
+
+Script.Load("lua/entities/PlayerSpawn.lua")
+Script.Load("lua/entities/TargetSpawn.lua")
+Script.Load("lua/entities/ReadyRoomStart.lua")
+Script.Load("lua/entities/ResourceNozzle.lua")
+Script.Load("lua/entities/TechPoint.lua")
+Script.Load("lua/entities/Door.lua")
+Script.Load("lua/entities/TeamJoin.lua")
+
+function Shared.FindEntities(classes, origin, radius) -- origin and radius can be left nil
+	if type(classes) == "string" then classes = {classes} end
+	local entities = {}
+	for k, mapName in ipairs(classes) do
+		local ent = Shared.FindEntityWithClassname(mapName, nil)
+        while ent do
+			if not (origin and radius) or (ent:GetOrigin()-origin):GetLength() < radius then
+				table.insert(entities, ent)
+			end
+			ent = Shared.FindEntityWithClassname(mapName, ent)
+        end
+	end
+	return entities
+end
 
 function GetContextString()
 	if (Server) then
