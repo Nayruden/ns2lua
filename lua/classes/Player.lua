@@ -485,7 +485,7 @@ function Player:OnProcessMove(input)
     self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
     self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
     
-    if (ground) then
+    if (self.ground) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
     else
