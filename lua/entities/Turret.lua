@@ -88,8 +88,9 @@ function Turret:OnThink()
         self:SetAngles(Angles(0, yaw, pitch))
         if (Server and Shared.GetTime() > self.nextFireTime) then
             --Msg("delay passed")
-            local startPoint, endPoint = self:GetOrigin()+self.fireOffset, player:GetOrigin()+player:GetViewOffset()
-            --Msg("tracing")
+            local startPoint = self:GetOrigin()+self.fireOffset
+			local endPoint = player:GetOrigin()+player:GetCenterOffset()
+			
             local trace = Shared.TraceRay(startPoint, endPoint, EntityFilterOne(self))
             --Msg("traced")
             if trace.entity == player then

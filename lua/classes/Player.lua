@@ -589,6 +589,12 @@ function Player:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     return Game.instance:GetHasGameStarted()
 end
 
+function Player:GetCenterOffset()
+	local capsuleRadius = self.extents.x
+    local capsuleHeight = (self.extents.y - capsuleRadius) * 2
+	
+    return Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
+end
 --
 -- Returns true if the player is standing on the ground.
 --
