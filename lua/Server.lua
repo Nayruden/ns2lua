@@ -28,12 +28,15 @@ Server.instagib = false
 
 ActiveClientPlayers = {}
 
-function ChangePlayerClass(client, class, active, spawnPos)
+function ChangePlayerClass(client, class, active, overridePos, overrideAngle)
 	DebugMessage("Entering ChangePlayerClass(client, class, active, spawnPos)")
     local class_table = (PlayerClasses[class] or PlayerClasses.Default)
 	
     DebugMessage("Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
-    local player = Server.CreateEntity(class_table.mapName, spawnPos or GetSpawnPos(class_table.extents) or Vector())
+	local spawnPos,spawnAngle = GetSpawnPos(class_table.extents)
+    local player = Server.CreateEntity(class_table.mapName, overridePos or spawnPos or Vector())
+	player:SetAngles(overrideAngle or spawnAngle or Vector())
+	
 	if active then
 		player:SetNick(active:GetNick())
 		active:ClearInventory()
@@ -84,7 +87,7 @@ function GetSpawnPos(extents, ...)
     end
     if spawnPoint then
         local spawnPos = Vector(spawnPoint:GetOrigin())
-        return spawnPos+Vector(0, 0.01, 0)--, spawnPoint:GetAngles()
+        return spawnPos+Vector(0, 0.01, 0), spawnPoint:GetAngles()
     end
 end
 
