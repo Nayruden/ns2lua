@@ -26,6 +26,8 @@ Script.Load("lua/Shared.lua")
 Server.targetsEnabled = false
 Server.instagib = false
 
+ActiveClientPlayers = {}
+
 function ChangePlayerClass(client, class, active, spawnPos)
 	DebugMessage("Entering ChangePlayerClass(client, class, active, spawnPos)")
     local class_table = (PlayerClasses[class] or PlayerClasses.Default)
@@ -39,6 +41,7 @@ function ChangePlayerClass(client, class, active, spawnPos)
 	
     Server.SetControllingPlayer(client, player)
 	player:SetController(client)
+    ActiveClientPlayers[client] = player
 	
 	if active then	
         Server.DestroyEntity(active)
@@ -102,9 +105,13 @@ function OnClientConnect(client)
 
     Shared.Message("Client " .. client .. " has joined the server")
     
-    for k,ply in pairs(GetAllPlayers()) do
-        Server.SendCommand(player, string.format("nickmsg \"%s\" \"%s\"", ply.controller, ply:GetNick() or "<unknown>"))
-    end
+    player.godMode = true
+    
+    AddTimer(5, function()
+        for k,ply in pairs(GetAllPlayers()) do
+            Server.SendCommand(ActiveClientPlayers[client], string.format("nickmsg \"%s\" \"%s\"", ply.controller, ply:GetNick() or "<unknown>"))
+        end
+    end)
     
 end
 
@@ -127,6 +134,14 @@ function OnMapPostLoad()
 	if http then
 		http.request("http://serverlist.devicenull.org/register.php?port=27015")
 	end
+end
+
+function NotifyPlayer(plys, text, time)
+    plys = type(plys) == "userdata" and {plys} or plys or GetAllPlayers()
+    for k,ply in ipairs(plys) do
+        Server.SendCommand(ply, "notify \""..string.gsub(text, '"', "\3").."\""..(time and " \""..time.."\"" or ""))
+        Server.Broadcast(ply, text)
+    end
 end
 
 function OnConsoleThirdPerson(player)
@@ -193,11 +208,11 @@ end
 function OnConsoleChangeClass(player, type)
 	DebugMessage("Entering OnConsoleChangeClass(player, type)")
     if type == "Default" then
-      --ChangePlayerClass(player.controller, type, player, player:GetOrigin())	
-        Shared.Message("You cannot use this class!")
+        --ChangePlayerClass(player.controller, type, player, player:GetOrigin())
+        NotifyPlayer(player, "You cannot use this class!")
     elseif PlayerClasses[type] then
-        ChangePlayerClass(player.controller, type, player, player:GetOrigin())
-        Shared.Message("You have become a "..type.."!")
+        local newplayer = ChangePlayerClass(player.controller, type, player, player:GetOrigin())
+        NotifyPlayer(newplayer, "You have become a "..type.."!")
     else
         local options = {}
         for k,v in pairs(PlayerClasses) do
@@ -209,7 +224,7 @@ function OnConsoleChangeClass(player, type)
             options[#options-1] = options[#options-1].." and "..options[#options]
             options[#options] = nil
         end
-        Shared.Message("Your options for this command are "..table.concat(options, ", ")..".")
+        NotifyPlayer(player, "Your options for this command are "..table.concat(options, ", ")..".")
     end
 	DebugMessage("Exiting OnConsoleChangeClass(player, type)")
 end
@@ -266,6 +281,10 @@ function Server.SendKillMessage(killer, killed)
 	Server.SendCommand(nil, string.format("kill \"%s\" \"%s\"",killer,killed))
 end
 
+function OnConsoleNoClip(player, go)
+    player.noclip = (tonumber(go) or not tonumber(go) and not player.noclip and 1) == 1
+end
+
 -- Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
@@ -285,3 +304,4 @@ Event.Hook("Console_lua",           OnConsoleLua)
 Event.Hook("Console_nick",          OnCommandNick)
 Event.Hook("Console_say",           OnConsoleSay)
 Event.Hook("Console_instagib",      OnCommandInstaGib)
+Event.Hook("Console_noclip",        OnConsoleNoClip)

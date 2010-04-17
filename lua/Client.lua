@@ -44,8 +44,7 @@ function OnCommandHelp(userdata, ...)
         Shared.Message("* lua")
         Shared.Message("* cllua")
     elseif (args[1] == "features") then
-
-
+        
         Shared.Message("Gameplay Changes")
 
         Shared.Message("  * Added “changeclass” command for changing your class to “buildbot”, “marine”, or “skulk”")
@@ -100,7 +99,7 @@ end
 ClientNicks = {}
 function OnClientNickMessage(src, client, nick)
     ClientNicks[tonumber(client:match(qtrm))] = nick:match(qtrm)
-    Msg("GOT NICK ",tonumber(client:match(qtrm))," ",nick:match(qtrm))
+    DMsg("GOT NICK ",tonumber(client:match(qtrm))," ",nick:match(qtrm))
 end Event.Hook("Console_nickmsg",  OnClientNickMessage)
 
 Event.Hook("Console_help", OnCommandHelp)

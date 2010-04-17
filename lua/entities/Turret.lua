@@ -21,6 +21,7 @@ Turret.attackRadius     = 10
 Turret.fireDelay        = 0.2
 Turret.fireDamage       = 2
 Turret.fireOffset       = Vector(0, 0.5, 0)
+Turret.heightTries      = 4
 
 function Turret:OnInit()
     Actor.OnInit(self)
@@ -89,41 +90,45 @@ function Turret:OnUpdate()
         if (Shared.GetTime() > self.nextFireTime) then
             --Msg("delay passed")
             local startPoint = self:GetOrigin()+self.fireOffset
-			local endPoint = player:GetOrigin()+player:GetCenterOffset()
-            local trace = Shared.TraceRay(startPoint, endPoint, EntityFilterOne(self))
-            AddDebugElement(nil, "line", startPoint, endPoint, 5, 1, 1, 1, 1)
-            --Msg("traced")
-            if trace.entity == player then
-                --Msg("have target")
-                do -- CreateHitEffect
-                    local coords = Coords.GetOrthonormal(trace.normal)
-                    --Msg("have hit coords")
-                    coords.origin = trace.endPoint
-                    Shared.CreateEffect(player, self.hitCinematic, nil, coords)
-                    --Msg("hit effect done")
+            local dh = 1/self.heightTries
+            for i = 1, self.heightTries do
+                local endPoint = player:GetOrigin()+player:GetHeightOffset(i)
+                local trace = Shared.TraceRay(startPoint, endPoint, EntityFilterOne(self))
+                AddDebugElement(nil, "line", startPoint, endPoint, 5, 255, 100, 100, 150)
+                --Msg("traced")
+                if trace.entity == player then
+                    --Msg("have target")
+                    do -- CreateHitEffect
+                        local coords = Coords.GetOrthonormal(trace.normal)
+                        --Msg("have hit coords")
+                        coords.origin = trace.endPoint
+                        Shared.CreateEffect(player, self.hitCinematic, nil, coords)
+                        --Msg("hit effect done")
+                    end
+                    local direction = (trace.endPoint - startPoint):GetUnit()
+                    --Msg("have direction")
+                    if Server then
+                        player:TakeDamage(self, self.fireDamage, self, trace.endPoint, direction)
+                    end
+                    if Client then -- CreateMuzzleEffect
+                        --local coords = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(0, 0, .5))
+                        local coords = self:GetAngles():GetCoords()
+                        coords.origin = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(.5, 0, 0))
+                        --Msg("muzzle coords obtained")
+                        Shared.CreateEffect(self, self.muzzleFlashCinematic, nil, coords)
+                        --Msg("muzzle effect created")
+                    end
+                    self:PlaySound(self.fireSound)
+                    --Msg("HIT")
                 end
-                local direction = (trace.endPoint - startPoint):GetUnit()
-                --Msg("have direction")
-                if Server then
-                    player:TakeDamage(self, self.fireDamage, self, trace.endPoint, direction)
-                end
-                do -- CreateMuzzleEffect
-                    --local coords = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(0, 0, .5))
-                    local coords = self:GetAngles():GetCoords()
-                    coords.origin = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(.5, 0, 0))
-                    --Msg("muzzle coords obtained")
-                    Shared.CreateEffect(self, self.muzzleFlashCinematic, nil, coords)
-                    --Msg("muzzle effect created")
-                end
-                self:PlaySound(self.fireSound)
-                --Msg("HIT")
+                self.nextFireTime = Shared.GetTime()+self.fireDelay
+                --Msg("fire complete!")
+                break
             end
-            self.nextFireTime = Shared.GetTime()+self.fireDelay
-            --Msg("fire complete!")
         end
     end
     
-    self:SetNextThink(Turret.thinkInterval)
+    --self:SetNextThink(Turret.thinkInterval)
 end
 
 

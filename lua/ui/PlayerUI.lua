@@ -76,7 +76,7 @@ function PlayerUI_AddNotification(text, time)
         text = string.upper(tostring(text)),
         time = (time or 4)+Shared.GetTime()
     })
-    DMsg("Adding notification  \"",text,"\" for ",time or 4)
+    DMsg("Adding notification \"",text,"\" for ",time or 4)
 end
 
 local qtrm = "^\"?(.-)\"?$"

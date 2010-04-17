@@ -15,7 +15,7 @@ PlayerClasses.Default = Player
 
 Player.networkVars =
     {
-        controller                  = "integer",
+        controller                  = "integer (0 to 127)",
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
         viewModelId                 = "entityid",
@@ -40,6 +40,7 @@ Player.networkVars =
 		walkSpeed                   = "float",
         sprintSpeed                 = "float",
 		backSpeedScale              = "float",
+        noclip                      = "predicted boolean",
     }
 
 -- Class specific variables
@@ -263,7 +264,9 @@ function Player:OnLand(input, forwardAxis, sideAxis)
 end
 
 function Player:OnPressExit(input)
-    ShowInGameMenu()
+    if Client then
+        ShowInGameMenu()
+    end
 end
 function Player:OnPressTaunt(input)
     local sound = table.random(self.TauntSounds)
@@ -346,6 +349,9 @@ function Player:OnNotHeldSecondaryAttack(input)
         self:StopSecondaryAttack()
     end
 end
+function Player:OnPressDrop(input)
+    self.noclip = not self.noclip
+end
 
 Player.Keys = { -- "n" postfix means they are networked and predicted
     Exit                = "press",
@@ -424,8 +430,8 @@ function Player:OnProcessMove(input)
     local sideAxis   = nil
     
     -- Compute the forward and side axis aligned with the world xz plane.
-    forwardAxis = Vector(viewCoords.zAxis.x, 0, viewCoords.zAxis.z)
-    sideAxis    = Vector(viewCoords.xAxis.x, 0, viewCoords.xAxis.z)
+    forwardAxis = Vector(viewCoords.zAxis.x, self.noclip and viewCoords.zAxis.y or 0, viewCoords.zAxis.z)
+    sideAxis    = Vector(viewCoords.xAxis.x, self.noclip and viewCoords.xAxis.y or 0, viewCoords.xAxis.z)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
@@ -498,7 +504,7 @@ function Player:OnProcessMove(input)
     if (self.ground) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
-    else
+    elseif not self.noclip then
         -- Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + self.gravity * input.time
     end
@@ -629,7 +635,9 @@ end
 function Player:ApplyFriction(input, ground)
     local velocity = Vector(self.velocity)
     
-	velocity.y = 0
+    if not self.noclip then
+        velocity.y = 0
+    end
 
     local speed = velocity:GetLength()
 
@@ -642,7 +650,9 @@ function Player:ApplyFriction(input, ground)
         -- Only apply friction in the movement plane.
         self.velocity.x = self.velocity.x * speedScalar
         self.velocity.z = self.velocity.z * speedScalar
-
+        if self.noclip then
+            self.velocity.y = self.velocity.y * speedScalar
+        end
     end
 
 end
@@ -655,11 +665,8 @@ function Player:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     return Game.instance:GetHasGameStarted()
 end
 
-function Player:GetCenterOffset()
-	local capsuleRadius = self.extents.x
-    local capsuleHeight = (self.extents.y - capsuleRadius) * 2
-	
-    return Vector(0, self.extents.y, 0)
+function Player:GetHeightOffset(height)
+    return Vector(0, self.extents.y*(height*2-1), 0)
 end
 --
 -- Returns true if the player is standing on the ground.
@@ -696,7 +703,7 @@ function Player:GetIsOnGround()
         return false, nil
     end
 
-    return trace.fraction < 1, trace.normal
+    return trace.fraction < 1 and not self.noclip, trace.normal
 
 end
 
@@ -718,7 +725,7 @@ function Player:PerformMovement(offset, maxTraces)
         local traceStart = origin + center
         local traceEnd = traceStart + offset
 
-        local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
+        local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.noclip and 0 or self.moveGroupMask)
 
         if (trace.fraction < 1) then
 			
@@ -1028,8 +1035,19 @@ end
 -- for the camera.
 --
 function Player:GetCameraViewCoords()
-
-    local viewCoords  = self:GetViewAngles():GetCoords()
+    if Client and Client.spectateTurret then -- added this to debug their aim
+        local turret_info = Shared.FindEntities("turret", self:GetOrigin(), 10, true)[1]
+        if (turret_info ~= nil) then
+            local turret = turret_info.ent
+            self:ShowModel(true)
+            local viewAngle = turret:GetAngles()
+            local viewCoords = Angles(viewAngle.pitch, viewAngle.yaw+90, 0):GetCoords()
+            viewCoords.origin = turret:GetOrigin()+turret.fireOffset+Vector(.5, 0, 0)
+            return viewCoords
+        end
+    end
+    
+    local viewCoords = self:GetViewAngles():GetCoords()
 
     viewCoords.origin = self:GetOrigin() + self.viewOffset
 
