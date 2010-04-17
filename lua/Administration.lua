@@ -1,8 +1,3 @@
-
-function GetAllPlayers()
-    return Shared.FindEntities(GetPlayerClassMapNames())
-end
-
 if (Server) then
     -- You can change stuff in these tables if you know what you're doing
     A_AccessGroups = { -- up to eight groups (can be extended later)

@@ -91,12 +91,21 @@ end
 function OnClientConnect(client)
     
     -- Create a new player for the client.
-    ChangePlayerClass(client, "Default", nil, GetSpawnPos(Player.extents, "ready_room_start") or GetSpawnPos(Player.extents) or Vector())
+    local player = ChangePlayerClass(
+        client,
+        "Default",
+        nil,
+        GetSpawnPos(Player.extents, "ready_room_start") or GetSpawnPos(Player.extents) or Vector()
+    )
 
     Game.instance:StartGame()
 
     Shared.Message("Client " .. client .. " has joined the server")
-
+    
+    for k,ply in pairs(GetAllPlayers()) do
+        Server.SendCommand(player, string.format("nickmsg \"%s\" \"%s\"", ply.controller, ply:GetNick() or "<unknown>"))
+    end
+    
 end
 
 --
@@ -225,6 +234,7 @@ function OnCommandNick( ply, ... )
     local nickname = table.concat( { ... }, " " )
     Server.Broadcast( ply, "Nick changed to " .. nickname )
     ply:SetNick( nickname )
+    Server.SendCommand(nil, string.format("nickmsg \"%s\" \"%s\"", ply.controller, nickname))
 end
 
 function OnCommandInstaGib( ply )
