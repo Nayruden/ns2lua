@@ -40,7 +40,7 @@ end
 function BuildBotPlayer:CanPressJump(input)
     return true
 end
-function BuildBotPlayer:OnPressJump(input, forwardAxis, sideAxis)
+function BuildBotPlayer:OnPressJump(input, angles, forwardAxis, sideAxis)
     Player.OnPressJump(self, input)
     self.velocity.x = self.velocity.x + forwardAxis.x*10
     self.velocity.z = self.velocity.z + forwardAxis.z*10
