@@ -136,8 +136,8 @@ function DebugPoint(point, size, lifetime, r, g, b, a)
 end
 
 function DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifetime)
-    if (Client and not Client.GetIsRunningPrediction()) then    
-        Client.DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifetime)        
+    if (Client and not Client.GetIsRunningPrediction()) then
+        Client.DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifetime)
     end
 end
 

@@ -15,6 +15,7 @@ PlayerClasses.Default = Player
 
 Player.networkVars =
     {
+        controller                  = "integer",
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
         viewModelId                 = "entityid",
@@ -387,7 +388,7 @@ local lds
 function Player:OnProcessMove(input)
     if (Client) then
         self:UpdateWeaponSwing(input)
-    elseif Shared.enableDebugMessages then
+    elseif Shared.debugKeys then
         local ds, ks = "", ""
         for i = 0, 35 do
             local v = 2^i
@@ -565,7 +566,24 @@ function Player:OnProcessMove(input)
     if (not Shared.GetIsRunningPrediction()) then
         self:UpdatePoseParameters()
     end
-
+    
+    if (Client) then
+        local weapon = self:GetActiveWeapon()
+        local viewCoords = self:GetViewAngles():GetCoords()
+        viewCoords.origin = self:GetOrigin() + self.viewOffset
+        local trace = Shared.TraceRay(
+            viewCoords.origin,
+            viewCoords.origin + viewCoords.zAxis*50,
+            weapon and EntityFilterTwo(self, weapon) or EntityFilterOne(self)
+        )
+        if trace.entity and trace.entity.GetNick then
+            self.player_looked_at = true
+            PlayerUI_SetDisplayString(tostring(trace.entity:GetNick()))
+        elseif self.player_looked_at then
+            PlayerUI_SetDisplayString("")
+        end
+    end
+    
 end
 
 function Player:UpdateStepSound()
@@ -610,10 +628,8 @@ end
 
 function Player:ApplyFriction(input, ground)
     local velocity = Vector(self.velocity)
+    
 	velocity.y = 0
-    --if (self.ground) then
-        --velocity.y = 0
-    --end
 
     local speed = velocity:GetLength()
 
@@ -643,7 +659,7 @@ function Player:GetCenterOffset()
 	local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
 	
-    return Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
+    return Vector(0, self.extents.y, 0)
 end
 --
 -- Returns true if the player is standing on the ground.
@@ -668,6 +684,13 @@ function Player:GetIsOnGround()
     local traceEnd   = traceStart + offset
 
     local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
+    
+    if Shared.debugMovement then
+        if Client then
+            Client.DebugColor(10, 10, 255, 0)
+        end
+        DebugCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, 0.05)
+    end
 
     if (trace.fraction < 1 and trace.normal.y < Player.maxWalkableNormal) then
         return false, nil
@@ -1089,6 +1112,10 @@ if (Server) then
         return self.nick
     end
 
+else
+    function Player:GetNick()
+        return ClientNicks[self.controller]
+    end
 end
 
 --

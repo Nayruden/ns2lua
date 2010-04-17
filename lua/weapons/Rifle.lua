@@ -29,6 +29,8 @@ Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Rifle.bulletsToShoot        = 1
 Rifle.spread                = 0.03
+Rifle.crouchSpreadScale     = 0--0.5
+Rifle.sprintSpreadScale     = 10--1.5
 Rifle.range                 = 50
 Rifle.meleeRange            = 1.5     -- Range of melee attack
 Rifle.penetration           = 0
@@ -226,12 +228,9 @@ function Rifle:FireBullets(player)
 
         if (self.spread > 0) then
         	local usespread = self.spread
-			if player.sprinting then
-				usespread = 1.5*self.spread
-			elseif player.crouching then
-				usespread = 0.5*self.spread
-			end
-			
+                *(1+((self.crouchSpreadScale or 1)-1)*player.crouchFade)
+                *(1+((self.sprintSpreadScale or 1)-1)*player.sprintFade)
+            
             local xSpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
             local ySpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
 

@@ -58,8 +58,8 @@ function Turret:GetNick()
     return "Turret"
 end
 
-function Turret:OnThink()
-    Actor.OnThink(self)
+function Turret:OnUpdate()
+    Actor.OnUpdate(self)
     
     local player_info = Shared.FindEntities(GetPlayerClassMapNames(), self:GetOrigin(), self.attackRadius, true)[1]
     
@@ -86,12 +86,12 @@ function Turret:OnThink()
         local pitch = math.asin(y1 / vertHyp)
 
         self:SetAngles(Angles(0, yaw, pitch))
-        if (Server and Shared.GetTime() > self.nextFireTime) then
+        if (Shared.GetTime() > self.nextFireTime) then
             --Msg("delay passed")
             local startPoint = self:GetOrigin()+self.fireOffset
 			local endPoint = player:GetOrigin()+player:GetCenterOffset()
-			
             local trace = Shared.TraceRay(startPoint, endPoint, EntityFilterOne(self))
+            AddDebugElement(nil, "line", startPoint, endPoint, 5, 1, 1, 1, 1)
             --Msg("traced")
             if trace.entity == player then
                 --Msg("have target")
@@ -100,12 +100,13 @@ function Turret:OnThink()
                     --Msg("have hit coords")
                     coords.origin = trace.endPoint
                     Shared.CreateEffect(player, self.hitCinematic, nil, coords)
-                   -- Msg("hit effect done")
+                    --Msg("hit effect done")
                 end
                 local direction = (trace.endPoint - startPoint):GetUnit()
                 --Msg("have direction")
-                player:TakeDamage(self, self.fireDamage, self, trace.endPoint, direction)
-                --Msg("damage taken")
+                if Server then
+                    player:TakeDamage(self, self.fireDamage, self, trace.endPoint, direction)
+                end
                 do -- CreateMuzzleEffect
                     --local coords = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(0, 0, .5))
                     local coords = self:GetAngles():GetCoords()
@@ -115,6 +116,7 @@ function Turret:OnThink()
                     --Msg("muzzle effect created")
                 end
                 self:PlaySound(self.fireSound)
+                --Msg("HIT")
             end
             self.nextFireTime = Shared.GetTime()+self.fireDelay
             --Msg("fire complete!")

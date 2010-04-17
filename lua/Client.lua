@@ -97,6 +97,12 @@ function OnChatMessage(src, name, msg)	-- Should test if this message is coming 
 	ChatUI_AddMessage(name..": "..msg)
 end
 
+ClientNicks = {}
+function OnClientNickMessage(src, client, nick)
+    ClientNicks[tonumber(client:match(qtrm))] = nick:match(qtrm)
+    Msg("GOT NICK ",tonumber(client:match(qtrm))," ",nick:match(qtrm))
+end Event.Hook("Console_nickmsg",  OnClientNickMessage)
+
 Event.Hook("Console_help", OnCommandHelp)
 Event.Hook("Console_cllua",  OnConsoleClLua)
 Event.Hook("Console_kill",  OnKillMessage)
