@@ -186,7 +186,7 @@ function Player:SetViewAngles(viewAngles)
 
     local angles = Angles(self:GetAngles())
     angles.yaw  = viewAngles.yaw
-
+    angles.pitch = self.noclip and viewAngles.pitch or 0
     self:SetAngles(angles)
 
 end
@@ -666,7 +666,7 @@ function Player:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
 end
 
 function Player:GetHeightOffset(height)
-    return Vector(0, self.extents.y*(height*2-1), 0)
+    return Vector(0, self.extents.y*height*2, 0)
 end
 --
 -- Returns true if the player is standing on the ground.

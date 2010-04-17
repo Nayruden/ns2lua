@@ -92,7 +92,7 @@ function Turret:OnUpdate()
             local startPoint = self:GetOrigin()+self.fireOffset
             local dh = 1/self.heightTries
             for i = 1, self.heightTries do
-                local endPoint = player:GetOrigin()+player:GetHeightOffset(i)
+                local endPoint = player:GetOrigin()+player:GetHeightOffset(dh*i)
                 local trace = Shared.TraceRay(startPoint, endPoint, EntityFilterOne(self))
                 AddDebugElement(nil, "line", startPoint, endPoint, 5, 255, 100, 100, 150)
                 --Msg("traced")
@@ -120,10 +120,10 @@ function Turret:OnUpdate()
                     end
                     self:PlaySound(self.fireSound)
                     --Msg("HIT")
+                    self.nextFireTime = Shared.GetTime()+self.fireDelay
+                    break
                 end
-                self.nextFireTime = Shared.GetTime()+self.fireDelay
                 --Msg("fire complete!")
-                break
             end
         end
     end

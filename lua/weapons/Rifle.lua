@@ -29,8 +29,8 @@ Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Rifle.bulletsToShoot        = 1
 Rifle.spread                = 0.03
-Rifle.crouchSpreadScale     = 0--0.5
-Rifle.sprintSpreadScale     = 10--1.5
+Rifle.crouchSpreadScale     = 0.5
+Rifle.sprintSpreadScale     = 1.5
 Rifle.range                 = 50
 Rifle.meleeRange            = 1.5     -- Range of melee attack
 Rifle.penetration           = 0

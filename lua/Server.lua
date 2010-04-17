@@ -285,6 +285,13 @@ function OnConsoleNoClip(player, go)
     player.noclip = (tonumber(go) or not tonumber(go) and not player.noclip and 1) == 1
 end
 
+function OnConsoleRemoveTurrets(player) -- only temporary until administration is done
+    for k, turret in pairs(Shared.FindEntities("turret")) do
+        Server.DestroyEntity(turret)
+    end
+    Server.Broadcast(nil, player:GetNick().." removed all turrets!")
+end
+
 -- Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
@@ -305,3 +312,4 @@ Event.Hook("Console_nick",          OnCommandNick)
 Event.Hook("Console_say",           OnConsoleSay)
 Event.Hook("Console_instagib",      OnCommandInstaGib)
 Event.Hook("Console_noclip",        OnConsoleNoClip)
+Event.Hook("Console_removeturrets", OnConsoleRemoveTurrets)
