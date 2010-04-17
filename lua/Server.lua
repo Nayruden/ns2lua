@@ -35,11 +35,14 @@ function ChangePlayerClass(client, class, active, spawnPos)
 	if active then
 		player:SetNick(active:GetNick())
 		active:ClearInventory()
-        Server.DestroyEntity(active)
-    end
+	end
 	
     Server.SetControllingPlayer(client, player)
-    player:SetController(client)
+	player:SetController(client)
+	
+	if active then	
+        Server.DestroyEntity(active)
+    end
 
 	DebugMessage("Exiting ChangePlayerClass(client, class, active, spawnPos)")
     return player
