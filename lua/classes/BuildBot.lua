@@ -46,6 +46,10 @@ function BuildBotPlayer:OnPressJump(input, angles, forwardAxis, sideAxis)
     self.velocity.z = self.velocity.z + forwardAxis.z*10
 end
 
+function BuildBotPlayer:UpdateStepSound()
+    return
+end
+
 BuildBotPlayer.mapName = "buildbotplayer"
 Shared.LinkClassToMap("BuildBotPlayer", "buildbotplayer", BuildBotPlayer.networkVars )
 

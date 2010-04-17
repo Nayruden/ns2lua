@@ -18,11 +18,16 @@ SkulkPlayer.crouchSpeedScale    = 1
 SkulkPlayer.defaultHealth       = 75
 SkulkPlayer.WeaponLoadout       = { "weapon_bite" }
 SkulkPlayer.TauntSounds         = { "sound/ns2.fev/alien/voiceovers/chuckle" }
+SkulkPlayer.StepLeftSound       = "sound/ns2.fev/alien/skulk/footstep_left"
+SkulkPlayer.StepRightSound      = "sound/ns2.fev/alien/skulk/footstep_right"
 SkulkPlayer.stoodViewOffset          = Vector(0, 0.6, 0)
 SkulkPlayer.crouchedViewOffset       = Vector(0, 0.6, 0)
 for i = 1, #SkulkPlayer.TauntSounds do
     Shared.PrecacheSound(SkulkPlayer.TauntSounds[i])
 end
+
+Shared.PrecacheSound(SkulkPlayer.StepLeftSound)
+Shared.PrecacheSound(SkulkPlayer.StepRightSound)
 
 function SkulkPlayer:OnInit()
 	DebugMessage("Entering SkulkPlayer:OnInit()")
@@ -50,6 +55,37 @@ function SkulkPlayer:OnReleasePrimaryAttack(input)
     if (Shared.GetTime() > self.activityEnd) then
         self:StopPrimaryAttack()
     end
+end
+
+function SkulkPlayer:UpdateStepSound()
+	if(self.stepSoundTime > 0) then
+		self.stepSoundTime = self.stepSoundTime - 1000.0 * (Shared.GetTime() - self.lastFrameTime)
+		if(self.stepSoundTime < 0) then
+			self.stepSoundTime = 0
+		end
+	end
+    self.lastFrameTime = Shared.GetTime()
+	if(self.stepSoundTime > 0) then
+		return
+	end
+	local velocity = Vector(self.velocity)
+	velocity.y = 0
+	local speed = velocity:GetLength()
+	
+	if(speed < (self.walkSpeed * 0.3)) then
+		return
+	end
+	
+	if(not self.ground) then
+		return
+	end
+	
+	if(self.sprinting) then
+		self.stepSoundTime = 150.0
+	else
+	    self.stepSoundTime = 300.0
+	end
+	self:PlayStepSound()
 end
 
 SkulkPlayer.mapName = "skulkplayer"

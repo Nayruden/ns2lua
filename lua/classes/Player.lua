@@ -62,9 +62,14 @@ Player.crouchAnimationTime  = 0.5
 Player.sprintAnimationTime  = 0.5
 Player.WeaponLoadout        = { }
 Player.TauntSounds          = { }
+Player.StepLeftSound		= "sound/ns2.fev/marine/common/footstep_left"
+Player.StepRightSound		= "sound/ns2.fev/marine/common/footstep_right"
 for i = 1, #Player.TauntSounds do
     Shared.PrecacheSound(Player.TauntSounds[i])
 end
+
+Shared.PrecacheSound(Player.StepLeftSound)
+Shared.PrecacheSound(Player.StepRightSound)
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
 Player.Teams				= enum { 'Marines', 'Aliens' }
@@ -91,6 +96,9 @@ function Player:OnInit()
     self.crouching                  = false
     self.crouchFade                 = 0
     self.crouchStartTime            = 0
+	self.stepSoundTime				= 0.0
+	-- toggles left/right for step sounds
+	self.stepSide					= false
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
@@ -106,6 +114,7 @@ function Player:OnInit()
     self.controller					= 0
     self.inAir                      = false
     self.isTaunting                 = false
+    self.lastFrameTime              = Shared.GetTime()
     
     self.viewOffset                 = self.stoodViewOffset
 
@@ -523,6 +532,7 @@ function Player:OnProcessMove(input)
 
         -- Move the player with collision detection.
         self:PerformMovement( self.velocity * input.time, 5 )
+        self:UpdateStepSound()
 
         if (self.ground) then
             -- Finally, move the player back down to compensate for moving them up.
@@ -556,6 +566,46 @@ function Player:OnProcessMove(input)
         self:UpdatePoseParameters()
     end
 
+end
+
+function Player:UpdateStepSound()
+	if(self.stepSoundTime > 0) then
+		self.stepSoundTime = self.stepSoundTime - 1000.0 * (Shared.GetTime() - self.lastFrameTime)
+		if(self.stepSoundTime < 0) then
+			self.stepSoundTime = 0
+		end
+	end
+    self.lastFrameTime = Shared.GetTime()
+	if(self.stepSoundTime > 0) then
+		return
+	end
+	local velocity = Vector(self.velocity)
+	velocity.y = 0
+	local speed = velocity:GetLength()
+	
+	if(speed < (self.walkSpeed * 0.3)) then
+		return
+	end
+	
+	if(not self.ground or self.crouching) then
+		return
+	end
+	
+	if(self.sprinting) then
+		self.stepSoundTime = 250.0
+	else
+	    self.stepSoundTime = 400.0
+	end
+	self:PlayStepSound()
+end
+
+function Player:PlayStepSound()
+	local stepSoundName = self.StepLeftSound
+	if(self.stepSide) then
+		stepSoundName = self.StepRightSound
+	end
+	self.stepSide = not self.stepSide
+	self:PlaySound(stepSoundName)
 end
 
 function Player:ApplyFriction(input, ground)
