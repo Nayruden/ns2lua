@@ -488,6 +488,15 @@ function GetAnglesDifference(startAngle, endAngle)
     
 end
 
+function VectorToAngle(vec)
+    local horizHypSqr = (vec.x*vec.x+vec.z*vec.z)
+    local horizHyp = math.sqrt(horizHypSqr)
+    local yaw = math.acos(vec.x / horizHyp)
+    if (vec.z > 0) then yaw = math.pi*2 - yaw end
+    local pitch = math.asin(vec.y / math.sqrt(horizHypSqr+vec.y*vec.y))
+    return Angles(pitch, yaw, viewAngles.roll)
+end
+
 -- Takes a normalized vector
 function SetAnglesFromVector(entity, vec)
 
