@@ -15,6 +15,7 @@ PlayerClasses.Default = Player
 
 Player.networkVars =
     {
+        controller                  = "integer (0 to 127)",
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
         viewModelId                 = "entityid",
@@ -28,20 +29,21 @@ Player.networkVars =
         activityEnd                 = "predicted float",
         score                       = "integer",
         health                      = "integer",
-        canJump                     = "integer (0 to 1)",
         kills                       = "integer",
         deaths                      = "integer",
-        moveSpeed                   = "integer",
-        moveSpeedBackwards          = "integer",
+        moveSpeed                   = "predicted float",
         invert_mouse                = "integer (0 to 1)",
         gravity						= "float",
         sprinting                   = "predicted boolean",
-        crouching                   = "predicted integer (0 to 3)",
+        crouching                   = "predicted boolean",
         taunting                    = "predicted boolean",
 		walkSpeed                   = "float",
         sprintSpeed                 = "float",
 		backSpeedScale              = "float",
+        noclip                      = "predicted boolean",
     }
+
+Script.Load("lua/classes/PlayerInput.lua")
 
 -- Class specific variables
 Player.modelName = "models/marine/male/male.model"
@@ -51,19 +53,29 @@ Player.maxWalkableNormal    = math.cos(math.pi * 0.25)
 Player.stepHeight           = 0.2
 Player.friction				= 6
 Player.moveAcceleration     = 4
+Player.maxAirWishSpeed		= 3.5
+Player.maxSpeed				= 5.6
 Player.jumpHeight           = 1
 Player.gravity              = -9.81
 Player.walkSpeed            = 10
-Player.sprintSpeedScale     = 5
+Player.sprintSpeedScale     = 2
+Player.crouchSpeedScale     = 0.5
 Player.backSpeedScale       = 1
 Player.defaultHealth        = 100
 Player.stoodViewOffset      = Vector(0, 1.6256, 0)
 Player.crouchedViewOffset   = Vector(0, 0.9, 0)
+Player.crouchAnimationTime  = 0.5
+Player.sprintAnimationTime  = 0.5
 Player.WeaponLoadout        = { }
 Player.TauntSounds          = { }
+Player.StepLeftSound		= "sound/ns2.fev/marine/common/footstep_left"
+Player.StepRightSound		= "sound/ns2.fev/marine/common/footstep_right"
 for i = 1, #Player.TauntSounds do
     Shared.PrecacheSound(Player.TauntSounds[i])
 end
+
+Shared.PrecacheSound(Player.StepLeftSound)
+Shared.PrecacheSound(Player.StepRightSound)
 
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
 Player.Teams				= enum { 'Marines', 'Aliens' }
@@ -74,7 +86,6 @@ function Player:OnInit()
 
     self:SetModel(self.modelName)
 
-    self.canJump                    = 1
     self.viewPitch                  = 0
     self.viewRoll                   = 0
 
@@ -86,7 +97,14 @@ function Player:OnInit()
 
     self.thirdPerson                = false
     self.sprinting                  = false
-    self.crouching                  = 0
+    self.sprintFade                 = 0
+    self.sprintStartTime            = 0
+    self.crouching                  = false
+    self.crouchFade                 = 0
+    self.crouchStartTime            = 0
+	self.stepSoundTime				= 0.0
+	-- toggles left/right for step sounds
+	self.stepSide					= false
 
     self.overlayAnimationSequence   = Model.invalidSequence
     self.overlayAnimationStart      = 0
@@ -102,6 +120,7 @@ function Player:OnInit()
     self.controller					= 0
     self.inAir                      = false
     self.isTaunting                 = false
+    self.lastFrameTime              = Shared.GetTime()
     
     self.viewOffset                 = self.stoodViewOffset
 
@@ -171,7 +190,7 @@ function Player:SetViewAngles(viewAngles)
 
     local angles = Angles(self:GetAngles())
     angles.yaw  = viewAngles.yaw
-
+    angles.pitch = self.noclip and viewAngles.pitch or 0
     self:SetAngles(angles)
 
 end
@@ -244,114 +263,31 @@ function Player:BuildPose(poses)
 
 end
 
-function Player:GetCanJump(input, ground, groundNormal)
-    return ground
-end
-
-function Player:OnJump(input, forwardAxis, sideAxis)
-    
-end
-function Player:OnLand(input, forwardAxis, sideAxis)
-    
-end
-
-function Player:GetCanCrouch(input, ground, groundNormal)
-    return true--ground
-end
-
-function Player:OnCrouch(input, forwardAxis, sideAxis)
-    
-end
-function Player:OnStand(input, forwardAxis, sideAxis)
-    
-end
-
-function Player:GetCanSprint(input, ground, groundNormal)
-    return true and not self.crouching
-end
-function Player:GetCanStartSprint(input, ground, groundNormal)
-    return true
-end
-function Player:OnSprint(input, forwardAxis, sideAxis)
-    
-end
-function Player:OnWalk(input, forwardAxis, sideAxis)
-    
-end
-
-function Player:GetCanPrimaryAttack(input) -- do not use this for ammo checks!
-    return true
-end
-function Player:OnStartPrimaryAttack(input) -- do not use this for animations!
-    
-end
-function Player:OnStopPrimaryAttack(input)
-    
-end
-
-function Player:GetCanSecondaryAttack(input) -- do not use this for ammo checks!
-    return true
-end
-function Player:OnStartSecondaryAttack(input) -- do not use this for animations!
-    
-end
-function Player:OnStopSecondaryAttack(input)
-    
-end
-
-function Player:GetCanReload(input) -- do not use this for specific weapon related checks!
-    return true
-end
-function Player:OnStartReload(input) -- do not use this for animations!
-    
-end
-function Player:OnStopReload(input)
-    
-end
-
-function Player:GetCanTaunt(input)
-    return true
-end
-function Player:OnStartTaunt(input)
-    local sound = table.random(self.TauntSounds)
-    if sound then
-        self:PlaySound(sound)
-    end
-end
-function Player:OnEndTaunt(input)
-    
-end
-
 --
 -- Called to handle user input for the player.
 --
+local lds
 function Player:OnProcessMove(input)
-
     if (Client) then
-
         self:UpdateWeaponSwing(input)
-
-        if (Client.GetIsRunningPrediction()) then
-
-            -- When exit hit, bring up menu
-            if(bit.band(input.commands, Move.Exit) ~= 0) then
-                ShowInGameMenu()
+    elseif Shared.debugKeys then
+        local ds, ks = "", ""
+        for i = 0, 35 do
+            local v = 2^i
+            local down = bit.band(input.commands, v) > 0
+            ds = ds..(down and 1 or 0)
+            if down then
+                for k,v in pairs(self.Keys) do
+                    if Move[k] == v then
+                        ks = ks.." "..k
+                        break
+                    end
+                end
             end
-
         end
-
-    end
-
-    if(bit.band(input.commands, Move.Taunt) ~= 0 and self:GetCanTaunt(input)) then
-        if (not self.taunting) then
-            self:OnStartTaunt(input)
-        end
-        self.taunting = 3
-    elseif (self.taunting) then
-        self.taunting = self.taunting - 1
-        if (self.taunting <= 0) then
-            self.taunting = nil
-        self:OnEndTaunt(input)
+        if ds ~= lds then
+            DMsg(ds..ks)
+            lds = ds
         end
     end
     
@@ -370,156 +306,48 @@ function Player:OnProcessMove(input)
     local sideAxis   = nil
     
     -- Compute the forward and side axis aligned with the world xz plane.
-    forwardAxis = Vector(viewCoords.zAxis.x, 0, viewCoords.zAxis.z)
-    sideAxis    = Vector(viewCoords.xAxis.x, 0, viewCoords.xAxis.z)
+    forwardAxis = Vector(viewCoords.zAxis.x, self.noclip and viewCoords.zAxis.y or 0, viewCoords.zAxis.z)
+    sideAxis    = Vector(viewCoords.xAxis.x, self.noclip and viewCoords.xAxis.y or 0, viewCoords.xAxis.z)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
-	
-    local canMove = self:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     
-    local ground, groundNormal = self:GetIsOnGround()
-    if (ground and self.inAir) then
+    local canMove = self:GetCanMove(input, angles, forwardAxis, sideAxis)
+    
+    self.ground, self.groundNormal = self:GetIsOnGround()
+    if (self.ground and self.inAir) then
         self:OnLand(input, forwardAxis, sideAxis)
     end
-    self.inAir = ground
-
-    -- Handle jumping
-    if (canMove and self:GetCanJump(input, ground, groundNormal)) then
-        if (self.canJump == 0 and bit.band(input.commands, Move.Jump) == 0) then
-            self.canJump = 1
-        elseif (self.canJump == 1 and bit.band(input.commands, Move.Jump) ~= 0) then
-            self.canJump = 0
-
-            -- Compute the initial velocity to give us the desired jump
-            -- height under the force of gravity.
-            self.velocity.y = math.sqrt(-2 * self.jumpHeight * self.gravity)
-            
-            self:OnJump(input, forwardAxis, sideAxis)
-            ground = false
-        end
-    end
-
-    -- Handle crouching
-    -- From my tests, it seems that the server doesn't always recognize that crouch is pressed, so we have a countdown to uncrouch as well
-    if (bit.band(input.commands, Move.Crouch) ~= 0 and self:GetCanCrouch(input, ground, groundNormal)) then
-        if (not self.crouching) then
-            --self:SetAnimation( "" ) -- Needs a crouch animation
-            self.moveSpeed = self.crouchSpeed or self.moveSpeed
-			self:SetPoseParam("crouch", 1.0)
-            self.viewOffset = self.crouchedViewOffset
-            self:OnCrouch(input, forwardAxis, sideAxis)
-        end
-        self.crouching = 3
-    elseif (self.crouching) then
-        self.crouching = self.crouching - 1
-        if (self.crouching <= 0) then
-            self.crouching = nil
-            self.curSpeed = self.moveSpeed
-			self:SetPoseParam("crouch", 0.0)
-            self.viewOffset = self.stoodViewOffset
-            self:OnStand(input, forwardAxis, sideAxis)
-        end
-    end
-
-    if (bit.band(input.commands, Move.MovementModifier) ~= 0 and self:GetCanSprint(input, ground, groundNormal)) then
-        if (not self.sprinting and self:GetCanStartSprint(input, ground, groundNormal)) then
-            self.sprinting = true
-            self.moveSpeed = self.moveSpeed*self.sprintSpeedScale
-            self:SetPoseParam("sprint", 1.0)
-            self:OnSprint(input, forwardAxis, sideAxis)
-        end
-    elseif (self.sprinting) then
-    	self.sprinting = false
-    	self.moveSpeed = self.walkSpeed
-    	self:SetPoseParam("sprint", 0.0)
-        self:OnWalk(input, forwardAxis, sideAxis)
-    end
+    self.inAir = self.ground
     
+    self.moveSpeed = self.walkSpeed
     
-    if (ground) then
+	-- OO handling of all Movement Keys
+	self:ProcessMoveKeys(input,angles,forwardAxis,sideAxis)
+    
+    self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
+    self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
+    
+    if (self.ground and self.velocity.y < 0) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
-    else
+		self:ApplyFriction(input)
+    elseif not self.noclip then
         -- Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + self.gravity * input.time
+		self:ApplyAirFriction(input)
+	else
+		self:ApplyFriction(input)
     end
 
-    self:ApplyFriction(input, ground)
-
-    if (canMove) then
-
-        -- Compute the desired movement direction based on the input.
-        local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
-        
-        local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
-
-        -- Accelerate in the desired direction, ala Quake/Half-Life
-
-        local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
-        local addSpeed     = wishSpeed - currentSpeed
-
-        if (addSpeed > 0) then
-            local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
-            self.velocity = self.velocity + wishDirection * accelSpeed
-        end
-
-        local offset = nil
-
-        if (ground) then
-            -- First move the character upwards to allow them to go up stairs and
-            -- over small obstacles.
-            local start = Vector(self:GetOrigin())
-            offset = self:PerformMovement( Vector(0, self.stepHeight, 0), 1 ) - start
-        end
-
-        -- Move the player with collision detection.
-        self:PerformMovement( self.velocity * input.time, 5 )
-
-        if (ground) then
-            -- Finally, move the player back down to compensate for moving them up.
-            -- We add in an additional step height for moving down steps/ramps.
-            offset.y = offset.y + self.stepHeight
-            self:PerformMovement( -offset, 1 )
-        end
-
-        -- Handle the buttons.
-
-        if (self.activity ~= Player.Activity.Reloading and self:GetCanReload(input)) then
-            if (bit.band(input.commands, Move.Reload) ~= 0) then
-
-                if (self.activity == Player.Activity.Shooting) then
-                    self:StopPrimaryAttack()
-                end
-                if (self.activity == Player.Activity.AltShooting) then
-                    self:StopSecondaryAttack()
-                end
-
-                self:Reload()
-                self:OnStartReload(input)
-
-            else
-
-                -- Process attack
-                if (bit.band(input.commands, Move.PrimaryAttack) ~= 0 and self:GetCanPrimaryAttack(input)) then
-                    self:PrimaryAttack()
-                    self:OnStartPrimaryAttack(input)
-                elseif (self.activity == Player.Activity.Shooting) then
-                    self:StopPrimaryAttack()
-                    self:OnStopPrimaryAttack(input)
-                end
-                if (bit.band(input.commands, Move.SecondaryAttack) ~= 0 and self:GetCanSecondaryAttack(input)) then
-                    self:SecondaryAttack()
-                    self:OnStartSecondaryAttack(input)
-                elseif (self.activity == Player.Activity.AltShooting and Shared.GetTime() > self.activityEnd) then
-                    self:StopSecondaryAttack()
-                    self:OnStopSecondaryAttack(input)
-                end
-
-            end
-        end
-
-    end
+	
+	if canMove then
+		if self.ground then
+			self:ApplyMove(input, viewCoords, forwardAxis, sideAxis)
+		else
+			self:ApplyAirMove(input, viewCoords, forwardAxis, sideAxis)
+		end
+	end
 
     -- Transition to the idle animation if the current activity has finished.
 
@@ -533,7 +361,6 @@ function Player:OnProcessMove(input)
         local weapon = self:GetActiveWeapon()
         if (weapon ~= nil) then
             weapon:ReloadFinish()
-            self:OnStopReload(input)
         end
     end
 
@@ -544,13 +371,109 @@ function Player:OnProcessMove(input)
     if (not Shared.GetIsRunningPrediction()) then
         self:UpdatePoseParameters()
     end
-
+    
+    if (Client) then
+        local weapon = self:GetActiveWeapon()
+        local viewCoords = self:GetViewAngles():GetCoords()
+        viewCoords.origin = self:GetOrigin() + self.viewOffset
+        local trace = Shared.TraceRay(
+            viewCoords.origin,
+            viewCoords.origin + viewCoords.zAxis*50,
+            weapon and EntityFilterTwo(self, weapon) or EntityFilterOne(self)
+        )
+        if trace.entity and trace.entity.GetNick then
+            self.player_looked_at = true
+            PlayerUI_SetDisplayString(tostring(trace.entity:GetNick()))
+        elseif self.player_looked_at then
+            PlayerUI_SetDisplayString("")
+        end
+    end
+    
 end
 
-function Player:ApplyFriction(input, ground)
-    local velocity = Vector(self.velocity)
-  
-    if (ground) then
+function Player:UpdateStepSound()
+	if(self.stepSoundTime > 0) then
+		self.stepSoundTime = self.stepSoundTime - 1000.0 * (Shared.GetTime() - self.lastFrameTime)
+		if(self.stepSoundTime < 0) then
+			self.stepSoundTime = 0
+		end
+	end
+    self.lastFrameTime = Shared.GetTime()
+	if(self.stepSoundTime > 0) then
+		return
+	end
+	local velocity = Vector(self.velocity)
+	velocity.y = 0
+	local speed = velocity:GetLength()
+	
+	if(speed < (self.walkSpeed * 0.3)) then
+		return
+	end
+	
+	if(not self.ground or self.crouching) then
+		return
+	end
+	
+	if(self.sprinting) then
+		self.stepSoundTime = 250.0
+	else
+	    self.stepSoundTime = 400.0
+	end
+	self:PlayStepSound()
+end
+
+function Player:PlayStepSound()
+	local stepSoundName = self.StepLeftSound
+	if(self.stepSide) then
+		stepSoundName = self.StepRightSound
+	end
+	self.stepSide = not self.stepSide
+	self:PlaySound(stepSoundName)
+end
+
+function Player:ApplyMove(input,  angles, forwardAxis, sideAxis)
+
+	-- Compute the desired movement direction based on the input.
+	local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
+	
+	local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
+
+	-- Accelerate in the desired direction, ala Quake/Half-Life
+
+	local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
+	local addSpeed     = wishSpeed - currentSpeed
+
+	if (addSpeed > 0) then
+		local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
+		self.velocity = self.velocity + wishDirection * accelSpeed
+	end
+	self:CapHorizontalSpeed()
+	
+	local offset = nil
+
+	if (self.ground) then
+		-- First move the character upwards to allow them to go up stairs and
+		-- over small obstacles.
+		local start = Vector(self:GetOrigin())
+		offset = self:PerformMovement( Vector(0, self.stepHeight, 0), 1 ) - start
+	end
+
+	-- Move the player with collision detection.
+	self:PerformMovement( self.velocity * input.time, 5 )
+	self:UpdateStepSound()
+
+	if (self.ground) then
+		-- Finally, move the player back down to compensate for moving them up.
+		-- We add in an additional step height for moving down steps/ramps.
+		offset.y = offset.y + self.stepHeight
+		self:PerformMovement( -offset, 1 )
+	end
+
+end
+function Player:ApplyFriction(input)	
+	local velocity = Vector(self.velocity)
+    
+    if not self.noclip then
         velocity.y = 0
     end
 
@@ -565,11 +488,54 @@ function Player:ApplyFriction(input, ground)
         -- Only apply friction in the movement plane.
         self.velocity.x = self.velocity.x * speedScalar
         self.velocity.z = self.velocity.z * speedScalar
-
+        if self.noclip then
+            self.velocity.y = self.velocity.y * speedScalar
+        end
     end
 
 end
 
+function Player:GetHorizontalSpeed()
+	local horizVelo = Vector(self.velocity.x,0,self.velocity.z)
+	return horizVelo:GetLength()
+end
+
+function Player:CapHorizontalSpeed()
+	local horizVelo = Vector(self.velocity.x,0,self.velocity.z)
+	if (horizVelo:GetLength() > self.maxSpeed) then
+		horizVelo:Normalize()
+		self.velocity = Vector(horizVelo.x  * self.maxSpeed, self.velocity.y, horizVelo.z * self.maxSpeed)
+	end
+end
+
+function Player:ApplyAirMove(input,  angles, forwardAxis, sideAxis)
+
+	-- Compute the desired movement direction based on the input.
+	local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
+	
+	local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
+	wishSpeed = math.min(wishSpeed,self.maxAirWishSpeed)
+
+	-- Accelerate in the desired direction, ala Quake/Half-Life
+		
+	local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
+	local addSpeed     = wishSpeed - currentSpeed
+
+	if (addSpeed > 0) then
+		local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
+		self.velocity = self.velocity + wishDirection * accelSpeed
+	end
+	self:CapHorizontalSpeed()
+	
+	local offset = nil
+
+	-- Move the player with collision detection.
+	self:PerformMovement( self.velocity * input.time, 5 )
+
+end
+function Player:ApplyAirFriction(input)
+-- only use friction when on the ground.
+end
 --
 -- Returns true if the player is allowed to move (this doesn't affect moving
 -- the view).
@@ -578,6 +544,9 @@ function Player:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
     return Game.instance:GetHasGameStarted()
 end
 
+function Player:GetHeightOffset(height)
+    return Vector(0, self.extents.y*height*2, 0)
+end
 --
 -- Returns true if the player is standing on the ground.
 --
@@ -601,12 +570,19 @@ function Player:GetIsOnGround()
     local traceEnd   = traceStart + offset
 
     local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
+    
+    if Shared.debugMovement then
+        if Client then
+            Client.DebugColor(10, 10, 255, 0)
+        end
+        DebugCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, 0.05)
+    end
 
     if (trace.fraction < 1 and trace.normal.y < Player.maxWalkableNormal) then
         return false, nil
     end
 
-    return trace.fraction < 1, trace.normal
+    return trace.fraction < 1 and not self.noclip, trace.normal
 
 end
 
@@ -628,9 +604,11 @@ function Player:PerformMovement(offset, maxTraces)
         local traceStart = origin + center
         local traceEnd = traceStart + offset
 
-        local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
+        local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.noclip and 0 or self.moveGroupMask)
 
         if (trace.fraction < 1) then
+			
+			--DMsg("collide")
 
             -- Remove the amount of the offset we've already moved.
             offset = offset * (1 - trace.fraction)
@@ -875,6 +853,19 @@ end
 function Player:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     self:SetPoseParam("move_yaw",   moveYaw)
     self:SetPoseParam("move_speed", horizontalVelocity:GetLength() * 0.25)
+    if self.crouching then
+        self.crouchFade = math.min((Shared.GetTime()-self.crouchStartTime)/self.crouchAnimationTime, 1)
+    else
+        self.crouchFade = 1-math.min((Shared.GetTime()-self.crouchStartTime)/self.crouchAnimationTime, 1)
+    end
+    self:SetPoseParam("crouch", self.crouchFade)
+    self.viewOffset = self.stoodViewOffset+(self.crouchedViewOffset-self.stoodViewOffset)*self.crouchFade
+    if self.sprinting then
+        self.sprintFade = math.min((Shared.GetTime()-self.sprintStartTime)/self.sprintAnimationTime, 1)
+    else
+        self.sprintFade = 1-math.min((Shared.GetTime()-self.sprintStartTime)/self.sprintAnimationTime, 1)
+    end
+    self:SetPoseParam("sprint", self.sprintFade)
 end
 
 function Player:UpdatePoseParameters()
@@ -923,8 +914,19 @@ end
 -- for the camera.
 --
 function Player:GetCameraViewCoords()
-
-    local viewCoords  = self:GetViewAngles():GetCoords()
+    if Client and Client.spectateTurret then -- added this to debug their aim
+        local turret_info = Shared.FindEntities("turret", self:GetOrigin(), 10, true)[1]
+        if (turret_info ~= nil) then
+            local turret = turret_info.ent
+            self:ShowModel(true)
+            local viewAngle = turret:GetAngles()
+            local viewCoords = Angles(viewAngle.pitch, viewAngle.yaw+90, 0):GetCoords()
+            viewCoords.origin = turret:GetOrigin()+turret.fireOffset+Vector(.5, 0, 0)
+            return viewCoords
+        end
+    end
+    
+    local viewCoords = self:GetViewAngles():GetCoords()
 
     viewCoords.origin = self:GetOrigin() + self.viewOffset
 
@@ -961,26 +963,41 @@ if (Server) then
 		self:RetractWeapon()
 	end
 
-    function Player:Respawn(overridePosition)
-        self:SetOrigin(overridePosition or GetSpawnPos(self.extents) or Vector())
+    function Player:Respawn(overridePosition, overrideAngle)
+		local spawnPos,spawnAng = GetSpawnPos(self.extents)
+        self:SetOrigin(overridePosition or spawnPos or Vector())
+		self:SetAngles(overrideAngle or spawnAng or Vector())
         self.health = self.defaultHealth
         local weapon = self:GetActiveWeapon()
         if weapon then
             weapon.numBulletsInClip = weapon.clipSize
         end
     end
+	
+	function Player:GetCanTakeDamage(attacker, damage, doer, point, direction)
+		if self.godMode then
+			return false
+		end
+	end
     
     function Player:TakeDamage(attacker, damage, doer, point, direction)
+		local o_damage = self:GetCanTakeDamage(attacker, damage, doer, point, direction)
+		if o_damage == false then
+			return
+		elseif o_damage then
+			damage = o_damage
+		end
         if Server.instagib == true then
             damage = 100
         end
         self.health = self.health - damage
         self.score = self.health
         if (self.health <= 0) then
-			Server.SendKillMessage(attacker:GetNick(), self:GetNick())
+			if attacker and type(attacker) == "userdata" and attacker.GetNick then
+				attacker.kills = (attacker.kills or 0) + 1
+				Server.SendKillMessage(attacker:GetNick(), self:GetNick())
+			end
             self.deaths = self.deaths + 1
-            attacker.kills = attacker.kills + 1
-            
             self:Respawn()
         end
 
@@ -994,6 +1011,10 @@ if (Server) then
         return self.nick
     end
 
+else
+    function Player:GetNick()
+        return ClientNicks[self.controller]
+    end
 end
 
 --

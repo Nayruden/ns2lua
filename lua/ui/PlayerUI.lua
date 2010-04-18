@@ -28,7 +28,7 @@ end
 function PlayerUI_GetWeaponAmmo()
     
     local player = Client.GetLocalPlayer()
-    return PlayerUI_GetEnergy()/(player.maxEnergy or 1)*120--player:GetWeaponAmmo()
+    return player:GetWeaponAmmo()--PlayerUI_GetEnergy()/(player.maxEnergy or 1)*120
     
 end
 
@@ -48,22 +48,42 @@ function PlayerUI_GetGameTime()
 end
 
 function PlayerUI_GetStatus()
-    if Main.GetDevMode() then
-        local player = Client.GetLocalPlayer()
-        local origin = Vector(player:GetOrigin())
-        local view = Angles(player:GetViewAngles())
-        local ground, groundnrml = player:GetIsOnGround()
-        local vel = player:GetVelocity()
-        return "xyz " .. Round(origin.x,3) .. " " .. Round(origin.y,3) .. " " .. Round(origin.z,3) .. "\r"
-                .. "vel " .. Round(vel.x,3) .. " " .. Round(vel.y,3) .. " " .. Round(vel.z,3) .. "\r"
-                .. "pyr " .. Round(view.pitch,3) .. " " .. Round(view.yaw,3) .. " " .. Round(view.roll,3) .. "\r" 
-                .. "canmove " .. tostring(player:GetCanMove()) .. " onground " .. tostring(ground)
-    else
-        return ""
+    local s, t = "", Shared.GetTime()
+    local i = 1
+    while i <= #PlayerUI_Notifications do
+        local notification = PlayerUI_Notifications[i]
+        if #notification.text == 0 then
+            table.remove(PlayerUI_Notifications, i)
+            i = i-1
+            if #PlayerUI_Notifications > 0 then
+                PlayerUI_Notifications[1].startTime = Shared.GetTime()
+            end
+        else
+            if notification.time < t then
+                notification.text = notification.text:sub(2) -- cool little (untimed) fade away thing
+            end
+            s = s..notification.text.."    "
+        end
+        i = i+1
     end
+    return s
 end
 
--- 23 BEGIN
+PlayerUI_Notifications = {}
+
+function PlayerUI_AddNotification(text, time)
+    table.insert(PlayerUI_Notifications, {
+        text = string.upper(tostring(text)),
+        time = (time or 4)+Shared.GetTime()
+    })
+    DMsg("Adding notification \"",text,"\" for ",time or 4)
+end
+
+local qtrm = "^\"?(.-)\"?$"
+function OnNotification(src, text, time)
+	PlayerUI_AddNotification(text:match(qtrm):gsub("\3", '"'), tonumber(time))
+end Event.Hook("Console_notify",  OnNotification)
+
 displystring = ""
 stringID = 0
 
@@ -97,4 +117,3 @@ end
 function PlayerUI_GetDisplayString()
     return displystring
 end
--- 23 END

@@ -50,4 +50,15 @@ Event.Hook("Console_map",  OnCommandMap)
 Event.Hook("Console_exit", OnCommandExit)
 Event.Hook("Console_quit", OnCommandExit)
 
+function OnConsoleMLua(...)
+    local str = table.concat( { ... }, " " ):gsub( "%s?([%[%]\\%.%?])%s?", "%1" )
+    Shared.Message( "(Menu) Running lua: " .. str )
+    local good, err = loadstring(str)
+    if not good then
+        Shared.Message( err )
+        return
+    end
+    good()
+end Event.Hook("Console_mlua", OnConsoleMLua)
+
 Main.SetMenu( kMainMenuFlash )

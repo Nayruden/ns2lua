@@ -376,7 +376,7 @@ function ViewModel:GetAttachPointCoords(attachPointIndex)
             model:GetBoneCoords(poses, boneCoords)
         
             local coords = self:GetCoords()
-            return coords--model:GetAttachPointCoords(attachPointIndex, boneCoords)
+            return coords * model:GetAttachPointCoords(attachPointIndex, boneCoords)
         end
 
     end

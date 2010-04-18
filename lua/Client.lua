@@ -14,9 +14,9 @@
 decoda_name = "Client"
 
 Script.Load("lua/Shared.lua")
-Script.Load("lua/PlayerUI.lua")
-Script.Load("lua/ChatUI.lua")
-Script.Load("lua/KillUI.lua")
+Script.Load("lua/ui/PlayerUI.lua")
+Script.Load("lua/ui/ChatUI.lua")
+Script.Load("lua/ui/KillUI.lua")
 
 Client.SetMouseVisible(false)
 Client.SetMouseCaptured(true)
@@ -44,8 +44,7 @@ function OnCommandHelp(userdata, ...)
         Shared.Message("* lua")
         Shared.Message("* cllua")
     elseif (args[1] == "features") then
-
-
+        
         Shared.Message("Gameplay Changes")
 
         Shared.Message("  * Added “changeclass” command for changing your class to “buildbot”, “marine”, or “skulk”")
@@ -96,6 +95,12 @@ function OnChatMessage(src, name, msg)	-- Should test if this message is coming 
 	msg = msg:match(qtrm)
 	ChatUI_AddMessage(name..": "..msg)
 end
+
+ClientNicks = {}
+function OnClientNickMessage(src, client, nick)
+    ClientNicks[tonumber(client:match(qtrm))] = nick:match(qtrm)
+    DMsg("GOT NICK ",tonumber(client:match(qtrm))," ",nick:match(qtrm))
+end Event.Hook("Console_nickmsg",  OnClientNickMessage)
 
 Event.Hook("Console_help", OnCommandHelp)
 Event.Hook("Console_cllua",  OnConsoleClLua)

@@ -1,5 +1,6 @@
-
 class 'TeamJoin' (Entity)
+
+Script.Load("lua/utility/Utility.lua")
 
 TeamJoin.thinkInterval = 0.25
 

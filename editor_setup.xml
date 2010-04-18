@@ -1,4 +1,17 @@
 <classes>
+    <!-- ns2lua turrret -->
+    <class name="turret">
+
+        <model>
+            <file>models/temp/sentry/sentry.model</file>
+        </model>
+        
+        <parameter name="attackRadius" type="distance" label="Attack radius" default="20.0" help="Temporary development turret that fires at nearby players."/>
+        <sphere>
+            <radius>attackRadius</radius>
+        </sphere>
+        
+    </class>
     
     <!-- Un-animated prop -->
     <class name="prop_static"  placeable="false">

@@ -12,7 +12,7 @@ MarinePlayer.normal_sprintSpeedScale    = 2
 MarinePlayer.normal_moveAcceleration    = 5
 MarinePlayer.normal_jumpHeight          = 0.7
 MarinePlayer.instagib_walkSpeed         = 12
-MarinePlayer.instagib_sprintSpeedScale  = 24
+MarinePlayer.instagib_sprintSpeedScale  = 2
 MarinePlayer.instagib_moveAcceleration  = 4
 MarinePlayer.instagib_jumpHeight        = 1
 MarinePlayer.backSpeedScale             = 0.5
@@ -63,7 +63,7 @@ function MarinePlayer:SuperchargeWithInstagibMagic(instagib)
         self.sprintSpeedScale   = self.instagib_sprintSpeedScale
     else
         self.moveAcceleration   = self.normal_walkSpeed
-        self.jumpHeight         = self.normal_sprintSpeedScale
+        self.jumpHeight         = self.normal_jumpHeight
         self.walkSpeed          = self.normal_walkSpeed
         self.sprintSpeedScale   = self.normal_sprintSpeedScale
     end
@@ -84,34 +84,27 @@ function MarinePlayer:Respawn(overridePosition)
     self.energy = self.maxEnergy
 end
 
-function MarinePlayer:OnStartTaunt(input)
-    DMsg("TAUNT")
-    if (bit.band(input.commands, Move.MovementModifier) ~= 0) then
-        if self.energy > 10 then
-            self.flashlightState = not self.flashlightState
-            DebugMessage(self.flashlightState and "FL on!" or "FL off!")
-        end
-        return false
-    end
-    return Player.OnStartTaunt(self, input)
+function MarinePlayer:OnPressToggleFlashlight(input)
+    self.flashlightState = not self.flashlightState
+    DebugMessage(self.flashlightState and "FL on!" or "FL off!")
 end
 
 function MarinePlayer:OnChangeWeapon(weapon)
     weapon:SetAttachPoint("RHand_Weapon")
 end
 
-function MarinePlayer:OnStopPrimaryAttack(input)
+function MarinePlayer:OnReleasePrimaryAttack(input)
     if (Shared.GetTime() > self.activityEnd) then
         self:StopPrimaryAttack()
     end
 end
 
-function MarinePlayer:GetCanStartSprint(input, ground, groundNormal)
-    return  self.energy > 20
+function MarinePlayer:CanPressMovementModifier(input, ground, groundNormal)
+    return self.energy > 35
 end
 
-function MarinePlayer:GetCanSprint(input, ground, groundNormal)
-    return self.energy > 5 and Player.GetCanSprint(self)
+function MarinePlayer:CanHoldMovementModifier(input, ground, groundNormal)
+    return self.energy > 5
 end
 
 function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
@@ -131,7 +124,7 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
                 self.flashlightObject:SetIntensity  (self.flashlightIntensity)
             end
             local coords = self:GetViewAngles():GetCoords()
-            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 1
+            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 0.5
             self.flashlightObject:SetCoords(coords)
         end
         self.energy = math.max(self.energy-self.flashlightEnergyDrainPerSecond*dt, 0)
@@ -142,12 +135,11 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
         Client.DestroyRenderLight(self.flashlightObject)
         self.flashlightObject = nil
     end
-    if self.sprinting then -- this /definately/ shouldn't go here, but meh
-        self.energy = math.max(
-            self.energy-self.sprintEnergyDrainPerSecond*dt*horizontalVelocity:GetLength()/self.walkSpeed/self.sprintSpeedScale*2,
-            0
-        )
-    end
+    -- this /definately/ shouldn't go here, but meh
+    self.energy = math.max(
+        self.energy-self.sprintEnergyDrainPerSecond*dt*self.sprintFade,
+        0
+    )
     self.energy = math.min(self.energy+self.energyGainPerSecond*dt, self.maxEnergy)
     self.lastDrainTime = Shared.GetTime()
 end
