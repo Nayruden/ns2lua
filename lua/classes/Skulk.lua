@@ -9,6 +9,8 @@ SkulkPlayer.networkVars = {
 SkulkPlayer.modelName           = "models/alien/skulk/skulk.model"
 Shared.PrecacheModel(SkulkPlayer.modelName)
 SkulkPlayer.extents             = Vector(0.4064, 0.4064, 0.4064)
+SkulkPlayer.maxAirWishSpeed		= 3.5
+SkulkPlayer.maxSpeed			= 8
 SkulkPlayer.jumpHeight          = 1.25
 SkulkPlayer.gravity             = -9.81
 SkulkPlayer.walkSpeed           = 14

@@ -328,7 +328,7 @@ function Player:OnProcessMove(input)
     self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
     self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
     
-    if (self.ground) then
+    if (self.ground and self.velocity.y < 0) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
 		self:ApplyFriction(input)
@@ -493,6 +493,11 @@ function Player:ApplyFriction(input)
         end
     end
 
+end
+
+function Player:GetHorizontalSpeed()
+	local horizVelo = Vector(self.velocity.x,0,self.velocity.z)
+	return horizVelo:GetLength()
 end
 
 function Player:CapHorizontalSpeed()

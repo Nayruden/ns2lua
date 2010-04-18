@@ -162,7 +162,8 @@ function OnConsoleInvertMouse(player)
 end
 
 function OnConsoleStuck(player)
-    player:SetOrigin(GetSpawnPos(player.extents))
+	local pos = GetSpawnPos(player.extents)
+    player:SetOrigin(pos)
 end
 
 function OnConsoleTarget(player)
