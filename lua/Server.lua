@@ -35,7 +35,7 @@ function ChangePlayerClass(client, class, active, overridePos, overrideAngle)
     DebugMessage("Changing "..(active and active:GetNick() or ("[client: "..client.."]")).." to "..class.." ("..class_table.mapName..")")
 	local spawnPos,spawnAngle = GetSpawnPos(class_table.extents)
     local player = Server.CreateEntity(class_table.mapName, overridePos or spawnPos or Vector())
-	player:SetAngles(overrideAngle or spawnAngle or Vector())
+	player:SetViewAngles(overrideAngle or spawnAngle or Vector())
 	
 	if active then
 		player:SetNick(active:GetNick())
