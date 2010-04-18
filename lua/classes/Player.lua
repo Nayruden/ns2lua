@@ -61,6 +61,8 @@ Player.walkSpeed            = 10
 Player.sprintSpeedScale     = 2
 Player.crouchSpeedScale     = 0.5
 Player.backSpeedScale       = 1
+Player.walkStepDelay        = 250
+Player.sprintStepDelay      = 400
 Player.defaultHealth        = 100
 Player.stoodViewOffset      = Vector(0, 1.6256, 0)
 Player.crouchedViewOffset   = Vector(0, 0.9, 0)
@@ -87,7 +89,7 @@ function Player:OnInit()
     self:SetModel(self.modelName)
 
     self.viewPitch                  = 0
-    self.viewRoll                   = 0
+    self.viewRoll                   = 0--math.pi
 
     self.velocity                   = Vector(0, 0, 0)
 
@@ -127,6 +129,8 @@ function Player:OnInit()
     -- Collide with everything except group 1. That group is reserved
     -- for things we don't want to collide with.
     self.moveGroupMask              = 0xFFFFFFFD
+    
+    self.downDirection              = Vector(0, 1, 0)
 
     if (Server) then
 
@@ -177,29 +181,6 @@ end
 
 function Player:ChangeTeam(newTeam)
 	self.team = newTeam
-end
-
---
--- Sets the view angles for the player. Note that setting the yaw of the
--- view will also adjust the player's yaw.
---
-function Player:SetViewAngles(viewAngles)
-
-    self.viewPitch = viewAngles.pitch
-    self.viewRoll  = viewAngles.roll
-
-    local angles = Angles(self:GetAngles())
-    angles.yaw  = viewAngles.yaw
-    angles.pitch = self.noclip and viewAngles.pitch or 0
-    self:SetAngles(angles)
-
-end
-
---
--- Gets the view angles for the player.
---
-function Player:GetViewAngles(viewAngles)
-    return Angles(self.viewPitch, self:GetAngles().yaw, self.viewRoll)
 end
 
 --
@@ -264,50 +245,49 @@ function Player:BuildPose(poses)
 end
 
 --
+-- Sets the view angles for the player. Note that setting the yaw of the
+-- view will also adjust the player's yaw.
+--
+function Player:SetViewAngles(viewAngles)
+    self.viewPitch = viewAngles.pitch
+    self.viewRoll  = viewAngles.roll
+    local angles = Angles(self:GetAngles())
+    angles.yaw  = viewAngles.yaw
+    angles.roll = viewAngles.roll
+    self:SetAngles(angles)
+end
+--
+-- Gets the view angles for the player.
+--
+function Player:GetViewAngles(viewAngles)
+    return Angles(self.viewPitch, self:GetAngles().yaw, self.viewRoll)
+end
+--
 -- Called to handle user input for the player.
 --
-local lds
 function Player:OnProcessMove(input)
     if (Client) then
         self:UpdateWeaponSwing(input)
-    elseif Shared.debugKeys then
-        local ds, ks = "", ""
-        for i = 0, 35 do
-            local v = 2^i
-            local down = bit.band(input.commands, v) > 0
-            ds = ds..(down and 1 or 0)
-            if down then
-                for k,v in pairs(self.Keys) do
-                    if Move[k] == v then
-                        ks = ks.." "..k
-                        break
-                    end
-                end
-            end
-        end
-        if ds ~= lds then
-            DMsg(ds..ks)
-            lds = ds
-        end
     end
     
     -- Update the view angles based on the input.
-    local angles
-    if (self.invert_mouse == 1) then
-        angles = Angles(-1 * input.pitch, input.yaw, 0.0)
-    else
-        angles = Angles(input.pitch, input.yaw, 0.0)
-    end
+    local angles = Angles(
+        input.pitch*math.cos(self.viewRoll)+input.yaw*math.sin(self.viewRoll),
+        input.pitch*math.sin(self.viewRoll)+input.yaw*math.cos(self.viewRoll),
+        self.viewRoll
+    )
     self:SetViewAngles(angles)
-
+    
     local viewCoords = angles:GetCoords()
 
     local fowardAxis = nil
     local sideAxis   = nil
     
+    local downDirXZLen, downDirYLen = 1-(self.downDirection.x^2+self.downDirection.z^2), (1-math.abs(self.downDirection.y))
+    
     -- Compute the forward and side axis aligned with the world xz plane.
-    forwardAxis = Vector(viewCoords.zAxis.x, self.noclip and viewCoords.zAxis.y or 0, viewCoords.zAxis.z)
-    sideAxis    = Vector(viewCoords.xAxis.x, self.noclip and viewCoords.xAxis.y or 0, viewCoords.xAxis.z)
+    forwardAxis = Vector(viewCoords.zAxis.x*downDirXZLen, viewCoords.zAxis.y*(1-math.abs(self.downDirection.y)), viewCoords.zAxis.z*downDirXZLen)
+    sideAxis    = Vector(viewCoords.xAxis.x*downDirXZLen, viewCoords.xAxis.y*(1-math.abs(self.downDirection.y)), viewCoords.xAxis.z*downDirXZLen)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
@@ -325,8 +305,10 @@ function Player:OnProcessMove(input)
 	-- OO handling of all Movement Keys
 	self:ProcessMoveKeys(input,angles,forwardAxis,sideAxis)
     
-    self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
-    self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
+    self.moveSpeed = self.moveSpeed
+        *(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
+        *(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
+        *(self.noclip and 2 or 1)
     
     if (self.ground and self.velocity.y < 0) then
         -- Since we're standing on the ground, remove any downward velocity.
@@ -334,7 +316,9 @@ function Player:OnProcessMove(input)
 		self:ApplyFriction(input)
     elseif not self.noclip then
         -- Apply the gravitational acceleration.
-        self.velocity.y = self.velocity.y + self.gravity * input.time
+        self.velocity.x = self.velocity.x + self.gravity * input.time * self.downDirection.x
+        self.velocity.y = self.velocity.y + self.gravity * input.time * self.downDirection.y
+        self.velocity.z = self.velocity.z + self.gravity * input.time * self.downDirection.z
 		self:ApplyAirFriction(input)
 	else
 		self:ApplyFriction(input)
@@ -342,7 +326,7 @@ function Player:OnProcessMove(input)
 
 	
 	if canMove then
-		if self.ground then
+		if self.ground or self.noclip then
 			self:ApplyMove(input, viewCoords, forwardAxis, sideAxis)
 		else
 			self:ApplyAirMove(input, viewCoords, forwardAxis, sideAxis)
@@ -415,9 +399,9 @@ function Player:UpdateStepSound()
 	end
 	
 	if(self.sprinting) then
-		self.stepSoundTime = 250.0
+		self.stepSoundTime = self.walkStepDelay
 	else
-	    self.stepSoundTime = 400.0
+	    self.stepSoundTime = self.sprintStepDelay
 	end
 	self:PlayStepSound()
 end
@@ -431,7 +415,7 @@ function Player:PlayStepSound()
 	self:PlaySound(stepSoundName)
 end
 
-function Player:ApplyMove(input,  angles, forwardAxis, sideAxis)
+function Player:ApplyMove(input, angles, forwardAxis, sideAxis)
 
 	-- Compute the desired movement direction based on the input.
 	local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
@@ -444,7 +428,7 @@ function Player:ApplyMove(input,  angles, forwardAxis, sideAxis)
 	local addSpeed     = wishSpeed - currentSpeed
 
 	if (addSpeed > 0) then
-		local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
+		local accelSpeed = math.min(addSpeed, self.moveAcceleration * input.time * wishSpeed)
 		self.velocity = self.velocity + wishDirection * accelSpeed
 	end
 	self:CapHorizontalSpeed()
@@ -468,31 +452,24 @@ function Player:ApplyMove(input,  angles, forwardAxis, sideAxis)
 		offset.y = offset.y + self.stepHeight
 		self:PerformMovement( -offset, 1 )
 	end
-
 end
+
 function Player:ApplyFriction(input)	
 	local velocity = Vector(self.velocity)
-    
-    if not self.noclip then
-        velocity.y = 0
-    end
-
-    local speed = velocity:GetLength()
-
+    local downDirXZLen, downDirYLen = 1-(self.downDirection.x^2+self.downDirection.z^2), 1-math.abs(self.downDirection.y)
+    local speed = Vector(
+        velocity.x*downDirXZLen,
+        velocity.y*downDirYLen,
+        velocity.z*downDirXZLen
+    ):GetLength()
     if (speed > 0) then
-
         local drop = speed * self.friction * input.time
-        
-        local speedScalar = math.max(speed - drop, 0) / speed
-
+        local speedScalar = math.max(speed - drop, 0) / speed - 1
         -- Only apply friction in the movement plane.
-        self.velocity.x = self.velocity.x * speedScalar
-        self.velocity.z = self.velocity.z * speedScalar
-        if self.noclip then
-            self.velocity.y = self.velocity.y * speedScalar
-        end
+        self.velocity.x = self.velocity.x * (1+speedScalar*downDirXZLen)
+        --self.velocity.y = self.velocity.y * (1+speedScalar*downDirYLen)
+        self.velocity.z = self.velocity.z * (1+speedScalar*downDirXZLen)
     end
-
 end
 
 function Player:GetHorizontalSpeed()
@@ -501,10 +478,10 @@ function Player:GetHorizontalSpeed()
 end
 
 function Player:CapHorizontalSpeed()
-	local horizVelo = Vector(self.velocity.x,0,self.velocity.z)
+	local horizVelo = Vector(self.velocity.x,self.noclip and self.velocity.y or 0,self.velocity.z)
 	if (horizVelo:GetLength() > self.maxSpeed) then
 		horizVelo:Normalize()
-		self.velocity = Vector(horizVelo.x  * self.maxSpeed, self.velocity.y, horizVelo.z * self.maxSpeed)
+		self.velocity = Vector(horizVelo.x * self.maxSpeed, self.noclip and horizVelo.y * self.maxSpeed or self.velocity.y, horizVelo.z * self.maxSpeed)
 	end
 end
 
@@ -534,7 +511,7 @@ function Player:ApplyAirMove(input,  angles, forwardAxis, sideAxis)
 
 end
 function Player:ApplyAirFriction(input)
--- only use friction when on the ground.
+    -- only use friction when on the ground.
 end
 --
 -- Returns true if the player is allowed to move (this doesn't affect moving
@@ -552,11 +529,11 @@ end
 --
 function Player:GetIsOnGround()
 
-    if (self.velocity.y > 0) then
+    --[[if (self.velocity.y > 0) then
         -- If we are moving away from the ground, don't treat
         -- us as standing on it.
         return false, nil
-    end
+    end]]
 
     local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
@@ -564,19 +541,17 @@ function Player:GetIsOnGround()
     local center = Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
     local origin = self:GetOrigin()
 
-    local offset = Vector(0, -0.1, 0)
+    local offset = self.downDirection * -0.1
+    
+    local heightOffset = self.downDirection * capsuleHeight
 
     local traceStart = origin + center
     local traceEnd   = traceStart + offset
 
-    local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
+    local traceLower = Shared.TraceCapsule(traceStart-heightOffset, traceEnd-heightOffset, capsuleRadius, 0, self.moveGroupMask)
+    local traceUpper = Shared.TraceCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0, self.moveGroupMask)
     
-    if Shared.debugMovement then
-        if Client then
-            Client.DebugColor(10, 10, 255, 0)
-        end
-        DebugCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, 0.05)
-    end
+    local trace = traceLower.fraction > traceUpper.fraction and traceUpper or traceLower
 
     if (trace.fraction < 1 and trace.normal.y < Player.maxWalkableNormal) then
         return false, nil
@@ -590,25 +565,30 @@ end
 -- Moves by the player by the specified offset, colliding and sliding with the world.
 --
 function Player:PerformMovement(offset, maxTraces)
-
     local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
-
     local center = Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
     local origin = Vector(self:GetOrigin())
+    local heightOffset, radiusOffset = Vector(0, capsuleHeight, 0), Vector(0, capsuleRadius, 0)
 
     local tracesPerformed = 0
-
     while (offset:GetLengthSquared() > 0.0 and tracesPerformed < maxTraces) do
-
-        local traceStart = origin + center
-        local traceEnd = traceStart + offset
-
-        local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.noclip and 0 or self.moveGroupMask)
+        local traceStart = origin+radiusOffset
+        local traceEnd = traceStart+offset
+        local traceLower = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, 0, self.moveGroupMask)
+        local traceUpper = Shared.TraceCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0, self.moveGroupMask)
+        
+        if Shared.debugMovement then
+            if Client then
+                Client.DebugColor(10, 10, 255, 0)
+            end
+            DebugCapsule(traceStart, traceEnd, capsuleRadius, 0)
+            DebugCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0)
+        end
+        
+        local trace = traceLower.fraction > traceUpper.fraction and traceUpper or traceLower
 
         if (trace.fraction < 1) then
-			
-			--DMsg("collide")
 
             -- Remove the amount of the offset we've already moved.
             offset = offset * (1 - trace.fraction)
@@ -623,7 +603,7 @@ function Player:PerformMovement(offset, maxTraces)
             offset = Vector(0, 0, 0)
         end
 
-        origin = trace.endPoint - center
+        origin = (traceLower.fraction > traceUpper.fraction and trace.endPoint-heightOffset or trace.endPoint) - radiusOffset
         tracesPerformed = tracesPerformed + 1
 
     end
@@ -926,9 +906,9 @@ function Player:GetCameraViewCoords()
         end
     end
     
-    local viewCoords = self:GetViewAngles():GetCoords()
-
-    viewCoords.origin = self:GetOrigin() + self.viewOffset
+    local viewAngles = self:GetViewAngles()
+    local viewCoords = viewAngles:GetCoords()
+    viewCoords.origin = self:GetOrigin() + Angles(0, viewAngles.yaw, viewAngles.roll):GetCoords():TransformPoint(self.viewOffset)
 
     if (self.thirdPerson) then
         --viewCoords.origin = viewCoords.origin - viewCoords.zAxis * 0.4 - viewCoords.xAxis * 0.35 + viewCoords.yAxis * 0.1
