@@ -7,7 +7,7 @@
 --
 --=============================================================================
 
-Script.Load("lua/Utility.lua")
+Script.Load("lua/utility/Utility.lua")
 
 class 'Player' (Actor)
 
