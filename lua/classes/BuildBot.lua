@@ -21,7 +21,7 @@ BuildBotPlayer.stoodViewOffset          = Vector(0, 0.6, 0)
 BuildBotPlayer.crouchedViewOffset       = Vector(0, 0.6, 0)
 
 -- gliding controls
-BuildBotPlayer.jumpHeight               = 0.5
+BuildBotPlayer.jumpHeight               = 1.5
 BuildBotPlayer.forwardFlapStrength 		= 5
 BuildBotPlayer.minGravity 				= 0 -- -4.4
 BuildBotPlayer.maxGravity				= -9.81
@@ -91,6 +91,10 @@ function BuildBotPlayer:ApplyMove(input, viewCoords, forwardAxis, sideAxis)
 		
 		-- Calculate move
 		local speed = self.velocity:GetLength()
+		local projectedSpeed = Math.DotProduct(self.velocity, eye_dir)
+		if (projectedSpeed < 0) then
+			speed = speed * -1
+		end
 		local glideVelo = eye_dir * speed
 		local veerVelo = (self.velocity - glideVelo) * self.maxGlide
 		
