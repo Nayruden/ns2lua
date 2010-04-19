@@ -32,7 +32,28 @@ for k,v in pairs(Player.Keys) do
         Player.networkVars["key_"..k] = "predicted boolean"
     end
 end
+local lds
 function Player:ProcessMoveKeys(input,angles,forwardAxis,sideAxis)
+    if Server and Shared.debugKeys then
+        local ds, ks = "", ""
+        for i = 0, 35 do
+            local v = 2^i
+            local down = bit.band(input.commands, v) > 0
+            ds = ds..(down and 1 or 0)
+            if down then
+                for k,v in pairs(self.Keys) do
+                    if Move[k] == v then
+                        ks = ks.." "..k
+                        break
+                    end
+                end
+            end
+        end
+        if ds ~= lds then
+            DMsg(ds..ks)
+            lds = ds
+        end
+    end
     for key, keyType in pairs(self.Keys) do
         local bval = Move[key]
         if keyType == "hold" or keyType == "holdn" then
@@ -162,7 +183,7 @@ function Player:OnPressSecondaryAttack(input)
     self:SecondaryAttack()
 end
 function Player:CanHoldSecondaryAttack(input)
-    if self.activity ~= Player.Activity.Reloading then
+    if self.activity == Player.Activity.Reloading then
         return false
     end
     self:SecondaryAttack()
