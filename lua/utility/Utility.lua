@@ -7,8 +7,8 @@
 -- ========= For more information, visit us at http:--www.unknownworlds.com =====================
 
 Script.Load("lua/Constants.lua")
-Script.Load("lua/Table.lua")
-Script.Load("lua/ns2devslib.lua")
+Script.Load("lua/utility/Table.lua")
+Script.Load("lua/utility/ns2devslib.lua")
   
 -- Splits string into array, along whitespace boundaries. First element indexed at 1.
 function StringToArray(instring)
@@ -136,8 +136,8 @@ function DebugPoint(point, size, lifetime, r, g, b, a)
 end
 
 function DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifetime)
-    if (Client and not Client.GetIsRunningPrediction()) then    
-        Client.DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifetime)        
+    if (Client and not Client.GetIsRunningPrediction()) then
+        Client.DebugCapsule(sweepStart, sweepEnd, capsuleRadius, capsuleHeight, lifetime)
     end
 end
 
@@ -486,6 +486,15 @@ function GetAnglesDifference(startAngle, endAngle)
     
     return diff
     
+end
+
+function VectorToAngle(vec)
+    local horizHypSqr = (vec.x*vec.x+vec.z*vec.z)
+    local horizHyp = math.sqrt(horizHypSqr)
+    local yaw = math.acos(vec.x / horizHyp)
+    if (vec.z > 0) then yaw = math.pi*2 - yaw end
+    local pitch = math.asin(vec.y / math.sqrt(horizHypSqr+vec.y*vec.y))
+    return Angles(pitch, yaw, viewAngles.roll)
 end
 
 -- Takes a normalized vector

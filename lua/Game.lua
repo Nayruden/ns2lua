@@ -16,7 +16,8 @@ class 'Game' (Entity)
 Game.updateInterval = 1
 Game.networkVars =
     {
-        startTime = "float",
+        startTime   = "float",
+        instagib    = "boolean",
     }
 
 --
@@ -46,7 +47,10 @@ function Game:OnInit()
     Entity.OnInit(self)
 
     Game.instance = self
-
+	self.delete_queue = {}
+    
+    self.instagib = false
+	
     if (Server) then
 
         -- Make the game always propagate to all clients (no visibility checks).
@@ -89,21 +93,49 @@ function Game:GetHasGameStarted()
     return self:GetGameTime() > 0
 end
 
+Timers = {}
+function AddTimer(delay, func, ...) -- return true in func to keep it running
+    table.insert(Timers, {
+        nt = Shared.GetTime()+delay,
+        d = delay,
+        f = func,
+        a = {...},
+    })
+end
+
 if (Server) then
 
     function Game:StartGame()
 
         -- Start the game in 5 seconds.
         if (self.startTime == 0) then
-            self.startTime = Shared.GetTime() + 5
+            self.startTime = Shared.GetTime()-- + 5
         end
 
 
     end
 
     function Game:OnThink()
+		local time = Shared.GetTime()
+        
+        local i = 1
+        while i <= #Timers do
+            local timer = Timers[i]
+            if time >  timer.nt then
+                local worked, res = pcall(timer.f, unpack(timer.a))
+                if not worked then
+                    Msg("Timer failed with: ",res)
+                    table.remove(Timers, i)
+                    i = i-1
+                elseif not res then -- timer complete
+                    table.remove(Timers, i)
+                    i = i-1
+                end
+            end
+            i = i+1
+        end
 
-        if (self.startTime > 0 and Shared.GetTime() > self.startTime) then
+        if (self.startTime > 0 and time > self.startTime) then
 
             -- Popup any targets based on spawns.
 
@@ -126,7 +158,15 @@ if (Server) then
             end
 
         end
-
+		
+		--Destroy any queued entities
+		for i = #self.delete_queue,1,-1 do
+			if (time > self.delete_queue[i].DeleteTime) then
+				Server.DestroyEntity(self.delete_queue[i].Entity)
+				table.remove(self.delete_queue, i)
+			end
+		end
+	
         self:SetNextThink(self.updateInterval)
 
     end

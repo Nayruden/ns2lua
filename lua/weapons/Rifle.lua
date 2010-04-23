@@ -29,6 +29,8 @@ Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
 
 Rifle.bulletsToShoot        = 1
 Rifle.spread                = 0.03
+Rifle.crouchSpreadScale     = 0.5
+Rifle.sprintSpreadScale     = 1.5
 Rifle.range                 = 50
 Rifle.meleeRange            = 1.5     -- Range of melee attack
 Rifle.penetration           = 0
@@ -160,8 +162,9 @@ function Rifle:Melee(player)
         player:SetOverlayAnimation(self:GetAnimationPrefix() .. "_alt")
     end
 
-     local viewCoords = player:GetCameraViewCoords()
-     local startPoint = viewCoords.origin
+    local viewCoords = player:GetViewAngles():GetCoords()
+    viewCoords.origin = player:GetOrigin() + player.viewOffset
+    local startPoint = viewCoords.origin
 
     -- Filter ourself out of the trace so that we don't hit the weapon or the
     -- player using it.
@@ -211,7 +214,8 @@ function Rifle:FireBullets(player)
 
     self.numBulletsInClip = self.numBulletsInClip - bulletsToShoot
 
-    local viewCoords = player:GetCameraViewCoords()
+    local viewCoords = player:GetViewAngles():GetCoords()
+    viewCoords.origin = player:GetOrigin() + player.viewOffset
     local startPoint = viewCoords.origin
 
     -- Filter ourself out of the trace so that we don't hit the weapon or the
@@ -224,12 +228,9 @@ function Rifle:FireBullets(player)
 
         if (self.spread > 0) then
         	local usespread = self.spread
-			if player.sprinting then
-				usespread = 1.5*self.spread
-			elseif player.crouching then
-				usespread = 0.5*self.spread
-			end
-			
+                *(1+((self.crouchSpreadScale or 1)-1)*player.crouchFade)
+                *(1+((self.sprintSpreadScale or 1)-1)*player.sprintFade)
+            
             local xSpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
             local ySpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
 
@@ -248,7 +249,7 @@ function Rifle:FireBullets(player)
 
             if (target ~= nil and target.TakeDamage ~= nil) then
                 local direction = (trace.endPoint - startPoint):GetUnit()
-                target:TakeDamage(player, 8, self, trace.endPoint, direction)
+                target:TakeDamage(player, 10, self, trace.endPoint, direction)
             end
 
         end

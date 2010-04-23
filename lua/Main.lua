@@ -15,11 +15,13 @@ decoda_name = "Main"
 Script.Load("lua/Globals.lua")
 Script.Load("lua/MainMenu.lua")
 
-mods = { "Practice" }
+mods = { "ns2lua" }
 maps =
     {
-        { name = "Range #1", fileName = "ns2_dm1.level" },
-        { name = "Range #2", fileName = "ns2_dm2.level" },
+        { name = "Range #1",    fileName = "ns2_dm1.level"  },
+        { name = "Range #2",    fileName = "ns2_dm2.level"  },
+        { name = "Test Level",  fileName = "test.level"     },
+        { name = "Splay",       fileName = "splay.level"    },
     }
 
 --
@@ -47,5 +49,16 @@ Event.Hook("Console_connect",  OnCommandConnect)
 Event.Hook("Console_map",  OnCommandMap)
 Event.Hook("Console_exit", OnCommandExit)
 Event.Hook("Console_quit", OnCommandExit)
+
+function OnConsoleMLua(...)
+    local str = table.concat( { ... }, " " ):gsub( "%s?([%[%]\\%.%?])%s?", "%1" )
+    Shared.Message( "(Menu) Running lua: " .. str )
+    local good, err = loadstring(str)
+    if not good then
+        Shared.Message( err )
+        return
+    end
+    good()
+end Event.Hook("Console_mlua", OnConsoleMLua)
 
 Main.SetMenu( kMainMenuFlash )

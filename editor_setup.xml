@@ -1,0 +1,465 @@
+<classes>
+    <!-- ns2lua turrret -->
+    <class name="turret">
+
+        <model>
+            <file>models/temp/sentry/sentry.model</file>
+        </model>
+        
+        <parameter name="attackRadius" type="distance" label="Attack radius" default="20.0" help="Temporary development turret that fires at nearby players."/>
+        <sphere>
+            <radius>attackRadius</radius>
+        </sphere>
+        
+    </class>
+    
+    <!-- Un-animated prop -->
+    <class name="prop_static"  placeable="false">
+        <model>
+            <file>model</file>
+            <scale>scale</scale>
+        </model>
+        <size>
+            <scale>scale</scale>
+        </size>
+        <parameter name="scale" type="vector" label="scale" default="1.0, 1.0, 1.0"/>
+        <parameter name="model" type="file" label="model" filter="*.model"/>
+    </class>
+
+    <!-- Base class for all lights -->
+    <class name="light_base" placeable="false">
+    
+        <parameter name="color" type="color" label="color" default="1.0, 1.0, 1.0"/>
+        <parameter name="distance" type="distance" label="Max Distance" default="2.0"/>'
+        <parameter name="intensity" type="real" label="Intensity" default="5.0"/>
+
+    </class>
+
+    <!-- Point light -->
+    <class name="light_point" placeable="false">
+        
+        <parent>light_base</parent>
+        
+        <point_light>
+            <color>color</color>
+            <radius>distance</radius>
+            <intensity>intensity</intensity>
+            <casts_shadows>casts_shadows</casts_shadows>
+        </point_light>    
+        
+        <sphere>
+            <radius>distance</radius>
+        </sphere>
+        
+        <parameter name="casts_shadows" type="boolean" label="Casts Shadows" default="true"/>
+    </class>
+    
+    <!-- Spot light -->
+    <class name="light_spot" placeable="false">
+        
+        <parent>light_base</parent>
+        
+        <spot_light>
+            <color>color</color>
+            <radius>distance</radius>
+            <intensity>intensity</intensity>
+            <inner_angle>innerAngle</inner_angle>
+            <outer_angle>outerAngle</outer_angle>
+            <atmospheric>atmospheric</atmospheric>
+            <casts_shadows>casts_shadows</casts_shadows>
+        </spot_light>
+                
+        <cone_radius>
+            <radius>distance</radius>
+            <angle>outerAngle</angle>
+        </cone_radius>
+
+        <cone_angle>
+            <angle>innerAngle</angle>
+            <radius>distance</radius>
+        </cone_angle>
+        
+        <cone_angle>
+            <angle>outerAngle</angle>
+            <radius>distance</radius>
+        </cone_angle>        
+        
+        <parameter name="innerAngle" type="angle" label="Inner Angle" default="30.0"/>
+        <parameter name="outerAngle" type="angle" label="Outer Angle" default="40.0"/>
+        <parameter name="atmospheric" type="boolean" label="Atmospheric" default="false"/>
+        <parameter name="casts_shadows" type="boolean" label="Casts Shadows" default="true"/>
+                        
+    </class>    
+
+    <!-- Base class for color grading -->
+    <class name="color_grading" placeable="false">
+
+        <color_grading>
+            <radius>distance</radius>
+            <balance>balance</balance>
+            <brightness>brightness</brightness>
+            <contrast>contrast</contrast>
+        </color_grading>	
+
+        <parameter name="balance" type="color" label="Color Balance" default="0.0, 0.0, 0.0"/>
+        <parameter name="distance" type="distance" label="Max Distance" default="2.0"/>
+        <parameter name="brightness" type="real" label="Brightness" default="0.0"/>
+        <parameter name="contrast" type="real" label="Contrast" default="0.0"/>
+
+        <sphere>
+            <radius>distance</radius>
+        </sphere>
+    </class>
+
+
+    <!-- Player spawn point -->
+    <class name="ready_room_start">
+        <model>
+            <file>models/system/editor/player_spawn.model</file>
+        </model>            
+    </class>
+    
+    <!-- Player spawn point (spawn near team_location) -->
+    <class name="player_start">
+        <model>
+            <file>models/system/editor/player_spawn.model</file>
+        </model>
+    </class>
+    
+    <!-- Team join -->
+    <class name="team_join">
+
+        <parameter name="editorTouchRadius" type="distance" label="Touch radius" default="5.0"/>
+        <sphere><radius>editorTouchRadius</radius></sphere>
+        
+        <!-- Team number -->
+        <parameter name="editorTeamNumber" type="choice" label="Team Number" default="1">
+            <choice label="Marine" value="1"/>
+            <choice label="Alien" value="2"/>
+            <choice label="Spectate" value="0"/>
+            <choice label="Random" value="3"/>
+        </parameter>
+
+        <model>
+            <file>models/system/editor/team_join.model</file>
+        </model>
+
+    </class>
+
+    <!-- Placeable structures -->
+    <class name="base_structure">
+        <parameter name="startsBuilt" type="boolean" default="true" />
+        
+        <!-- Team number -->
+        <parameter name="editorTeamNumber" type="choice" label="Team Number" default="1">
+            <choice label="World" value="0"/>
+            <choice label="Marine" value="1"/>
+            <choice label="Alien" value="2"/>
+        </parameter>
+
+    </class>
+    
+    <class name="commandstation"> <parent>base_structure</parent><model><file>models/marine/command_station/command_station.model</file></model></class>
+    <class name="armory"> <parent>base_structure</parent><model><file>models/marine/armory/armory.model</file></model></class>
+    <class name="infantryportal"> <parent>base_structure</parent><model><file>models/marine/infantry_portal/infantry_portal.model</file></model></class>
+    <class name="sentry"> <parent>base_structure</parent><model><file>models/marine/sentry/sentry.model</file></model></class>
+    <class name="masc"> <parent>base_structure</parent><model><file>models/marine/masc/masc.model</file></model></class>
+    <class name="hive"> <parent>base_structure</parent><model><file>models/alien/hive/hive.model</file></model></class>
+    <class name="harvester"> <parent>base_structure</parent><model><file>models/alien/harvester/harvester.model</file></model></class>
+    
+    <!-- Location for command station or hive -->
+    <class name="team_location">
+
+        <model>
+            <file>models/system/editor/team_location.model</file>
+        </model>
+        
+        <!-- Team number -->
+        <parameter name="teamNumber" type="choice" label="Team Number" default="0">
+            <choice label="Neutral. Either team can start here" value="0"/>
+            <choice label="Marine only" value="1"/>
+            <choice label="Alien only" value="2"/>
+        </parameter>
+        
+        <parameter name="spawnRadius" type="distance" label="Spawn radius" default="20.0" help="Players spawn at random player_starts within this radius."/>
+        <sphere>
+            <radius>spawnRadius</radius>
+        </sphere>
+        
+    </class>
+    
+    <!-- Tell overview what area to render out and the game what area to use -->
+    <class name="minimap_extents">
+    
+        <model>
+            <file>models/system/editor/team_location.model</file>
+        </model>
+        
+        <parameter name="xRadius" type="distance" label="Size around x in your level" default="25"/>
+        <sphere>
+            <radius>xRadius</radius>
+        </sphere>
+
+        <parameter name="yRadius" type="distance" label="Size around y in your level" default="25"/>
+        <sphere>
+            <radius>yRadius</radius>
+        </sphere>
+
+        <parameter name="zRadius" type="distance" label="Size around z in your level" default="25"/>
+        <sphere>
+            <radius>zRadius</radius>
+        </sphere>
+
+    </class>
+
+    <!-- Reverb control -->    
+    <class name="reverb">
+        <help>FMOD Reverb object. Place it to adjust the audio reverb qualities nearby. References reverb settings from FMOD Designer.</help>
+
+        <model>
+            <file>models/system/editor/sound_reverb.model</file>
+        </model>        
+        
+        <sphere><radius>minRadius</radius></sphere>
+        <parameter name="minRadius" type="distance" label="Min Radius" default="5.0" help="At this distance from the point, the reverb settings are fully heard."/>        
+        
+        <sphere><radius>maxRadius</radius></sphere>
+        <parameter name="maxRadius" type="distance" label="Max Radius" default="20.0" help="At this distance from the point, the reverb settings are no longer heard."/>
+        
+        <parameter name="reverbType" type="choice" label="Type" default="1">
+            <choice label="Generic" value="1"/>
+            <choice label="Hallway" value="2"/>
+            <choice label="Vent" value="3"/>
+            <choice label="Medium Room" value="4"/>
+            <choice label="Large Room" value="5"/>
+            <choice label="Big Hallway" value="6"/>
+            <choice/>
+        </parameter>
+        
+    </class>
+    
+    <!-- Simple location -->
+    <class name="location">
+
+        <model>
+            <file>models/system/editor/location.model</file>
+        </model>
+    
+        <sphere><radius>radius</radius></sphere>
+        <parameter name="radius" type="distance" label="Radius" default="5.0" help="Players in this sphere are in this location."/>        
+        <parameter name="name" type="string" label="name" help="Name of location which is shown to players" />
+
+    </class>
+    
+    <!-- Ambient sound -->    
+    <class name="ambient_sound">
+        <help>Plays sound for local player when entering radius.</help>
+
+        <model>
+            <file>models/system/editor/ambient_sound.model</file>
+        </model>        
+
+        <parameter name="eventName" type="file" filter="sound" label="FMOD event name" default="" help="Sound to play when player enters radius."/>
+        
+        <sphere><radius>radius</radius></sphere>
+        <parameter name="radius" type="distance" label="Trigger radius" default="20.0" help="Players entering this sphere will have sound triggered for them."/>
+                
+        <sphere><radius>minFalloff</radius></sphere>
+        <parameter name="minFalloff" type="distance" label="Minimum falloff" default="5.0" help="Sound played at full volume within this distance."/>
+
+        <sphere><radius>maxFalloff</radius></sphere>
+        <parameter name="maxFalloff" type="distance" label="Maximum falloff" default="21.0" help="Sound is decreased to inaudible at this distance (using linear or logarithmic falloff)."/>
+        
+        <parameter name="falloffType" type="choice" label="Type" default="2">
+            <choice label="Logarithmic" value="1" help="minFalloff is where sound starts to attenuate from. maxFalloff is ignored. More realistic, not very game-friendly."/>
+            <choice label="Linear" value="2" help="Sound is full volume at minFalloff and becomes inaudible at maxFalloff."/>
+        </parameter>
+        
+        <parameter name="volume" type="real" label="Volume (0 to 1)" default="1.0"/>
+        <parameter name="pitch" type="real" label="Pitch (+4 octaves to -4 octaves)" default="0.0"/>
+        
+        <parameter name="positioning" type="choice" label="Type" default="1" help="">
+            <choice label="World relative" value="1"/>
+            <choice label="Head relative" value="2"/>
+        </parameter>
+        
+        <parameter name="offOnExit" type="boolean" label="Turns off when player leaves radius" default="true"/>
+    
+        <parameter name="startsOn" type="boolean" label="Starts on" default="false"/>
+
+    </class>
+  
+    <!-- Tech point for building a Command Station or Hive -->
+    <class name="tech_point">
+    
+        <model>
+            <file>models/misc/tech_point/tech_point.model</file>
+        </model>
+        
+        <parameter name="teamNumber" type="choice" label="Team Number" default="0">
+            <choice label="Neutral. Either team can build here" value="0"/>
+            <choice label="Marine only" value="1"/>
+            <choice label="Alien only" value="2"/>
+        </parameter>
+        
+        <parameter name="cameraHeight" type="distance" label="Camera Height" default="10" help="Height above entity for commander viewpoint."/>
+        
+    </class>
+    
+    <!-- Tech point to be used in smaller rooms -->
+    <class name="tech_point_hole">
+        <model>
+            <file>models/misc/tech_point_hole/tech_point_hole.model</file>
+        </model>
+        <parameter name="cameraHeight" type="distance" label="Camera height" default="10.0"/>'
+    </class>
+    
+    <class name="resource_point">
+        <model>
+            <file>models/misc/resource_nozzle/resource_nozzle.model</file>
+        </model>
+        <parameter name="cameraHeight" type="distance" label="Camera height" default="10.0"/>'
+    </class>
+
+    <class name="commander_camera">
+    <model>
+      <file>models/system/editor/commander_camera/commander_camera.model</file>
+    </model>
+    <parameter name="cameraHeight" type="distance" label="Camera height" default="10.0"/>'
+  </class>
+
+    <class name="door">
+        <model>
+            <file>models/misc/door/door.model</file>
+        </model>
+		
+        <!-- Team number -->
+        <parameter name="behaviorType" type="choice" label="Door Behavior" default="1">
+            <choice label="Proximity" value="1"/>
+            <choice label="Always Open" value="2"/>
+            <choice label="Always Closed" value="3"/>            
+        </parameter>
+
+		<parameter name="touchRadius" type="distance" label="Proximity radius" default="3.0" help="Players within this radius will cause the door to open."/>
+        <sphere>
+			<radius>touchRadius</radius>
+		</sphere>
+		
+		<parameter name="openTime" type="real" label="Hold open time" default="1.5"/>
+    </class>
+       
+    <!-- Power grid -->
+    <class name="power_grid_node">
+        <model>
+            <file>models/system/editor/power_node.model</file>
+        </model>
+        
+    <parameter name="powerRadius" type="distance" label="Power radius" default="20.0" help="Powers lights and marine structures in this radius."/>
+        <sphere>
+            <radius>powerRadius</radius>
+        </sphere>
+
+    </class>
+    
+  <!-- Cinematic entity -->
+  <class name="cinematic_base" placeable="false">
+
+    <parameter name="cinematicName" type="file" label="Cinematic file" default="" filter="*.cinematic" help="Name of cinematic file (created with Cinematic Editor)"/>
+    <parameter name="loop" type="boolean" label="Loop" default="false"/>    
+    
+  </class>
+    
+  <class name="cinematic">
+    
+    <parent>cinematic_base</parent>
+    <help>Adds a cinematic entity to the game world.</help>
+
+    <model>
+      <file>models/system/editor/cinematic.model</file>
+    </model>
+
+  </class>
+
+  <!-- Particle effect - child of generic cinematic -->
+  <class name="particles">
+    
+    <parent>cinematic_base</parent>
+    <help>Creates environmental particle system effect.</help>
+
+    <model>
+      <file>models/system/editor/particles.model</file>
+    </model>
+
+    <sphere>
+      <radius>radius</radius>
+    </sphere>
+    <parameter name="radius" type="distance" label="Trigger radius" default="20.0" help="Players entering this sphere will trigger the effect."/>
+    
+    <parameter name="offOnExit" type="boolean" label="Turns off when player leaves radius" default="false"/>
+    
+    <parameter name="startsOn" type="boolean" label="Starts on" default="false"/>    
+
+  </class>
+
+    <!-- Animated prop -->
+    <class name="prop_dynamic"  placeable="true">
+        <model>
+            <file>model</file>
+            <scale>scale</scale>
+        </model>
+        <size>
+            <scale>scale</scale>
+        </size>
+        <parameter name="scale" type="vector" label="scale" default="1.0, 1.0, 1.0"/>
+        <parameter name="model" type="file" label="model" filter="*.model"/>
+        <parameter name="animation" type="string" label="animation" />
+    </class>
+
+  
+  <!-- Skybox cinematic - child of generic cinematic -->
+  <class name="skybox">
+    
+
+    <parent>cinematic_base</parent>
+    <help>Creates a skybox cinematic that's always centered around the viewer.</help>
+
+    <model>
+      <file>models/system/editor/skybox.model</file>
+    </model>
+
+  </class>
+  
+<class name="target" placeable="true">
+    <model>
+      <file>model</file>
+    </model>
+    <parameter name="model" type="file" label="model" default="models/misc/target/target.model" filter="*.model"/>
+
+    <parameter name="teamNumber" type="choice" label="Team Number" default="3">
+        <choice label="Marine" value="1"/>
+        <choice label="Alien" value="2"/>
+        <choice label="Always take damage" value="3"/>
+    </parameter>
+        
+    <parameter name="health" type="real" label="Health before dying" default="1.0"/>
+
+    <parameter name="deathSoundName" type="file" filter="sound" label="Kill sound" default="" help="Sound to play when killed."/>
+
+    <parameter name="spawnAnimation" type="string" label="Spawn animation" default="idle" help="Animation played when target is first spawned." />
+
+    <parameter name="popupAnimation" type="string" label="Popup animation" default="popup" help="Animation played when player is nearby." />
+
+    <parameter name="popupSoundName" type="file" filter="sound" label="Popup sound" default="" help="Sound to play when target pops up."/>
+
+    <parameter name="popupRadius" type="distance" label="Popup radius" default="10.0" help="Target plays popup animation when any player comes within this range."/>
+    <sphere>
+       <radius>popupRadius</radius>
+    </sphere>
+    
+    <parameter name="popupDelay" type="real" label="Random delay before popping up" default="0.0"/>
+    
+</class>
+
+  
+</classes>
+
