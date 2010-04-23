@@ -9,7 +9,7 @@
 -- automatically loaded by the engine when a game starts.
 --
 --=============================================================================
--- u made me mess this up
+
 -- Set the name of the VM for debugging
 decoda_name = "Server"
 
