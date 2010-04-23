@@ -47,8 +47,8 @@ function Target:OnInit()
     if (Server) then
         
         self.popupTime  = 0
-		--self.popupRadius  = 20
-		--self.popupDelay = 0
+		self.popupRadius  = 393.7
+		self.popupDelay = 0
 		
         self.state      = Target.State.Unpopped
         
@@ -132,34 +132,26 @@ if (Server) then
             if (self.popupTime ~= 0 and time > self.popupTime) and Server.targetsEnabled == true then
                 self:Popup()
             else
-			
-				for key,val in pairs(PlayerClasses) do
-					local player = Server.FindEntityWithClassnameInRadius(val.mapName, self:GetOrigin(), self.popupRadius, nil)
-					
-					if (player ~= nil) then
-						-- Trigger a popup in the future (with the mean being the specfied delay).
-						self.popupTime = time + Shared.GetRandomFloat(0, self.popupDelay * 2)
-					end
-				end    
+            
+                local player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.popupRadius, nil)
+                
+                if (player ~= nil) then
+                    -- Trigger a popup in the future (with the mean being the specfied delay).
+                    self.popupTime = time + Shared.GetRandomFloat(0, self.popupDelay * 2)
+                end
+                
             end
             
         end
         
         if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn ) then
-			local proxy_test = false
-			for key,val in pairs(PlayerClasses) do
-				local player = Server.FindEntityWithClassnameInRadius(val.mapName, self:GetOrigin(), self.popupRadius, nil)
-					
-				proxy_test = proxy_test or (player ~= nil)
-			end
+            local player = Server.FindEntityWithClassnameInRadius("player", self:GetOrigin(), self.popupRadius, nil)                
 			
-			if (proxy_test) then
+			if (player ~= nil) then
 				-- Wait until the player leaves
-				self.NextRespawn = Game.instance:GetGameTime() + 5			
-			else
-				local target = Server.CreateEntity( "target", self:GetOrigin() )
-				target.popupRadius = self.popupRadius
-				target.popupDelay = self.popupDelay
+				self.NextRespawn = Game.instance:GetGameTime() + 5
+            else
+				local target = Server.CreateEntity( "target",  self:GetOrigin() )
 				target:SetAngles( self:GetAngles() )
 				self.state = Target.State.Respawned			
 			end
