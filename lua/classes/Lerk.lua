@@ -5,7 +5,7 @@ LerkPlayer.networkVars = {
     gliding = "predicted boolean"
 }
 
-LerkPlayer.modelName                = "models/alien/lerk/build_bot.model"
+LerkPlayer.modelName                = "models/alien/lerk/lerk.model"
 Shared.PrecacheModel(LerkPlayer.modelName)
 Shared.PrecacheModel(LerkPlayer.modelName)
 LerkPlayer.extents                  = Vector(0.4064, 0.7874, 0.4064)
