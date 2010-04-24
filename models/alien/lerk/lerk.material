@@ -1,0 +1,11 @@
+<material>
+    <maps>
+        <map type="texture" value="models/alien/lerk/lerk.dds" />
+        <map type="bump" value="models/alien/lerk/lerk_bump.dds" />
+        <map type="specular" value="models/alien/lerk/lerk_spec.dds" />
+    </maps>
+
+    <properties>
+        <property type="surface" value="organic" />
+    </properties>
+</material>
