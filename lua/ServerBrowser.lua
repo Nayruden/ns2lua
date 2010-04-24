@@ -1,12 +1,12 @@
 --=============================================================================
 --
 -- lua/ServerBrowser.lua
--- 
+--
 -- Created by Henry Kropf and Charlie Cleveland
 -- Copyright 2010, Unknown Worlds Entertainment
 --
 --=============================================================================
-Script.Load("lua/Utility.lua")
+Script.Load("lua/Utility/utility.lua")
 
 package.path  = ".\\ns2\\lua\\?.lua;.\\ns2lua\\lua\\?.lua"
 package.cpath = ".\\ns2\\lua\\?.dll;.\\ns2lua\\lua\\?.dll"
@@ -52,7 +52,7 @@ end
 --
 -- Sort option for the game field in order specified by ascending boolean
 --/
-function MainMenu_SBSortByGame(newAscending) 
+function MainMenu_SBSortByGame(newAscending)
     sortType = kSortTypeGame
     ascending = newAscending
     justSorted = true
@@ -61,7 +61,7 @@ end
 --
 -- Sort option for the map field in order specified by ascending boolean
 --/
-function MainMenu_SBSortByMap(newAscending) 
+function MainMenu_SBSortByMap(newAscending)
     sortType = kSortTypeMap
     ascending = newAscending
     justSorted = true
@@ -70,7 +70,7 @@ end
 --
 -- Sort option for the players field in order specified by ascending boolean
 --/
-function MainMenu_SBSortByPlayers(newAscending) 
+function MainMenu_SBSortByPlayers(newAscending)
     sortType = kSortTypePlayers
     ascending = newAscending
     justSorted = true
@@ -79,7 +79,7 @@ end
 --
 -- Sort option for the ping field in order specified by ascending boolean
 --/
-function MainMenu_SBSortByPing(newAscending) 
+function MainMenu_SBSortByPing(newAscending)
     sortType = kSortTypePing
     ascending = newAscending
     justSorted = true
@@ -113,24 +113,24 @@ function MainMenu_SBHasNewData()
         --returnServerList = {}
         --serverRecords = {}
     end
-    
+
     if(not hasNewData) then
         updateStatus = string.format("Found %d servers.", numServers)
     end
-    
+
     if(justSorted) then
         hasNewData = true
         justSorted = false
     end
-       
+
     return hasNewData
-    
+
 end
 
 -- Sort current server list according to sortType and ascending
 function SortReturnServerList()
 
-    function sortString(e1, e2)    
+    function sortString(e1, e2)
         if(ascending) then
             return string.lower(e1[sortType]) < string.lower(e2[sortType])
         else
@@ -138,7 +138,7 @@ function SortReturnServerList()
         end
     end
 
-    function sortNumber(e1, e2)    
+    function sortNumber(e1, e2)
         if(ascending) then
             return e1[sortType] < e2[sortType]
         else
@@ -164,7 +164,7 @@ function GetTrimmedMapName(mapName)
     for trimmedName in string.gmatch(mapName, "\/(.+)\.level") do
         return trimmedName
     end
-    
+
     return mapName
 end
 
@@ -173,7 +173,7 @@ function GetServerRecord(serverIndex)
 end
 
 --
--- Return a linear array of all servers, in 
+-- Return a linear array of all servers, in
 -- {servername, gametype, map, playercount, ping, serverUID}
 -- order
 --/
@@ -186,7 +186,7 @@ function split(str, delim)
 end
 
 function MainMenu_SBGetServerList()
-    
+
     if(refresh) then
         refresh = false
         --serverRecords = {}
@@ -198,7 +198,7 @@ function MainMenu_SBGetServerList()
             lines = split(servers,"\n")
             for key1,value1 in pairs(lines) do
                 if (key1 ~= 1) then
-                    
+
                     rows = split(value1,"\t")
                     name = ""
                     ip = ""
@@ -234,40 +234,40 @@ function MainMenu_SBGetServerList()
         --hasNewData = true
         local numServer = Main.GetNumServers()
         for serverIndex = 1, numServer - 1 do
-        
+
             local serverRecord = GetServerRecord(serverIndex)
-            
+
             -- Build master list so we don't re-retrieve later
             table.insert(serverRecords, serverRecord)
 
         end
 
-        
+
         SortReturnServerList()
-        
+
         -- Create return server list as linear array
         returnServerList = {}
-        
+
         for index, serverRecord in ipairs(serverRecords) do
-        
+
             for j=1, table.maxn(serverRecord) do
                 table.insert(returnServerList, serverRecord[j])
             end
-            
+
         end
         serverRecords = {}
     else
         updateStatus = ""
-    end 
-   
+    end
+
     return returnServerList
-    
+
 end
 
 --
 -- Join the server specified by UID
 --/
-function MainMenu_SBJoinServer(uid) 
+function MainMenu_SBJoinServer(uid)
     LeaveMenu()
     Main.ConnectServer(uid)
 end
