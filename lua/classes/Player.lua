@@ -7,7 +7,7 @@
 --
 --=============================================================================
 
-Script.Load("lua/Utility.lua")
+Script.Load("lua/utility/Utility.lua")
 
 class 'Player' (Actor)
 
@@ -43,7 +43,7 @@ Player.networkVars =
         noclip                      = "predicted boolean",
     }
 
-	Script.Load("lua/classes/PlayerInput.lua")
+Script.Load("lua/classes/PlayerInput.lua")
 
 -- Class specific variables
 Player.modelName = "models/marine/male/male.model"
@@ -53,6 +53,8 @@ Player.maxWalkableNormal    = math.cos(math.pi * 0.25)
 Player.stepHeight           = 0.2
 Player.friction				= 6
 Player.moveAcceleration     = 4
+Player.maxAirWishSpeed		= 3.5
+Player.maxSpeed				= 5.6
 Player.jumpHeight           = 1
 Player.gravity              = -9.81
 Player.walkSpeed            = 10
@@ -111,7 +113,7 @@ function Player:OnInit()
     self.score                      = 0
     self.kills                      = 0
     self.deaths                     = 0
-
+	
     self.moveSpeed					= self.walkSpeed
     self.invert_mouse               = 0
     self.team						= Player.Teams.Marines
@@ -119,7 +121,7 @@ function Player:OnInit()
     self.inAir                      = false
     self.isTaunting                 = false
     self.lastFrameTime              = Shared.GetTime()
-
+    
     self.viewOffset                 = self.stoodViewOffset
 
     -- Collide with everything except group 1. That group is reserved
@@ -139,18 +141,18 @@ function Player:OnInit()
 
         self.hudFP = self:SetHud("ui/hud.swf")
 		self.chatFP = self:SetHud("ui/chat.swf")
-
+        
         --23begin
         self.healthFP = self:SetHud("ui/health.swf")
-        --12end
-
+        --12end  
+        
         self.horizontalSwing = 0
         self.verticalSwing   = 0
         self.fov = math.atan(math.tan(math.pi / 4.0) * (GetAspectRatio() / (4.0 / 3.0))) * 2
     end
 
     self:SetBaseAnimation("run")
-
+    
 	if (Server) then
 		for i, weapon in ipairs(self.WeaponLoadout) do
 			DebugMessage("Giving "..(tostring(self:GetNick()) or "<unknown player>").." a "..weapon..".")
@@ -234,14 +236,14 @@ function Player:SetBaseAnimation(activity)
 
     local animationPrefix = ""
     local weapon = self:GetActiveWeapon()
-
+    
     local o_activity, o_weapon_activity = self:OnSetBaseAnimation(activity)
 
     if (o_weapon_activity ~= false and weapon) then
         animationPrefix =  weapon:GetAnimationPrefix() .. "_"
         weapon:SetAnimation( o_weapon_activity or activity)
     end
-
+    
     if (o_activity ~= false) then
         self:SetAnimation(o_activity or (animationPrefix .. activity))
     end
@@ -260,7 +262,6 @@ function Player:BuildPose(poses)
     end
 
 end
-
 
 --
 -- Called to handle user input for the player.
@@ -289,7 +290,7 @@ function Player:OnProcessMove(input)
             lds = ds
         end
     end
-
+    
     -- Update the view angles based on the input.
     local angles
     if (self.invert_mouse == 1) then
@@ -303,82 +304,55 @@ function Player:OnProcessMove(input)
 
     local fowardAxis = nil
     local sideAxis   = nil
-
+    
     -- Compute the forward and side axis aligned with the world xz plane.
     forwardAxis = Vector(viewCoords.zAxis.x, self.noclip and viewCoords.zAxis.y or 0, viewCoords.zAxis.z)
     sideAxis    = Vector(viewCoords.xAxis.x, self.noclip and viewCoords.xAxis.y or 0, viewCoords.xAxis.z)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
-
-    local canMove = self:GetCanMove(input, viewCoords, forwardAxis, sideAxis)
-
+    
+    local canMove = self:GetCanMove(input, angles, forwardAxis, sideAxis)
+    
     self.ground, self.groundNormal = self:GetIsOnGround()
     if (self.ground and self.inAir) then
         self:OnLand(input, forwardAxis, sideAxis)
     end
     self.inAir = self.ground
-
+    
     self.moveSpeed = self.walkSpeed
-
-
-
+    
+	-- OO handling of all Movement Keys
+	self:ProcessMoveKeys(input,angles,forwardAxis,sideAxis)
+    
     self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
     self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
-
-    if (self.ground) then
+    
+    if (self.ground and self.velocity.y < 0) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
+		self:ApplyFriction(input)
     elseif not self.noclip then
         -- Apply the gravitational acceleration.
         self.velocity.y = self.velocity.y + self.gravity * input.time
+		self:ApplyAirFriction(input)
+	else
+		self:ApplyFriction(input)
     end
 
-    self:ApplyFriction(input, self.ground)
-
-    if (canMove) then
-
-        -- Compute the desired movement direction based on the input.
-        local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
-
-        local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
-
-        -- Accelerate in the desired direction, ala Quake/Half-Life
-
-        local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
-        local addSpeed     = wishSpeed - currentSpeed
-
-        if (addSpeed > 0) then
-            local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
-            self.velocity = self.velocity + wishDirection * accelSpeed
-        end
-
-        local offset = nil
-
-        if (self.ground) then
-            -- First move the character upwards to allow them to go up stairs and
-            -- over small obstacles.
-            local start = Vector(self:GetOrigin())
-            offset = self:PerformMovement( Vector(0, self.stepHeight, 0), 1 ) - start
-        end
-
-        -- Move the player with collision detection.
-        self:PerformMovement( self.velocity * input.time, 5 )
-        self:UpdateStepSound()
-
-        if (self.ground) then
-            -- Finally, move the player back down to compensate for moving them up.
-            -- We add in an additional step height for moving down steps/ramps.
-            offset.y = offset.y + self.stepHeight
-            self:PerformMovement( -offset, 1 )
-        end
-
-    end
+	
+	if canMove then
+		if self.ground then
+			self:ApplyMove(input, viewCoords, forwardAxis, sideAxis)
+		else
+			self:ApplyAirMove(input, viewCoords, forwardAxis, sideAxis)
+		end
+	end
 
     -- Transition to the idle animation if the current activity has finished.
 
     local time = Shared.GetTime()
-
+    
     if (time > self.activityEnd and self.activity == Player.Activity.PrimaryAttack) then
         player:SetOverlayAnimation(nil)
     end
@@ -397,7 +371,7 @@ function Player:OnProcessMove(input)
     if (not Shared.GetIsRunningPrediction()) then
         self:UpdatePoseParameters()
     end
-
+    
     if (Client) then
         local weapon = self:GetActiveWeapon()
         local viewCoords = self:GetViewAngles():GetCoords()
@@ -414,7 +388,7 @@ function Player:OnProcessMove(input)
             PlayerUI_SetDisplayString("")
         end
     end
-
+    
 end
 
 function Player:UpdateStepSound()
@@ -431,15 +405,15 @@ function Player:UpdateStepSound()
 	local velocity = Vector(self.velocity)
 	velocity.y = 0
 	local speed = velocity:GetLength()
-
+	
 	if(speed < (self.walkSpeed * 0.3)) then
 		return
 	end
-
+	
 	if(not self.ground or self.crouching) then
 		return
 	end
-
+	
 	if(self.sprinting) then
 		self.stepSoundTime = 250.0
 	else
@@ -457,9 +431,48 @@ function Player:PlayStepSound()
 	self:PlaySound(stepSoundName)
 end
 
-function Player:ApplyFriction(input, ground)
-    local velocity = Vector(self.velocity)
+function Player:ApplyMove(input,  angles, forwardAxis, sideAxis)
 
+	-- Compute the desired movement direction based on the input.
+	local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
+	
+	local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
+
+	-- Accelerate in the desired direction, ala Quake/Half-Life
+
+	local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
+	local addSpeed     = wishSpeed - currentSpeed
+
+	if (addSpeed > 0) then
+		local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
+		self.velocity = self.velocity + wishDirection * accelSpeed
+	end
+	self:CapHorizontalSpeed()
+	
+	local offset = nil
+
+	if (self.ground) then
+		-- First move the character upwards to allow them to go up stairs and
+		-- over small obstacles.
+		local start = Vector(self:GetOrigin())
+		offset = self:PerformMovement( Vector(0, self.stepHeight, 0), 1 ) - start
+	end
+
+	-- Move the player with collision detection.
+	self:PerformMovement( self.velocity * input.time, 5 )
+	self:UpdateStepSound()
+
+	if (self.ground) then
+		-- Finally, move the player back down to compensate for moving them up.
+		-- We add in an additional step height for moving down steps/ramps.
+		offset.y = offset.y + self.stepHeight
+		self:PerformMovement( -offset, 1 )
+	end
+
+end
+function Player:ApplyFriction(input)	
+	local velocity = Vector(self.velocity)
+    
     if not self.noclip then
         velocity.y = 0
     end
@@ -469,7 +482,7 @@ function Player:ApplyFriction(input, ground)
     if (speed > 0) then
 
         local drop = speed * self.friction * input.time
-
+        
         local speedScalar = math.max(speed - drop, 0) / speed
 
         -- Only apply friction in the movement plane.
@@ -482,6 +495,47 @@ function Player:ApplyFriction(input, ground)
 
 end
 
+function Player:GetHorizontalSpeed()
+	local horizVelo = Vector(self.velocity.x,0,self.velocity.z)
+	return horizVelo:GetLength()
+end
+
+function Player:CapHorizontalSpeed()
+	local horizVelo = Vector(self.velocity.x,0,self.velocity.z)
+	if (horizVelo:GetLength() > self.maxSpeed) then
+		horizVelo:Normalize()
+		self.velocity = Vector(horizVelo.x  * self.maxSpeed, self.velocity.y, horizVelo.z * self.maxSpeed)
+	end
+end
+
+function Player:ApplyAirMove(input,  angles, forwardAxis, sideAxis)
+
+	-- Compute the desired movement direction based on the input.
+	local wishDirection = forwardAxis * input.move.z + sideAxis * input.move.x
+	
+	local wishSpeed = math.min(wishDirection:Normalize(), 1) * self.moveSpeed * (input.move.z < 0 and self.backSpeedScale or 1)
+	wishSpeed = math.min(wishSpeed,self.maxAirWishSpeed)
+
+	-- Accelerate in the desired direction, ala Quake/Half-Life
+		
+	local currentSpeed = Math.DotProduct(self.velocity, wishDirection)
+	local addSpeed     = wishSpeed - currentSpeed
+
+	if (addSpeed > 0) then
+		local accelSpeed = math.min(addSpeed, Player.moveAcceleration * input.time * wishSpeed)
+		self.velocity = self.velocity + wishDirection * accelSpeed
+	end
+	self:CapHorizontalSpeed()
+	
+	local offset = nil
+
+	-- Move the player with collision detection.
+	self:PerformMovement( self.velocity * input.time, 5 )
+
+end
+function Player:ApplyAirFriction(input)
+-- only use friction when on the ground.
+end
 --
 -- Returns true if the player is allowed to move (this doesn't affect moving
 -- the view).
@@ -516,7 +570,7 @@ function Player:GetIsOnGround()
     local traceEnd   = traceStart + offset
 
     local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.moveGroupMask)
-
+    
     if Shared.debugMovement then
         if Client then
             Client.DebugColor(10, 10, 255, 0)
@@ -553,7 +607,7 @@ function Player:PerformMovement(offset, maxTraces)
         local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.noclip and 0 or self.moveGroupMask)
 
         if (trace.fraction < 1) then
-
+			
 			--DMsg("collide")
 
             -- Remove the amount of the offset we've already moved.
@@ -621,7 +675,7 @@ function Player:RetractWeapon()
 end
 
 function Player:OnChangeWeapon(weapon)
-
+    
 end
 
 function Player:ChangeWeapon(weapon)
@@ -718,8 +772,8 @@ end
 -- Performs the secondary attack for the current weapon
 --
 function Player:SecondaryAttack()
-
-end
+    
+end  
 
 
 function Player:StopPrimaryAttack()
@@ -828,7 +882,7 @@ function Player:UpdatePoseParameters()
     local z = Math.DotProduct(viewCoords.zAxis, horizontalVelocity)
 
     local moveYaw = math.atan2(z, x) * 180 / math.pi
-
+    
     self:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
 
 end
@@ -871,7 +925,7 @@ function Player:GetCameraViewCoords()
             return viewCoords
         end
     end
-
+    
     local viewCoords = self:GetViewAngles():GetCoords()
 
     viewCoords.origin = self:GetOrigin() + self.viewOffset
@@ -909,8 +963,7 @@ if (Server) then
 		self:RetractWeapon()
 	end
 
-
-	function Player:Respawn(overridePosition, overrideAngle)
+    function Player:Respawn(overridePosition, overrideAngle)
 		local spawnPos,spawnAng = GetSpawnPos(self.extents)
         self:SetOrigin(overridePosition or spawnPos or Vector())
 		self:SetAngles(overrideAngle or spawnAng or Vector())
@@ -920,13 +973,13 @@ if (Server) then
             weapon.numBulletsInClip = weapon.clipSize
         end
     end
-
+	
 	function Player:GetCanTakeDamage(attacker, damage, doer, point, direction)
 		if self.godMode then
 			return false
 		end
 	end
-
+    
     function Player:TakeDamage(attacker, damage, doer, point, direction)
 		local o_damage = self:GetCanTakeDamage(attacker, damage, doer, point, direction)
 		if o_damage == false then
@@ -1008,14 +1061,14 @@ if (Client) then
 
         flashPlayer:Load(hudFileName)
         flashPlayer:SetBackgroundOpacity(0)
-
+        
         return flashPlayer
     end
 
     function Player:GetRenderFov()
         return self.fov
     end
-
+    
     function Player:SetRenderFov(fov)
         self.fov = fov
     end

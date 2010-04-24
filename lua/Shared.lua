@@ -39,6 +39,7 @@ Script.Load("lua/PropDynamic.lua")
 Script.Load("lua/classes/Skulk.lua")
 Script.Load("lua/classes/Marine.lua")
 Script.Load("lua/classes/BuildBot.lua")
+Script.Load("lua/classes/Lerk.lua")
 
 Script.Load("lua/entities/PlayerSpawn.lua")
 Script.Load("lua/entities/TargetSpawn.lua")
