@@ -90,7 +90,7 @@ function Player:OnInit()
     self:SetModel(self.modelName)
 
     self.viewPitch                  = 0
-    self.viewRoll                   = 0--math.pi
+    self.viewRoll                   = math.pi/2
 
     self.velocity                   = Vector(0, 0, 0)
 
@@ -132,6 +132,7 @@ function Player:OnInit()
     self.moveGroupMask              = 0xFFFFFFFD
     
     self.downDirection              = Vector(0, 1, 0)
+    self.actualDownDirection        = self.downDirection
 
     if (Server) then
 
@@ -263,6 +264,15 @@ end
 function Player:GetViewAngles(viewAngles)
     return Angles(self.viewPitch, self:GetAngles().yaw, self.viewRoll)
 end
+
+function Player:SetDownDirection(dir)
+    self.downDirection = dir
+    self.actualDownDirection = dir -- so we can revert from noclip
+end
+function Player:GetDownDirection()
+    return self.downDirection
+end
+
 --
 -- Called to handle user input for the player.
 --
@@ -272,6 +282,7 @@ function Player:OnProcessMove(input)
     end
     
     -- Update the view angles based on the input.
+    self.viewRoll = math.pi
     local angles = Angles(
         input.pitch*math.cos(self.viewRoll)+input.yaw*math.sin(self.viewRoll),
         input.pitch*math.sin(self.viewRoll)+input.yaw*math.cos(self.viewRoll),
@@ -280,15 +291,11 @@ function Player:OnProcessMove(input)
     self:SetViewAngles(angles)
     
     local viewCoords = angles:GetCoords()
-
-    local fowardAxis = nil
-    local sideAxis   = nil
-    
-    local downDirXZLen, downDirYLen = 1-(self.downDirection.x^2+self.downDirection.z^2), (1-math.abs(self.downDirection.y))
+    local downDirXZLen, downDirYLen = 1-(self.downDirection.x^2+self.downDirection.z^2), 1-math.abs(self.downDirection.y)
     
     -- Compute the forward and side axis aligned with the world xz plane.
-    forwardAxis = Vector(viewCoords.zAxis.x*downDirXZLen, viewCoords.zAxis.y*(1-math.abs(self.downDirection.y)), viewCoords.zAxis.z*downDirXZLen)
-    sideAxis    = Vector(viewCoords.xAxis.x*downDirXZLen, viewCoords.xAxis.y*(1-math.abs(self.downDirection.y)), viewCoords.xAxis.z*downDirXZLen)
+    local forwardAxis = Vector(viewCoords.zAxis.x*downDirXZLen, viewCoords.zAxis.y*downDirYLen, viewCoords.zAxis.z*downDirXZLen)
+    local sideAxis    = Vector(viewCoords.xAxis.x*downDirXZLen, viewCoords.xAxis.y*downDirYLen, viewCoords.xAxis.z*downDirXZLen)
 
     forwardAxis:Normalize()
     sideAxis:Normalize()
@@ -311,7 +318,7 @@ function Player:OnProcessMove(input)
         *(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
         *(self.noclip and 2 or 1)
     
-    if (self.ground and self.velocity.y < 0) then
+    if (self.ground) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
 		self:ApplyFriction(input)
@@ -440,7 +447,14 @@ function Player:ApplyMove(input, angles, forwardAxis, sideAxis)
 		-- First move the character upwards to allow them to go up stairs and
 		-- over small obstacles.
 		local start = Vector(self:GetOrigin())
-		offset = self:PerformMovement( Vector(0, self.stepHeight, 0), 1 ) - start
+		offset = self:PerformMovement(
+            -Vector(
+                self.stepHeight * self.downDirection.x,
+                self.stepHeight * self.downDirection.y,
+                self.stepHeight * self.downDirection.z
+            ),
+            1
+        ) - start
 	end
 
 	-- Move the player with collision detection.
@@ -450,7 +464,9 @@ function Player:ApplyMove(input, angles, forwardAxis, sideAxis)
 	if (self.ground) then
 		-- Finally, move the player back down to compensate for moving them up.
 		-- We add in an additional step height for moving down steps/ramps.
-		offset.y = offset.y + self.stepHeight
+        offset.x = offset.x + self.stepHeight * self.downDirection.x
+		offset.y = offset.y + self.stepHeight * self.downDirection.y
+        offset.z = offset.z + self.stepHeight * self.downDirection.z
 		self:PerformMovement( -offset, 1 )
 	end
 end
@@ -468,7 +484,7 @@ function Player:ApplyFriction(input)
         local speedScalar = math.max(speed - drop, 0) / speed - 1
         -- Only apply friction in the movement plane.
         self.velocity.x = self.velocity.x * (1+speedScalar*downDirXZLen)
-        --self.velocity.y = self.velocity.y * (1+speedScalar*downDirYLen)
+        self.velocity.y = self.velocity.y * (1+speedScalar*downDirYLen)
         self.velocity.z = self.velocity.z * (1+speedScalar*downDirXZLen)
     end
 end
@@ -550,7 +566,7 @@ function Player:GetIsOnGround()
     
     local trace = traceLower.fraction > traceUpper.fraction and traceUpper or traceLower
 
-    if (trace.fraction < 1 and trace.normal.y < Player.maxWalkableNormal) then
+    if (trace.fraction < 1 and trace.normal.x*self.downDirection.x+trace.normal.y*self.downDirection.y+trace.normal.z*self.downDirection.z < Player.maxWalkableNormal) then
         return false, nil
     end
 
@@ -572,15 +588,15 @@ function Player:PerformMovement(offset, maxTraces)
     while (offset:GetLengthSquared() > 0.0 and tracesPerformed < maxTraces) do
         local traceStart = origin+radiusOffset
         local traceEnd = traceStart+offset
-        local traceLower = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, 0, self.moveGroupMask)
-        local traceUpper = Shared.TraceCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0, self.moveGroupMask)
+        local traceLower = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, 0, self.noclip and 0 or self.moveGroupMask)
+        local traceUpper = Shared.TraceCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0, self.noclip and 0 or self.moveGroupMask)
         
         if Shared.debugMovement then
             if Client then
                 Client.DebugColor(10, 10, 255, 0)
             end
-            DebugCapsule(traceStart, traceEnd, capsuleRadius, 0)
-            DebugCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0)
+            DebugCapsule(traceStart, traceEnd, capsuleRadius, 0, 0.1)
+            DebugCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0, 0.1)
         end
         
         local trace = traceLower.fraction > traceUpper.fraction and traceUpper or traceLower
@@ -1072,10 +1088,10 @@ if (Client) then
 
         -- Look at difference between previous and current angles to add "swing" to view model
         local kSwingSensitivity = .5
-        local yawDiff = GetAnglesDifference(self:GetViewAngles().yaw, input.yaw)
+        local yawDiff = GetAnglesDifference(self:GetViewAngles().yaw, input.pitch*math.sin(self.viewRoll)+input.yaw*math.cos(self.viewRoll))
         self.horizontalSwing = self.horizontalSwing + yawDiff*kSwingSensitivity
 
-        local pitchDiff = GetAnglesDifference(self:GetViewAngles().pitch, input.pitch)
+        local pitchDiff = GetAnglesDifference(self:GetViewAngles().pitch, input.pitch*math.cos(self.viewRoll)+input.yaw*math.sin(self.viewRoll))
         self.verticalSwing = self.verticalSwing - pitchDiff*kSwingSensitivity
 
         -- Decrease it non-linearly over time (the farther off center it is the faster it will return)

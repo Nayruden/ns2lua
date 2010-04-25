@@ -296,6 +296,13 @@ function OnConsoleRemoveTurrets(player) -- only temporary until administration i
     Server.Broadcast(nil, player:GetNick().." removed all turrets!")
 end
 
+function OnConsoleSetDown(player, dir)
+    player:SetDownDirection(
+            dir == "down"   and Vector( 0,  1,  0)
+        or  dir == "up"     and Vector( 0, -1,  0)
+    )
+end
+
 -- Hook the game methods.
 Event.Hook("ClientConnect",         OnClientConnect)
 Event.Hook("ClientDisconnect",      OnClientDisconnect)
@@ -317,3 +324,4 @@ Event.Hook("Console_say",           OnConsoleSay)
 Event.Hook("Console_instagib",      OnCommandInstaGib)
 Event.Hook("Console_noclip",        OnConsoleNoClip)
 Event.Hook("Console_removeturrets", OnConsoleRemoveTurrets)
+Event.Hook("Console_setdown",       OnConsoleSetDown)

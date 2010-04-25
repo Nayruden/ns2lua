@@ -126,7 +126,10 @@ function Player:CanPressJump(input)
     return self.ground
 end
 function Player:OnPressJump(input)
-    self.velocity.y = math.sqrt(-2 * self.jumpHeight * self.gravity)
+    local jumpPower = math.sqrt(-2 * self.jumpHeight * self.gravity)
+    self.velocity.x = self.velocity.x + jumpPower * self.downDirection.x
+    self.velocity.y = self.velocity.y + jumpPower * self.downDirection.y
+    self.velocity.z = self.velocity.z + jumpPower * self.downDirection.z
     self.ground = false
 end
 function Player:OnPressCrouch(input)
@@ -199,5 +202,6 @@ function Player:OnNotHeldSecondaryAttack(input)
 end
 function Player:OnPressDrop(input)
     self.noclip = not self.noclip
+    self.downDirection = self.noclip and Vector(0, 0, 0) or self.actualDownDirection
 end
 
