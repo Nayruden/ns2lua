@@ -229,6 +229,10 @@ function Player:OnSetBaseAnimation(activity)
             nil     -- override weapon animation (false to prevent)
 end
 
+function Player:GetVelocitySquared() 
+	return self.velocity.x * self.velocity.x + self.velocity.y * self.velocity.y + self.velocity.z * self.velocity.z
+end
+
 --
 -- Sets the activity the player is currently performing.
 --
@@ -756,10 +760,11 @@ function Player:PrimaryAttack()
                 if (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
-                if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
+                
+				self:Idle()
+                
+				if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
                     self:Reload()
-                else
-                    self:Idle()
                 end
             end
         end

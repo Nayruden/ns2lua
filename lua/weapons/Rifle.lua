@@ -228,11 +228,12 @@ function Rifle:FireBullets(player)
 
         if (self.spread > 0) then
         	local usespread = self.spread
-                *(1+((self.crouchSpreadScale or 1)-1)*player.crouchFade)
+                *(1+((self.crouchSpreadScale or 1)-1)*player.crouchFade) -- this looks funny because of the added "fade" values
                 *(1+((self.sprintSpreadScale or 1)-1)*player.sprintFade)
-            
-            local xSpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
-            local ySpread = ((NetworkRandom() * 2 * usespread) - usespread) + ((NetworkRandom() * 2 * usespread) - usespread)
+				
+			-- local usespread = self.spread + self.spread * player:GetVelocitySquared()
+            local xSpread = (NetworkRandom() - NetworkRandom()) * usespread -- gaussian distribution
+            local ySpread = (NetworkRandom() - NetworkRandom()) * usespread
 
             spreadDirection = viewCoords.zAxis + viewCoords.xAxis * xSpread + viewCoords.yAxis * ySpread
 
