@@ -328,7 +328,7 @@ function Player:OnProcessMove(input)
     self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
     self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
     
-    if (self.ground and self.velocity.y < 0) then
+    if (self.ground and self.velocity.y <= kEpsilon) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
 		self:ApplyFriction(input)
