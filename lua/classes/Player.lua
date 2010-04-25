@@ -18,6 +18,7 @@ Player.networkVars =
         controller                  = "integer (0 to 127)",
         viewPitch                   = "interpolated predicted angle",
         viewRoll                    = "interpolated predicted angle",
+        downDirection               = "predicted vector",
         viewModelId                 = "entityid",
         viewOffset                  = "interpolated vector",
         velocity                    = "predicted vector",
@@ -537,18 +538,14 @@ function Player:GetIsOnGround()
 
     local capsuleRadius = self.extents.x
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
-
     local center = Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
-    local origin = self:GetOrigin()
-
+    local origin = Vector(self:GetOrigin())
+    local heightOffset, radiusOffset = self.downDirection*capsuleHeight, self.downDirection*capsuleRadius
     local offset = self.downDirection * -0.1
-    
-    local heightOffset = self.downDirection * capsuleHeight
 
-    local traceStart = origin + center
-    local traceEnd   = traceStart + offset
-
-    local traceLower = Shared.TraceCapsule(traceStart-heightOffset, traceEnd-heightOffset, capsuleRadius, 0, self.moveGroupMask)
+    local traceStart = origin+radiusOffset
+    local traceEnd = traceStart+offset
+    local traceLower = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, 0, self.moveGroupMask)
     local traceUpper = Shared.TraceCapsule(traceStart+heightOffset, traceEnd+heightOffset, capsuleRadius, 0, self.moveGroupMask)
     
     local trace = traceLower.fraction > traceUpper.fraction and traceUpper or traceLower
@@ -569,7 +566,7 @@ function Player:PerformMovement(offset, maxTraces)
     local capsuleHeight = (self.extents.y - capsuleRadius) * 2
     local center = Vector(0, capsuleHeight * 0.5 + capsuleRadius, 0)
     local origin = Vector(self:GetOrigin())
-    local heightOffset, radiusOffset = Vector(0, capsuleHeight, 0), Vector(0, capsuleRadius, 0)
+    local heightOffset, radiusOffset = self.downDirection*capsuleHeight, self.downDirection*capsuleRadius
 
     local tracesPerformed = 0
     while (offset:GetLengthSquared() > 0.0 and tracesPerformed < maxTraces) do
