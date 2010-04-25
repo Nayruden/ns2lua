@@ -26,6 +26,7 @@ Target.networkVars =
     {
         impulsePosition  = "vector",
         impulseDirection = "vector",
+		willRespawn = "boolean"
     }
 
 function Target:OnInit()
@@ -44,16 +45,12 @@ function Target:OnInit()
         self.physicsGroup = 1
     end
     
-    if (Server) then
-        
+    if (Server) then        
         self.popupTime  = 0
-		--self.popupRadius  = 20
-		--self.popupDelay = 0
+		self.willRespawn = true
 		
-        self.state      = Target.State.Unpopped
-        
-        self:SetNextThink(Target.thinkInterval)
-        
+        self.state      = Target.State.Unpopped        
+        self:SetNextThink(Target.thinkInterval)       
     end
     
 end
@@ -145,7 +142,7 @@ if (Server) then
             
         end
         
-        if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn ) then
+        if (self.state == Target.State.Killed and Game.instance:GetGameTime() > self.NextRespawn and self.willRespawn) then
 			local proxy_test = false
 			for key,val in pairs(PlayerClasses) do
 				local player = Server.FindEntityWithClassnameInRadius(val.mapName, self:GetOrigin(), self.popupRadius, nil)
