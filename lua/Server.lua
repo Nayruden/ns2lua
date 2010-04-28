@@ -167,8 +167,9 @@ function OnConsoleStuck(player)
 end
 
 function OnConsoleTarget(player)
-    local target = Server.CreateEntity( "target",  player:GetOrigin() )
-    target:SetAngles( player:GetAngles() )
+    local target = Server.CreateEntity( "target",  player:GetOrigin() )	
+    target.willRespawn = false
+	target:SetAngles( player:GetAngles() )	
     target:Popup()
 end
 

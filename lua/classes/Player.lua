@@ -229,6 +229,10 @@ function Player:OnSetBaseAnimation(activity)
             nil     -- override weapon animation (false to prevent)
 end
 
+function Player:GetVelocitySquared() 
+	return self.velocity.x * self.velocity.x + self.velocity.y * self.velocity.y + self.velocity.z * self.velocity.z
+end
+
 --
 -- Sets the activity the player is currently performing.
 --
@@ -328,7 +332,7 @@ function Player:OnProcessMove(input)
     self.moveSpeed = self.moveSpeed*(1+((self.crouchSpeedScale or 1)-1)*self.crouchFade)
     self.moveSpeed = self.moveSpeed*(1+((self.sprintSpeedScale or 1)-1)*self.sprintFade)
     
-    if (self.ground and self.velocity.y < 0) then
+    if (self.ground and self.velocity.y <= kEpsilon) then
         -- Since we're standing on the ground, remove any downward velocity.
         self.velocity.y = 0
 		self:ApplyFriction(input)
@@ -756,10 +760,11 @@ function Player:PrimaryAttack()
                 if (self.activity == Player.Activity.Shooting) then
                     self:StopPrimaryAttack()
                 end
-                if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
+                
+				self:Idle()
+                
+				if (self:GetWeaponClip() == 0 and self:GetWeaponAmmo() > 0) then
                     self:Reload()
-                else
-                    self:Idle()
                 end
             end
         end
