@@ -1,6 +1,6 @@
 class 'BuildBotPlayer' (Player)
 
-PlayerClasses.Lerk = BuildBotPlayer
+PlayerClasses.buildbot = BuildBotPlayer
 BuildBotPlayer.networkVars = {
     gliding = "predicted boolean"
 }
@@ -28,7 +28,7 @@ function BuildBotPlayer:OnInit()
     DebugMessage("Entering BuildBotPlayer:OnInit()")
     Player.OnInit(self)
 
-    self:SetBaseAnimation("glide", true)
+    self:SetBaseAnimation("fly", true)
 	DebugMessage("Exiting BuildBotPlayer:OnInit()")
 
 	gliding = false

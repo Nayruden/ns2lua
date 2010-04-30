@@ -1,6 +1,6 @@
 class 'LerkPlayer' (Player)
 
-PlayerClasses.buildbot = LerkPlayer
+PlayerClasses.lerk = LerkPlayer
 LerkPlayer.networkVars = {
 
 }
@@ -40,7 +40,7 @@ function LerkPlayer:OnInit()
     DebugMessage("Entering LerkPlayer:OnInit()")
     Player.OnInit(self)
 
-    self:SetBaseAnimation("fly", true)
+    self:SetBaseAnimation("glide", true)
 	DebugMessage("Exiting LerkPlayer:OnInit()")
 end
 
