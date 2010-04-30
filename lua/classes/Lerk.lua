@@ -1,8 +1,8 @@
 class 'LerkPlayer' (Player)
 
-PlayerClasses.Lerk = LerkPlayer
+PlayerClasses.buildbot = LerkPlayer
 LerkPlayer.networkVars = {
-    gliding = "predicted boolean"
+
 }
 
 LerkPlayer.modelName                = "models/alien/lerk/lerk.model"
@@ -42,8 +42,6 @@ function LerkPlayer:OnInit()
 
     self:SetBaseAnimation("fly", true)
 	DebugMessage("Exiting LerkPlayer:OnInit()")
-
-	gliding = false
 end
 
 function LerkPlayer:OnSetBaseAnimation(activity)
@@ -55,61 +53,10 @@ function LerkPlayer:CanPressJump(input)
     return true
 end
 function LerkPlayer:OnPressJump(input, angles, forwardAxis, sideAxis)
-	local forwardVelo = forwardAxis * (self.forwardFlapStrength)
-	self.velocity = self.velocity + forwardVelo
-	self.velocity.y = self.velocity.y + math.sqrt(-2 * self.jumpHeight * self.gravity)
-
-	self.ground = false
-	self.gliding = true
+    Player.OnPressJump(self, input)
+    self.velocity.x = self.velocity.x + forwardAxis.x*10
+    self.velocity.z = self.velocity.z + forwardAxis.z*10
 end
-
-function LerkPlayer:CanHoldJump(input, angles, forwardAxis, sideAxis)
-	-- Calculate Lift
-	local viewCoords = angles:GetCoords()
-	local speed = self:GetHorizontalSpeed()
-	local lift = speed / self.liftScale * (viewCoords.zAxis.y + 0.5) / 1.5
-	lift = math.max(0,math.min(1,lift))
-
-	self.gravity = self.minGravity + (1 - lift) * (self.maxGravity - self.minGravity)
-
-	return true -- OnPressJump is allowed.
-end
-
-function LerkPlayer:OnReleaseJump(input, angles, forwardAxis, sideAxis)
-	self.gravity = self.maxGravity
-	self.gliding = false
-end
-
-function LerkPlayer:ApplyAirMove(input, viewCoords, forwardAxis, sideAxis)
-	self:ApplyMove(input, viewCoords, forwardAxis, sideAxis)
-end
-function LerkPlayer:ApplyMove(input, viewCoords, forwardAxis, sideAxis)
-	-- Decide glide amount
-	if ( self.gliding ) then
-		local glide = math.min(self:GetHorizontalSpeed() / self.glideScale, self.maxGlide)
-
-		-- Find direction player is looking
-		local eye_dir = Vector(viewCoords.zAxis.x, viewCoords.zAxis.y, viewCoords.zAxis.z)
-
-		-- Calculate move
-		local speed = self.velocity:GetLength()
-		local projectedSpeed = Math.DotProduct(self.velocity, eye_dir)
-		if (projectedSpeed < 0) then
-			speed = speed * -1
-		end
-		local glideVelo = eye_dir * speed
-		local veerVelo = (self.velocity - glideVelo) * self.maxGlide
-
-		self.velocity = self.velocity - veerVelo
-	end
-
-	self:CapHorizontalSpeed()
-
-	-- Move the player with collision detection.
-	self:PerformMovement( self.velocity * input.time, 5 )
-
-end
-
 
 function LerkPlayer:UpdateStepSound()
     return
