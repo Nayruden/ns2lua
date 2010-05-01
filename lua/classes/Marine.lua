@@ -123,8 +123,11 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
                 self.flashlightObject:SetOuterCone  (self.flashlightOuterCone)
                 self.flashlightObject:SetIntensity  (self.flashlightIntensity)
             end
-            local coords = self:GetViewAngles():GetCoords()
-            coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 0.5
+            --local coords = self:GetViewAngles():GetCoords()
+            --coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 0.5
+            --local coords = self:GetAttachPointCoords( self:GetAttachPointIndex("RHand_Weapon") )
+            local coords = self:GetActiveWeapon():GetAttachPointCoords( 0 )
+            coords = coords * Coords.GetRotation( Vector(0,1,0), math.pi/2 )
             self.flashlightObject:SetCoords(coords)
         end
         self.energy = math.max(self.energy-self.flashlightEnergyDrainPerSecond*dt, 0)
