@@ -123,12 +123,29 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
                 self.flashlightObject:SetOuterCone  (self.flashlightOuterCone)
                 self.flashlightObject:SetIntensity  (self.flashlightIntensity)
             end
-            --local coords = self:GetViewAngles():GetCoords()
-            --coords.origin = self:GetOrigin() + self.viewOffset + coords.zAxis * 0.5
-            --local coords = self:GetAttachPointCoords( self:GetAttachPointIndex("RHand_Weapon") )
-            local coords = self:GetActiveWeapon():GetAttachPointCoords( 0 )
-            coords = coords * Coords.GetRotation( Vector(0,1,0), math.pi/2 )
-            self.flashlightObject:SetCoords(coords)
+			
+			--Attach flashlight to the gun
+			local coords = Coords()
+			local weapon = self:GetActiveWeapon()
+			local weapcoords = weapon:GetAttachPointCoords( weapon:GetAttachPointIndex("fxnode_riflemuzzle") )
+			
+			local viewModel = self:GetViewModelEntity()
+			if viewModel == nil or not viewModel:GetIsVisible() then
+			--3rd Person
+				coords = weapcoords
+			else
+			--First Person
+				--Get the ViewModels orientation for the gun
+				coords = viewModel:GetAttachPointCoords( viewModel:GetAttachPointIndex("fxnode_riflemuzzle") )
+				--Compensate for the gun no actually moving in 1st person
+				coords = coords * Coords.GetRotation( Vector(0,1,0), self:GetViewAngles().pitch )
+				--Viewmodels are really low, this is more realistic
+				coords.origin = weapcoords.origin
+			end
+			
+			--The attachpoint points down, translate it to forward
+			coords = coords * Coords.GetRotation( Vector(0,1,0), math.pi/2 )
+			self.flashlightObject:SetCoords(coords)
         end
         self.energy = math.max(self.energy-self.flashlightEnergyDrainPerSecond*dt, 0)
         if self.energy == 0 then
