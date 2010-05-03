@@ -108,7 +108,10 @@ function MarinePlayer:CanHoldMovementModifier(input, ground, groundNormal)
 end
 
 function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
-    local dt = Shared.GetTime()-self.lastDrainTime
+	local now = Shared.GetTime()
+	local dt = now-self.lastDrainTime
+	self.lastDrainTime = now
+	
     Player.OnUpdatePoseParameters(self, viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     
     self:SetPoseParam("body_pitch", pitch)
@@ -161,7 +164,6 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
         0
     )
     self.energy = math.min(self.energy+self.energyGainPerSecond*dt, self.maxEnergy)
-    self.lastDrainTime = Shared.GetTime()
 end
 
 function MarinePlayer:SecondaryAttack()
