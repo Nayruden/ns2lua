@@ -37,7 +37,7 @@ MarinePlayer.sprintEnergyDrainPerSecond     = 20
 
 MarinePlayer.networkVars = {
     flashlightState              = "predicted boolean",
-    energy                       = "predicted integer (0 to "..MarinePlayer.maxEnergy..")",
+    energy                       = "predicted float (0 to "..MarinePlayer.maxEnergy..")",
 }
 
 function MarinePlayer:OnInit()
@@ -108,21 +108,34 @@ function MarinePlayer:CanHoldMovementModifier(input, ground, groundNormal)
 end
 
 function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
-    local dt = Shared.GetTime()-self.lastDrainTime
+	local now = Shared.GetTime()
+	local dt = now-self.lastDrainTime
+	self.lastDrainTime = now
+	
     Player.OnUpdatePoseParameters(self, viewAngles, horizontalVelocity, x, z, pitch, moveYaw)
     
     self:SetPoseParam("body_pitch", pitch)
     
     if self.flashlightState then -- this should probably be somewhere else.. but this is good enough
         if Client then
+            local intense = self.flashlightIntensity
             if not self.flashlightObject then
                 self.flashlightObject = Client.CreateRenderLight()
                 self.flashlightObject:SetColor      (self.flashlightColor    )
                 self.flashlightObject:SetRadius     (self.flashlightRadius   )
                 self.flashlightObject:SetInnerCone  (self.flashlightInnerCone)
-                self.flashlightObject:SetOuterCone  (self.flashlightOuterCone)
-                self.flashlightObject:SetIntensity  (self.flashlightIntensity)
+                self.flashlightObject:SetOuterCone  (self.flashlightOuterCone)      
+                self.flashlightObject:SetIntensity  (self.flashlightIntensity)   
             end
+			
+            local secenergy = (self.flashlightEnergyDrainPerSecond - self.energyGainPerSecond) * 2
+            if self.energy < secenergy then
+                local intense = self.flashlightIntensity
+                intense = intense*self.energy/secenergy
+                self.flashlightObject:SetIntensity(intense)
+				DebugMessage(tostring(self.energy).." "..tostring(intense))
+            end
+            
 			
 			--Attach flashlight to the gun
 			local coords = Coords()
@@ -161,7 +174,6 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
         0
     )
     self.energy = math.min(self.energy+self.energyGainPerSecond*dt, self.maxEnergy)
-    self.lastDrainTime = Shared.GetTime()
 end
 
 function MarinePlayer:SecondaryAttack()
