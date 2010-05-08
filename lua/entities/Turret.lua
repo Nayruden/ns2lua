@@ -23,8 +23,8 @@ Turret.fireDamage       = 2
 Turret.fireOffset       = Vector(0, 0.5, 0)
 Turret.heightTries      = 4
 
-function Turret:OnInit()
-    Actor.OnInit(self)
+function Turret:OnCreate()
+    Actor.OnCreate(self)
     
     if (Client) then    
         -- Don't collide with the player (once we're physically simulated)
@@ -111,9 +111,9 @@ function Turret:OnUpdate()
                         player:TakeDamage(self, self.fireDamage, self, trace.endPoint, direction)
                     end
                     if Client then -- CreateMuzzleEffect
-                        --local coords = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(0, 0, .5))
+                        --local coords = self:GetCoords():TransformPoint(self.fireOffset+Vector(0, 0, .5))
                         local coords = self:GetAngles():GetCoords()
-                        coords.origin = self:GetObjectToWorldCoords():TransformPoint(self.fireOffset+Vector(.5, 0, 0))
+                        coords.origin = self:GetCoords():TransformPoint(self.fireOffset+Vector(.5, 0, 0))
                         --Msg("muzzle coords obtained")
                         Shared.CreateEffect(self, self.muzzleFlashCinematic, nil, coords)
                         --Msg("muzzle effect created")

@@ -29,9 +29,9 @@ Target.networkVars =
 		willRespawn = "boolean"
     }
 
-function Target:OnInit()
+function Target:OnCreate()
 	self.NextRespawn = 0
-    Actor.OnInit(self)
+    Actor.OnCreate(self)
     
 	--self:SetModel(self.modelName)
     --self:SetAnimation( "idle" )

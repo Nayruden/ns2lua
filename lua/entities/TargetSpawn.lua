@@ -9,7 +9,7 @@
 
 class 'TargetSpawn' (Entity)
 
-function TargetSpawn:OnInit()
+function TargetSpawn:OnCreate()
     self:SetIsVisible(false)
 end
 

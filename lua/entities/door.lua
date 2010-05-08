@@ -20,8 +20,8 @@ Door.networkVars =
 	activityEnd = "predicted float"
 }
 
-function Door:OnInit()
-	Actor.OnInit(self)
+function Door:OnCreate()
+	Actor.OnCreate(self)
 	self:SetModel(self.modelName)
 	self:SetIsVisible(true)
 	

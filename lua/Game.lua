@@ -42,9 +42,9 @@ function GetEntitiesWithClassname(className)
 
 end
 
-function Game:OnInit()
+function Game:OnCreate()
 
-    Entity.OnInit(self)
+    Entity.OnCreate(self)
 
     Game.instance = self
 	self.delete_queue = {}

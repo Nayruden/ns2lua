@@ -22,9 +22,9 @@ Actor.networkVars =
         physicsActor        = "predicted boolean",
     }
     
-function Actor:OnInit()
+function Actor:OnCreate()
 
-    Entity.OnInit(self)
+    Entity.OnCreate(self)
     
     self.modelIndex         = 0
     self.animationSequence  = Model.invalidSequence

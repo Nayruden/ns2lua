@@ -5,8 +5,8 @@ class 'StringPacket' (DataPacket)
 StringPacket.networkVars = {}
 
 -- NOTE: self.numInts must be set before this constructor is called
-function StringPacket:OnInit()
-	DataPacket.OnInit(self)
+function StringPacket:OnCreate()
+	DataPacket.OnCreate(self)
 	self:ClearString()
 end
 
@@ -69,9 +69,9 @@ function DefineStringPacketClass(numBytes)
 		strclass.networkVars["i"..i] = "integer"
 	end
 
-	function strclass:OnInit()
+	function strclass:OnCreate()
 		self.numInts = strclass.numInts
-		StringPacket.OnInit(self)
+		StringPacket.OnCreate(self)
 	end
 
 	Shared.LinkClassToMap(className, className:lower(), strclass.networkVars)

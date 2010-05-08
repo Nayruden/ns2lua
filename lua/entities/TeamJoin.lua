@@ -4,8 +4,8 @@ Script.Load("lua/utility/Utility.lua")
 
 TeamJoin.thinkInterval = 0.25
 
-function TeamJoin:OnInit()
-	Entity.OnInit(self)
+function TeamJoin:OnCreate()
+	Entity.OnCreate(self)
 	if (Server) then
 		self:SetPropagate(Entity.Propagate_Always)
 		self:SetNextThink(TeamJoin.thinkInterval)

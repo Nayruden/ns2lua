@@ -2,8 +2,8 @@ class 'DataPacket' (Entity)
 
 DataPacket.networkVars = {}
 
-function DataPacket:OnInit()
-	Entity.OnInit(self)
+function DataPacket:OnCreate()
+	Entity.OnCreate(self)
     if (Server) then
         -- Make the game always propagate to all clients (no visibility checks).
         self:SetPropagate(Entity.Propagate_Always)

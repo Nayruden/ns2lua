@@ -1,7 +1,7 @@
 
 class 'ReadyRoomStart' (Entity)
 
-function ReadyRoomStart:OnInit()
+function ReadyRoomStart:OnCreate()
     self:SetIsVisible(false)
 end
 

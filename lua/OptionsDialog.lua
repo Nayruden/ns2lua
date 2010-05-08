@@ -169,7 +169,7 @@ function OptionsDialogUI_SetValues(nickname, mouseSens, screenResIdx, visualDeta
     
 end
 
-function OptionsDialogUI_OnInit()
+function OptionsDialogUI_OnCreate()
 
     local soundVol = OptionsDialogUI_GetSoundVolume()
     local musicVol = OptionsDialogUI_GetMusicVolume()
@@ -192,5 +192,5 @@ end
 displayModes = BuildDisplayModesList()
 
 -- Load and set default sound levels
-OptionsDialogUI_OnInit()
+OptionsDialogUI_OnCreate()
 

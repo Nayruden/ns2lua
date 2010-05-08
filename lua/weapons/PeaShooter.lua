@@ -42,9 +42,9 @@ Shared.PrecacheSound(PeaShooter.fireSound)
 Shared.PrecacheSound(PeaShooter.fireLoopSound)
 Shared.PrecacheSound(PeaShooter.fireEndSound)
 
-function PeaShooter:OnInit()
+function PeaShooter:OnCreate()
 
-    Weapon.OnInit(self)
+    Weapon.OnCreate(self)
 
     self:SetModel(PeaShooter.worldModelName)
 

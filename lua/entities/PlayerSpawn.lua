@@ -9,7 +9,7 @@
 
 class 'PlayerSpawn' (Entity)
 
-function PlayerSpawn:OnInit()
+function PlayerSpawn:OnCreate()
     self:SetIsVisible(false)
 end
 

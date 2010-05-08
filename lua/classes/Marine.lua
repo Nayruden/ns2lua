@@ -40,13 +40,13 @@ MarinePlayer.networkVars = {
     energy                       = "predicted float (0 to "..MarinePlayer.maxEnergy..")",
 }
 
-function MarinePlayer:OnInit()
-	DebugMessage("Entering MarinePlayer:OnInit()")
+function MarinePlayer:OnCreate()
+	DebugMessage("Entering MarinePlayer:OnCreate()")
     
-    Player.OnInit(self)
+    Player.OnCreate(self)
 	
     self:SetBaseAnimation("run", true)
-	DebugMessage("Exiting MarinePlayer:OnInit()")
+	DebugMessage("Exiting MarinePlayer:OnCreate()")
     self.flashlightState = false
     MarinePlayer:SuperchargeWithInstagibMagic(Game.instance.instagib)
     
@@ -128,12 +128,12 @@ function MarinePlayer:OnUpdatePoseParameters(viewAngles, horizontalVelocity, x, 
                 self.flashlightObject:SetIntensity  (self.flashlightIntensity)   
             end
 			
+			--Fade out last 2 seconds of flashlight
             local secenergy = (self.flashlightEnergyDrainPerSecond - self.energyGainPerSecond) * 2
             if self.energy < secenergy then
                 local intense = self.flashlightIntensity
                 intense = intense*self.energy/secenergy
                 self.flashlightObject:SetIntensity(intense)
-				DebugMessage(tostring(self.energy).." "..tostring(intense))
             end
             
 			

@@ -56,9 +56,9 @@ Shared.PrecacheSound(Rifle.fireSound)
 Shared.PrecacheSound(Rifle.fireLoopSound)
 Shared.PrecacheSound(Rifle.fireEndSound)
 
-function Rifle:OnInit()
+function Rifle:OnCreate()
 
-    Weapon.OnInit(self)
+    Weapon.OnCreate(self)
 
     self:SetModel(Rifle.worldModelName)
 

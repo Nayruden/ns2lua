@@ -37,9 +37,9 @@ Shared.PrecacheSound(Bite.hitSound)
 Shared.PrecacheSound(Bite.fireLoopSound)
 Shared.PrecacheSound(Bite.fireEndSound)
 
-function Bite:OnInit()
+function Bite:OnCreate()
 
-    Weapon.OnInit(self)
+    Weapon.OnCreate(self)
 
     self:SetModel(Bite.worldModelName)
 

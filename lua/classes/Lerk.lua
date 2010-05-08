@@ -36,12 +36,12 @@ for i = 1, #LerkPlayer.TauntSounds do
     Shared.PrecacheSound(LerkPlayer.TauntSounds[i])
 end
 
-function LerkPlayer:OnInit()
-    DebugMessage("Entering LerkPlayer:OnInit()")
-    Player.OnInit(self)
+function LerkPlayer:OnCreate()
+    DebugMessage("Entering LerkPlayer:OnCreate()")
+    Player.OnCreate(self)
 
     self:SetBaseAnimation("glide", true)
-	DebugMessage("Exiting LerkPlayer:OnInit()")
+	DebugMessage("Exiting LerkPlayer:OnCreate()")
 end
 
 function LerkPlayer:OnSetBaseAnimation(activity)

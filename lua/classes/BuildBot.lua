@@ -34,12 +34,12 @@ for i = 1, #BuildBotPlayer.TauntSounds do
     Shared.PrecacheSound(BuildBotPlayer.TauntSounds[i])
 end
 
-function BuildBotPlayer:OnInit()
-    DebugMessage("Entering BuildBotPlayer:OnInit()")
-    Player.OnInit(self)
+function BuildBotPlayer:OnCreate()
+    DebugMessage("Entering BuildBotPlayer:OnCreate()")
+    Player.OnCreate(self)
 
     self:SetBaseAnimation("fly", true)
-DebugMessage("Exiting BuildBotPlayer:OnInit()")
+DebugMessage("Exiting BuildBotPlayer:OnCreate()")
 
 gliding = false
 end

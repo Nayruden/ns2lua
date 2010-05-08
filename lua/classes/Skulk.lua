@@ -31,12 +31,12 @@ end
 Shared.PrecacheSound(SkulkPlayer.StepLeftSound)
 Shared.PrecacheSound(SkulkPlayer.StepRightSound)
 
-function SkulkPlayer:OnInit()
-	DebugMessage("Entering SkulkPlayer:OnInit()")
-    Player.OnInit(self)
+function SkulkPlayer:OnCreate()
+	DebugMessage("Entering SkulkPlayer:OnCreate()")
+    Player.OnCreate(self)
 	
     self:SetBaseAnimation("run", true)
-	DebugMessage("Exiting SkulkPlayer:OnInit()")
+	DebugMessage("Exiting SkulkPlayer:OnCreate()")
 end
 
 function SkulkPlayer:OnSetBaseAnimation(activity)

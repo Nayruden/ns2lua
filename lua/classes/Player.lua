@@ -80,9 +80,9 @@ Shared.PrecacheSound(Player.StepRightSound)
 Player.Activity             = enum { 'None', 'Drawing', 'Reloading', 'Shooting', 'AltShooting' }
 Player.Teams				= enum { 'Marines', 'Aliens' }
 
-function Player:OnInit()
-	DebugMessage("Entering Player:OnInit()")
-    Actor.OnInit(self)
+function Player:OnCreate()
+	DebugMessage("Entering Player:OnCreate()")
+    Actor.OnCreate(self)
 
     self:SetModel(self.modelName)
 
@@ -160,7 +160,7 @@ function Player:OnInit()
         end
 	end
 
-	DebugMessage("Exiting Player:OnInit()")
+	DebugMessage("Exiting Player:OnCreate()")
 end
 
 function Player:SetController(client)
@@ -1043,7 +1043,7 @@ function Player:CreateWeaponEffect(playerAttachPointName, entityAttachPointName,
         local coords = Coords.GetIdentity();
 
         if (attachPoint ~= -1) then
-            coords = self:GetObjectToWorldCoords():GetInverse() * self:GetAttachPointCoords(attachPoint)
+            coords = self:GetCoords():GetInverse() * self:GetAttachPointCoords(attachPoint)
         end
 
         local weapon = self:GetActiveWeapon()

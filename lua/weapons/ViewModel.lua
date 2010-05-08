@@ -30,9 +30,9 @@ ViewModel.networkVars =
         blendLength                 = "float"
     }
 
-function ViewModel:OnInit()
+function ViewModel:OnCreate()
 
-    Entity.OnInit(self)
+    Entity.OnCreate(self)
     
     -- Use a custom propagation callback to only propagate to the owning player.
     self:SetPropagate(Entity.Propagate_Callback)
