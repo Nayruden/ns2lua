@@ -26,6 +26,7 @@ Rifle.reloadSound           = "sound/ns2.fev/marine/rifle/reload"
 Rifle.muzzleFlashCinematic  = "cinematics/marine/rifle/muzzle_flash.cinematic"
 Rifle.shellCinematic        = "cinematics/marine/rifle/shell.cinematic"
 Rifle.hitCinematic          = "cinematics/marine/hit.cinematic"
+Rifle.barrelSmoke 					= "cinematics/marine/rifle/barrel_smoke.cinematic"
 
 Rifle.bulletsToShoot        = 1
 Rifle.spread                = 0.03
@@ -49,6 +50,7 @@ Shared.PrecacheModel(Rifle.worldModelName)
 Shared.PrecacheCinematic(Rifle.hitCinematic)
 Shared.PrecacheCinematic(Rifle.muzzleFlashCinematic)
 Shared.PrecacheCinematic(Rifle.shellCinematic)
+Shared.PrecacheCinematic(Rifle.barrelSmoke)
 
 Shared.PrecacheSound(Rifle.drawSound)
 Shared.PrecacheSound(Rifle.reloadSound)
@@ -263,6 +265,7 @@ function Rifle:FireBullets(player)
     -- Create the shell casing ejecting effect.
     player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflecasing", Rifle.shellCinematic)
 
+		player:CreateWeaponEffect("RHand_Weapon", "fxnode_riflemuzzle", Rifle.barrelSmoke)
     -- Play the sound effect. One the first bullet we fire we play the single
     -- shot sound effect. After that we start the looping firing sound effect.
     -- This gives us a clear sound if fire a single shot, but allows better sound
