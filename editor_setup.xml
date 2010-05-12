@@ -111,9 +111,16 @@
         </sphere>
     </class>
 
+    <!-- Base spawn point -->
+    <class name="base_start" placeable="false">
+        <model>
+            <file>models/system/editor/player_spawn.model</file>
+        </model>            
+    </class>
 
     <!-- Player spawn point -->
     <class name="ready_room_start">
+        <parent>base_start</parent>
         <model>
             <file>models/system/editor/player_spawn.model</file>
         </model>            
@@ -121,6 +128,7 @@
     
     <!-- Player spawn point (spawn near team_location) -->
     <class name="player_start">
+        <parent>base_start</parent>
         <model>
             <file>models/system/editor/player_spawn.model</file>
         </model>
@@ -129,11 +137,11 @@
     <!-- Team join -->
     <class name="team_join">
 
-        <parameter name="editorTouchRadius" type="distance" label="Touch radius" default="5.0"/>
-        <sphere><radius>editorTouchRadius</radius></sphere>
+        <parameter name="touchRadius" type="distance" label="Touch radius" default="5.0"/>
+        <sphere><radius>touchRadius</radius></sphere>
         
         <!-- Team number -->
-        <parameter name="editorTeamNumber" type="choice" label="Team Number" default="1">
+        <parameter name="teamNumber" type="choice" label="Team Number" default="1">
             <choice label="Marine" value="1"/>
             <choice label="Alien" value="2"/>
             <choice label="Spectate" value="0"/>
@@ -151,7 +159,7 @@
         <parameter name="startsBuilt" type="boolean" default="true" />
         
         <!-- Team number -->
-        <parameter name="editorTeamNumber" type="choice" label="Team Number" default="1">
+        <parameter name="teamNumber" type="choice" label="Team Number" default="1">
             <choice label="World" value="0"/>
             <choice label="Marine" value="1"/>
             <choice label="Alien" value="2"/>
@@ -187,6 +195,18 @@
         </sphere>
         
     </class>
+
+    <!-- NS2 strategy gameplay rules -->
+    <class name="ns2_gamerules" label="Use core NS2 strategy gameplay">
+
+        <parent>gamerules</parent>
+        
+        <model>
+            <file>models/system/editor/team_location.model</file>
+        </model>
+
+    </class>
+
     
     <!-- Tell overview what area to render out and the game what area to use -->
     <class name="minimap_extents">
@@ -358,15 +378,19 @@
         <sphere>
             <radius>powerRadius</radius>
         </sphere>
-
     </class>
     
   <!-- Cinematic entity -->
   <class name="cinematic_base" placeable="false">
 
     <parameter name="cinematicName" type="file" label="Cinematic file" default="" filter="*.cinematic" help="Name of cinematic file (created with Cinematic Editor)"/>
-    <parameter name="loop" type="boolean" label="Loop" default="false"/>    
-    
+
+    <parameter name="repeatStyle" type="choice" label="Repeat Style" default="1">
+        <choice label="No Repeat" value="0"/>
+        <choice label="Loop" value="1"/>
+        <choice label="Endless" value="2"/>
+    </parameter>
+
   </class>
     
   <class name="cinematic">
@@ -419,7 +443,6 @@
   <!-- Skybox cinematic - child of generic cinematic -->
   <class name="skybox">
     
-
     <parent>cinematic_base</parent>
     <help>Creates a skybox cinematic that's always centered around the viewer.</help>
 
@@ -436,9 +459,9 @@
     <parameter name="model" type="file" label="model" default="models/misc/target/target.model" filter="*.model"/>
 
     <parameter name="teamNumber" type="choice" label="Team Number" default="3">
-        <choice label="Marine" value="1"/>
-        <choice label="Alien" value="2"/>
-        <choice label="Always take damage" value="3"/>
+		<choice label="Always take damage" value="0"/>
+		<choice label="Marine" value="1"/>
+        <choice label="Alien" value="2"/>        
     </parameter>
         
     <parameter name="health" type="real" label="Health before dying" default="1.0"/>

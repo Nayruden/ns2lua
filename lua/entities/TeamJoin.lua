@@ -12,27 +12,29 @@ function TeamJoin:OnCreate()
 	end 
 end
 
+function TeamJoin:OnLoad()
+	 self.teamNumber = tonumber(self.teamNumber)
+	 self.touchRadius = tonumber(self.touchRadius)
+end
+
 if (Server) then
 	function TeamJoin:OnThink()
 		Entity.OnThink(self)
-        
 		local player
 		for key, value in pairs(PlayerClasses) do
-			player = Server.FindEntityWithClassnameInRadius(value.mapName, self:GetOrigin(), 2.5, nil)
+			player = Server.FindEntityWithClassnameInRadius(value.mapName, self:GetOrigin(), self.touchRadius, nil)
 			if (player ~= nil) then
-				-- Trigger a popup in the future (with the mean being the specfied delay).
-				local teamnum = Trim(self.editorTeamNumber)
-				if (teamnum == "1" or teamnum == "3" and math.random(2) == 1) then
+				if(self.teamNumber == 1 or self.teamNumber == 3 and math.random(2) == 1) then
 					player = player:ChangeClass("marine", GetSpawnPos(player.extents) or Vector())
 					player:ChangeTeam(Player.Teams.Marines)
-				elseif (teamnum == "2") then
+				elseif (self.teamNumber == 2) then
 					player = player:ChangeClass("skulk", GetSpawnPos(player.extents) or Vector())
 					player:ChangeTeam(Player.Teams.Aliens)
-				end			
+				end
 			end
 		end
 		
-		self:SetNextThink(Target.thinkInterval)
+		self:SetNextThink(TeamJoin.thinkInterval)
 
     end
 end
