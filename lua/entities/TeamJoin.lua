@@ -13,8 +13,19 @@ function TeamJoin:OnCreate()
 end
 
 function TeamJoin:OnLoad()
-	 self.teamNumber = tonumber(self.teamNumber)
-	 self.touchRadius = tonumber(self.touchRadius)
+	--undo these changes after max pushs updated maps to steam
+	if(self.editorTouchRadius) then
+		self.touchRadius = tonumber(self.editorTouchRadius)
+	else
+		self.touchRadius = tonumber(self.touchRadius)
+	end
+
+	--undo these changes after max pushs updated maps to steam
+	if(self.editorTeamNumber) then
+		self.teamNumber = tonumber(self.editorTeamNumber)
+	else
+		self.teamNumber = tonumber(self.teamNumber)
+	end	
 end
 
 if (Server) then
