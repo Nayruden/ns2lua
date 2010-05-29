@@ -91,6 +91,35 @@
                         
     </class>    
 
+    <!-- Ambient light -->
+    <class name="light_ambient" placeable="false">
+        
+        <parent>light_base</parent>
+        
+        <ambient_light>
+            <color>color</color>
+            <radius>distance</radius>
+            <intensity>intensity</intensity>
+            <color_dir_right>color_dir_right</color_dir_right>
+            <color_dir_left>color_dir_left</color_dir_left>
+            <color_dir_up>color_dir_up</color_dir_up>
+            <color_dir_down>color_dir_down</color_dir_down>
+            <color_dir_forward>color_dir_forward</color_dir_forward>
+            <color_dir_backward>color_dir_backward</color_dir_backward>
+        </ambient_light>    
+        
+        <sphere>
+            <radius>distance</radius>
+        </sphere>
+        
+        <parameter name="color_dir_right" type="color" label="Right Color" default="1.0, 1.0, 1.0"/>
+        <parameter name="color_dir_left" type="color" label="Left Color" default="1.0, 1.0, 1.0"/>
+        <parameter name="color_dir_up" type="color" label="Up Color" default="1.0, 1.0, 1.0"/>
+        <parameter name="color_dir_down" type="color" label="Down Color" default="1.0, 1.0, 1.0"/>
+        <parameter name="color_dir_forward" type="color" label="Forward Color" default="1.0, 1.0, 1.0"/>
+        <parameter name="color_dir_backward" type="color" label="Backward Color" default="1.0, 1.0, 1.0"/>
+    </class>
+
     <!-- Base class for color grading -->
     <class name="color_grading" placeable="false">
 
@@ -352,6 +381,8 @@
         <model>
             <file>models/misc/door/door.model</file>
         </model>
+	<parameter name="weldTime" type="real" label="Weld time in seconds" default="20.0"/>
+    	<parameter name="weldHealth" type="real" label="Health to destroy after welded (1 to 2000)" default="250.0"/>
 		
         <!-- Team number -->
         <parameter name="behaviorType" type="choice" label="Door Behavior" default="1">
