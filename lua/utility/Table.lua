@@ -301,7 +301,7 @@ function table.tostring(t)
             
             elseif(type(value) == "number") then
 
-                --/* For printing out lists of entity ids
+                /* For printing out lists of entity ids
                 
                 local className = "unknown"
                 local entity = Shared.GetEntity(value)
@@ -310,7 +310,7 @@ function table.tostring(t)
                 end
                 
                 table.insert(buffer, string.format("%s (%s)", tostring(value), tostring(className)))
-                --*/
+                */
                 
                 table.insert(buffer, string.format("%s", tostring(value)))
                 
