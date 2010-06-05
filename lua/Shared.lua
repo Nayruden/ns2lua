@@ -31,6 +31,7 @@ end
 
 Script.Load("lua/classes/Player.lua")
 Script.Load("lua/entities/Target.lua")
+Script.Load("lua/entities/Elevator.lua")
 Script.Load("lua/entities/Turret.lua")
 Script.Load("lua/PropDynamic.lua")
 --Script.Load("lua/Effect.lua")
