@@ -9,103 +9,50 @@
 --
 --=============================================================================
 
--- Default key bindings if not saved in options
--- When changing values in the right-hand column, make sure to change BindingsUI_GetBindingsText() below.
-local defaults = {
-    {"MoveForward", "W"},
-    {"MoveLeft", "A"},
-    {"MoveBackward", "S"},
-    {"MoveRight", "D"},
-    {"Jump", "Space"},
-    {"MovementModifier", "LeftShift"},
-    {"Crouch", "LeftControl"},
-    {"PrimaryAttack", "MouseButton0"},
-    {"SecondaryAttack", "MouseButton1"},
-    {"Reload", "R"},
-    {"Drop", "G"},
-    {"Taunt", "Z"},
-    {"Voice", "F9"},
-    {"ToggleSayings", "X"},
-    {"Weapon1", "1"},
-    {"Weapon2", "2"},
-    {"Weapon3", "3"},
-    {"Weapon4", "4"},
-    {"Weapon5", "5"},
-}
+Script.Load("lua/BindingsShared.lua")
 
--- Order, names, description of keys in menu
-local globalControlBindings = {
-    "Movement", "title", "Movement", "",
-    "MoveForward", "input", "Move forward", "W",
-    "MoveLeft", "input", "Move left", "A",
-    "MoveBackward", "input", "Move backward", "S",
-    "MoveRight", "input", "Move right", "D",
-    "Jump", "input", "Jump", "Space",
-    "MovementModifier", "input", "Movement special", "LeftShift",
-    "Crouch", "input", "Crouch", "LeftControl",
-    "Action", "title", "Action", "",
-    "PrimaryAttack", "input", "Primary attack", "MouseButton0",
-    "SecondaryAttack", "input", "Secondary attack", "MouseButton1",
-    "Reload", "input", "Reload", "R",
-    "Drop", "input", "Drop weapon", "G",
-    "Taunt", "input", "Taunt", "Z",
-    "ToggleSayings", "input", "Voice menu", "X",
-    "Voice", "input", "Use microphone", "F9",
-    "Weapon1", "input", "Weapon #1", "1",
-    "Weapon2", "input", "Weapon #2", "2",
-    "Weapon3", "input", "Weapon #3", "3",
-    "Weapon4", "input", "Weapon #4", "4",
-    "Weapon5", "input", "Weapon #5", "5",
-}
 
 local specialKeys = {
     [" "] = "SPACE"
 }
 
-function GetDefaultInputValue(controlId)
 
-    local rc = nil
+local LazyLoadMode = true
+local ChangedKeybinds = {}
 
-    for index, pair in ipairs(defaults) do
-        if(pair[1] == controlId) then
-            rc = pair[2]
-            break
-        end
-    end    
-    
-    return rc
-    
+if(Main.GetOptionString("ChangedKeybinds", "") ~= "") then
+	Main.SetOptionString("ChangedKeybinds", "")
 end
-
 --
 -- Get the value of the input control
 --/
 function BindingsUI_GetInputValue(controlId)
-
-    local value = Main.GetOptionString( "input/" .. controlId, "" )
-
-    local rc = nil
-    
-    if(value ~= "") then
-        rc = value
-    else
-        rc = GetDefaultInputValue(controlId)
-        Main.SetOptionString( "input/" .. controlId, rc )
-    end
-    
-    return rc
-    
+	  
+	  if(LazyLoadMode) then
+	  	KeyBindInfo:Init()
+	  	LazyLoadMode = false
+	  end
+	  
+    return KeyBindInfo:GetBoundKey(controlId) or ""
 end
 
 --
 -- Set the value of the input control
 --/
 function BindingsUI_SetInputValue(controlId, controlValue)
-
-    if(controlId ~= nil) then
-        Main.SetOptionString( "input/" .. controlId, controlValue )
-    end
-    
+		
+	if(LazyLoadMode) then
+	 	KeyBindInfo:Init()
+	  LazyLoadMode = false
+	end
+	  
+  if(controlId ~= nil) then
+		KeyBindInfo:SetKeybind(controlValue, controlId)
+		
+		if(Client) then
+   		ChangedKeybinds[#ChangedKeybinds+1]	= controlId
+		end
+  end  
 end
 
 --
@@ -115,7 +62,7 @@ end
 -- controlId, "separator", unused, unused
 --/
 function BindingsUI_GetBindingsData()
-    return globalControlBindings   
+   return KeyBindInfo:GetBindingDialogTable()   
 end
 
 --
@@ -157,7 +104,13 @@ function BindingsUI_ExitDialog()
     
     Main.ReloadKeyOptions()
     
+    if(#ChangedKeybinds ~= 0) then
+    	if(Client) then
+    		Main.SetOptionString("ChangedKeybinds", table.concat(ChangedKeybinds, "@"))
+    		table.clear(ChangedKeybinds)
+    	else
+    		table.clear(ChangedKeybinds)
+    		Main.SetOptionString("ChangedKeybinds", "")
+    	end
+    end
 end
-
-local bindingsData = BindingsUI_GetBindingsTranslationData()
-local a = 0

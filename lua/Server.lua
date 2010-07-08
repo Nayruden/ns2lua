@@ -132,11 +132,7 @@ function OnMapPostLoad()
 
     -- Create the game object. This is a networked object that manages the game
     -- state and logic.
-    
     Server.CreateEntity("game", Vector(0, 0, 0))
-	if http then
-		http.request("http://serverlist.devicenull.org/register.php?port=27015")
-	end
 end
 
 function NotifyPlayer(plys, text, time)
@@ -275,7 +271,17 @@ function OnCommandInstaGib( ply )
 end
 
 function OnConsoleSay(player, ...)
-	local msg = string.format("cmsg \"%s\" \"%s\"", player:GetNick(), table.concat( { ... }, " " ))
+	
+	local teamcolour = "Spectator"
+
+	if(player:isa("SkulkPlayer")) then
+		teamcolour = "Alien"
+	elseif(player:isa("MarinePlayer")) then
+		teamcolour = "Marine"
+	end
+
+	
+	local msg = string.format("cmsg %s \"%s\" \"%s\"", teamcolour, player:GetNick(), table.concat( { ... }, " " ))
 	Shared.Message(msg)
 	Server.SendCommand(nil, msg)
 	--local chatPacket = Server.CreateEntity("chatpacket", Vector(0, 0, 0))

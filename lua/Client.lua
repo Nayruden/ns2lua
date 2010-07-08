@@ -13,7 +13,12 @@
 -- Set the name of the VM for debugging
 decoda_name = "Client"
 
+
 Script.Load("lua/Shared.lua")
+
+--load the keybind system before the ui so they can register there binds
+Script.Load("/lua/KeybindMapper.lua")
+
 Script.Load("lua/ui/PlayerUI.lua")
 Script.Load("lua/ui/ChatUI.lua")
 Script.Load("lua/ui/KillUI.lua")
@@ -26,9 +31,10 @@ function ShowInGameMenu()
 
     Client.SetMouseVisible(true)
     Client.SetMouseCaptured(false)
+    
+    KeybindMapper:InGameMenuOpened()
 
     Shared.SetMenu("ui/main_menu.swf")
-
 end
 
 
@@ -47,13 +53,13 @@ function OnCommandHelp(userdata, ...)
         
         Shared.Message("Gameplay Changes")
 
-        Shared.Message("  * Added “changeclass” command for changing your class to “buildbot”, “marine”, or “skulk”")
+        Shared.Message("  * Added â€œchangeclassâ€ command for changing your class to â€œbuildbotâ€, â€œmarineâ€, or â€œskulkâ€")
         Shared.Message("  * Basic deathmatch functionality. You can kill other players, and get teleported back to spawn when dead.")
         Shared.Message("  * K/D ratio will be shown in the hud")
         Shared.Message("  * View height will be adjusted depending on which class (marine/skulk) you choose")
-        Shared.Message("  * Very, very experimental skulk “bite” and buildbot ‘peashooter’ weapons added")
+        Shared.Message("  * Very, very experimental skulk â€œbiteâ€ and buildbot â€˜peashooterâ€™ weapons added")
         Shared.Message("  * Added rifle autoreload")
-        Shared.Message("  * Added crouch ability (only slows you down since there’s no animation)")
+        Shared.Message("  * Added crouch ability (only slows you down since thereâ€™s no animation)")
         Shared.Message("  * Skulk moves 2x as fast as marines, Buildbot has 1/2 gravity")
 
         Shared.Message("General Changes and Fixes")
@@ -61,9 +67,9 @@ function OnCommandHelp(userdata, ...)
         Shared.Message("  * Fixed permajump (holding jump made you keep jumping whenever you touched the ground)")
         Shared.Message("  * Fixed ammo count changing before reload anim finished")
         Shared.Message("  * Fix 5 second delay when a player joins a server")
-        Shared.Message("  * Added “nick” command for changing your name.")
-        Shared.Message("  * Added “stuck” command")
-        Shared.Message("  * Added an “invertmouse” console command")
+        Shared.Message("  * Added â€œnickâ€ command for changing your name.")
+        Shared.Message("  * Added â€œstuckâ€ command")
+        Shared.Message("  * Added an â€œinvertmouseâ€ console command")
 
 
     else
@@ -90,11 +96,6 @@ function OnKillMessage(src, killer, killed)	-- Should test if this message is co
 	killed = killed:match(qtrm)
 	KillUI_AddKill(killer,killed)
 end
-function OnChatMessage(src, name, msg)	-- Should test if this message is coming from server
-	name = name:match(qtrm)
-	msg = msg:match(qtrm)
-	ChatUI_AddMessage(name..": "..msg)
-end
 
 ClientNicks = {}
 function OnClientNickMessage(src, client, nick)
@@ -105,4 +106,4 @@ end Event.Hook("Console_nickmsg",  OnClientNickMessage)
 Event.Hook("Console_help", OnCommandHelp)
 Event.Hook("Console_cllua",  OnConsoleClLua)
 Event.Hook("Console_kill",  OnKillMessage)
-Event.Hook("Console_cmsg",  OnChatMessage)
+

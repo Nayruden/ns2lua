@@ -181,17 +181,19 @@ end
 --/
 function table.clear(t)
 
-    if(t ~= nil) then
+	if(t ~= nil) then
+		local numElements = table.maxn(t)
     
-        local numElements = table.maxn(t)
-    
-        for i = 1, numElements do
-        
-            table.remove(t, 1)
-            
-        end
-        
-    end
+  	for i = 1, numElements do
+    	table.remove(t, 1)
+   	end
+   	
+   	if(next(t, nil)) then
+   		for key,_ in pairs(t) do
+				t[key] = nil
+			end
+   	end        
+	end
     
 end
 

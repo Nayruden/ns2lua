@@ -138,9 +138,7 @@ function Player:OnCreate()
     end
 
     if (Client) then
-
         self.hudFP = self:SetHud("ui/hud.swf")
-		self.chatFP = self:SetHud("ui/chat.swf")
         
         --23begin
         self.healthFP = self:SetHud("ui/health.swf")
@@ -272,6 +270,7 @@ end
 --
 local lds
 function Player:OnProcessMove(input)
+
     if (Client) then
         self:UpdateWeaponSwing(input)
     elseif Shared.debugKeys then
@@ -609,6 +608,7 @@ function Player:PerformMovement(offset, maxTraces)
         local traceEnd = traceStart + offset
 
         local trace = Shared.TraceCapsule(traceStart, traceEnd, capsuleRadius, capsuleHeight, self.noclip and 0 or self.moveGroupMask)
+
 
         if (trace.fraction < 1) then
 			
@@ -1069,6 +1069,14 @@ if (Client) then
         
         return flashPlayer
     end
+
+		function Player:OverrideInput(moveobj)
+			--not the best place to put this call but it will do
+			KeybindMapper:CheckKeybindChanges()
+
+			moveobj.move = KeybindMapper.MovementVector
+			moveobj.commands = KeybindMapper.MoveInputBitFlags
+		end
 
     function Player:GetRenderFov()
         return self.fov
