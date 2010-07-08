@@ -6,6 +6,8 @@ ChatUI = {
 	
 	LineSpacing = 16,
 	FontSize = 16,
+	TextFadeLength = 2,
+	TextFadeDelay = 7,
 	MaxLineWidth = 500,
 	HistoryBufferSize = 60,
 	MaxVisibleLines = 10,
@@ -105,6 +107,14 @@ function ChatUI_GetMaxLineCount()
 	return ChatUI.MaxVisibleLines
 end
 
+function ChatUI_GetTextFadeLength()
+	return ChatUI.TextFadeLength
+end
+
+function ChatUI_GetTextFadeDelay()
+	return ChatUI.TextFadeDelay
+end
+
 function ChatUI_GetMaxLineWidth()
 	return ChatUI.MaxLineWidth
 end
@@ -140,4 +150,4 @@ end
 Event.Hook("MapPostLoad", function() ReloadChatFlash() end )
 
 
-Event.Hook("Console_reloadcchat",  ReloadChatFlash)
+Event.Hook("Console_reloadchat",  ReloadChatFlash)
