@@ -274,7 +274,7 @@ function OnConsoleSay(player, ...)
 	
 	local teamcolour = "Spectator"
 
-	if(player:isa("SkulkPlayer")) then
+	if(player:isa("SkulkPlayer") or player:isa("LerkPlayer")) then
 		teamcolour = "Alien"
 	elseif(player:isa("MarinePlayer")) then
 		teamcolour = "Marine"

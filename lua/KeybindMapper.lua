@@ -23,16 +23,16 @@ local InputKeybinds = {
 }
 
 local MovementKeybinds = {
-	{"MoveForward", "z", 1},
-	{"MoveBackward", "z", -1},
-	{"MoveLeft", "x", 1},
-	{"MoveRight", "x", -1},
+	MoveForward = {"z", 1, "MoveForward"},
+	MoveBackward = {"z", -1, "MoveBackward"},
+	MoveLeft = {"x", 1, "MoveLeft"},
+	MoveRight = {"x", -1, "MoveRight"},
 }
 
-local NumberToName = {}
+local InputBitToName = {}
 
 for _,inputname in ipairs(InputEnum) do
-	NumberToName[Move[inputname]] = inputname
+	InputBitToName[Move[inputname]] = inputname
 end
 
 KeybindMapper = {
@@ -72,13 +72,13 @@ function KeybindMapper:RefreshInputKeybinds()
 	table.clear(self.InputMovementKeyMappings)
 	MovementVector = Vector(0,0,0)
 
-	for _,movdir in ipairs(MovementKeybinds) do
-		local key = KeyBindInfo:GetBoundKey(movdir[1])
+	for bindname,movdir in pairs(MovementKeybinds) do
+		local key = KeyBindInfo:GetBoundKey(bindname)
 		
 		if(key) then
 			self.InputMovementKeyMappings[key] = movdir
 		else
-			Shared.Message("KeybindMapper: Warning no key was bound to movment bind "..movdir[1])
+			Shared.Message("KeybindMapper: Warning no key was bound to movment bind "..bindname)
 		end
 	end
 
@@ -186,9 +186,9 @@ function KeybindMapper:OnKeyDown(key)
 	local movedir = self.InputMovementKeyMappings[key]
 
 	if(movedir) then
-		--don't do anything if the the oppsite movment key is already being held down i.e. our movement vector field is non zero
-		if(self.MovementVector[movedir[2]] == 0) then
-			self.MovementVector[movedir[2]] = movedir[3] 
+		--don't do anything if the the opposite movment key is already being held down i.e. our movement vector field is non zero
+		if(self.MovementVector[movedir[1]] == 0) then
+			self.MovementVector[movedir[1]] = movedir[2] 
 		end
 		
 		return
@@ -196,7 +196,7 @@ function KeybindMapper:OnKeyDown(key)
 	
 	--check to see if this is one of the Move.input keybinds if it is set the bit it coresponds to
 	if(self.InputKeybindMappings[key]) then
-		--PrintDebug("OnKeyDown input", NumberToName[self.InputKeybindMappings[key]])
+		--PrintDebug("OnKeyDown input", InputBitToName[self.InputKeybindMappings[key]])
 		self.MoveInputBitFlags = bit.bor(self.MoveInputBitFlags, self.InputKeybindMappings[key])
 	 return
 	end
@@ -214,19 +214,19 @@ function KeybindMapper:OnKeyUp(key)
 	local movedir = self.InputMovementKeyMappings[key]
 
 	if(movedir) then
-		--don't do anything if the the oppsite movment key is already being held down i.e. our movement vector field is not equal to our direction number
-		if(self.MovementVector[movedir[2]] == movedir[3]) then
-			self.MovementVector[movedir[2]] = 0
+		--don't do anything if the the opposite movment key is already being held down i.e. our movement vector field is not equal to our direction number
+		if(self.MovementVector[movedir[1]] == movedir[2]) then
+			self.MovementVector[movedir[1]] = 0
 		end
 
 		return
 	end
 
-	--check to see if this is one of the Move.input keybinds, if it is unset the bit it coresponds to.
-	if(self.InputKeybindMappings[key]) then
-		--PrintDebug("OnKeyDown input", NumberToName[self.InputKeybindMappings[key]])
+	--check to see if this is one of the Move.input keybinds and if the bit is set. then unset the bit it coresponds to.
+	if(self.InputKeybindMappings[key] and bit.band(self.MoveInputBitFlags, self.InputKeybindMappings[key]) ~= 0) then
+		--PrintDebug("OnKeyDown input", InputBitToName[self.InputKeybindMappings[key]])
 		self.MoveInputBitFlags = bit.bxor(self.MoveInputBitFlags, self.InputKeybindMappings[key])
-		return
+	 return
 	end
 
 	local action = self.Keybinds[key]
@@ -267,7 +267,7 @@ function KeybindMapper:LinkBindToFunction(bindname, func, updown, arg)
 	end
 	keybindEntry.arg1 = arg
 
-	self:RegisterActionToBind(bindname, keybindAction)
+	self:RegisterActionToBind(bindname, keybindEntry)
 end
 
 --if the fuction name is not provided the name of the bind is used as the function name
@@ -309,6 +309,10 @@ function KeybindMapper:LinkBindToConsoleCmd(bindname, commandstring, updown)
 end
 
 function KeybindMapper:RegisterActionToBind(bindname, keybindaction)
+	
+	if(not keybindaction) then
+		error("RegisterActionToBind: was passed a nil action")
+	end
 
 	self.KeybindActions[bindname] = keybindaction
 
@@ -321,6 +325,95 @@ function KeybindMapper:RegisterActionToBind(bindname, keybindaction)
 		end
 	end
 end
+
+function KeybindMapper:GetDescriptionForBoundKey(key)
+
+	if(self.InputMovementKeyMappings[key]) then
+		return "Movement Keybind:"..self.InputMovementKeyMappings[key][3]
+	end
+	
+	if(self.InputKeybindMappings[key]) then
+		return "Move.input bit Keybind:"..self.InputBitToName[self.InputKeybindMappings[key]]
+	end
+	
+	local action = self.Keybinds[key]
+	
+	if(action) then
+		if(action.ConsoleCommand) then
+			if(action.BindName) then
+				return string.format("Console command \"%s\" Assocated with bind \"%s\"", action.ConsoleCommand, action.BindName)
+			elseif(action.UserCreatedBind) then
+				
+			end
+		end
+	end
+	
+end
+
+function KeybindMapper:ClearKey(key)
+
+	if(self.InputKeybindMappings[key]) then
+		self.MoveInputBitFlags = bit.band(self.MoveInputBitFlags, bit.bnot(self.InputKeybindMappings[key]))
+		self.InputKeybindMappings[key] = nil
+	end
+
+	if(self.InputMovementKeyMappings[key]) then
+		local movdir = self.InputMovementKeyMappings[key]
+		
+		if(self.MovementVector[movedir[1]] == movedir[2]) then
+			self.MovementVector[movedir[1]] = 0
+		end
+		
+		self.InputMovementKeyMappings[key] = nil
+	end
+	
+	self.Keybinds[key] = nil	
+
+end
+
+function KeybindMapper:BindKeyToConsoleCommand(key, commandstring)
+	
+	local keybindAction = {
+		ConsoleCommand = commandstring,
+		UserCreatedBind = true,
+	}
+
+	local func = function() Shared.ConsoleCommand(commandstring) end
+
+	if(updown == nil or updown == "down") then
+		keybindAction.OnDown = func
+	elseif(updown == "up") then
+		keybindAction.OnUp = func
+	end
+	
+	self.Keybinds[key] = keybindAction
+end
+
+function BindConsoleCommand(player, key, ...)
+	
+	local upperkey = key:upper()
+	local RealKeyName = false
+	
+	for i,keyname in ipairs(InputKeyNames) do
+		if(upperkey == keyname:upper()) then
+				RealKeyName = keyname
+			break
+		end
+	end
+
+	if(RealKeyName) then
+		KeybindMapper:ClearKey(RealKeyName)
+		
+		local command = table.concat({...}, " ")
+		
+		KeybindMapper:BindKeyToConsoleCommand(RealKeyName, command)
+	else
+		Shared.Message("bind:Unreconized key "..key)
+	end
+end
+
+Event.Hook("Console_bind",  BindConsoleCommand)
+
 
 --called by flash
 function IsInputTrackingDisabled()
@@ -337,6 +430,7 @@ function SetModiferKeyState(key, down)
 	
 end
 ]]--
+
 --called by flash
 function OnKeyDown(key, code)
 	KeybindMapper:OnKeyDown(key)
@@ -346,8 +440,6 @@ end
 function OnKeyUp(key, code)
 	KeybindMapper:OnKeyUp(key)
 end
-
-
 
 Event.Hook("MapPostLoad", function() 
 	KeybindMapper:Init() 
@@ -365,3 +457,4 @@ end
 KeybindMapper:LinkBindToConsoleCmd("JoinMarines", "changeclass marine")
 KeybindMapper:LinkBindToConsoleCmd("JoinAliens", "changeclass skulk")
 KeybindMapper:LinkBindToConsoleCmd("ReadyRoom", "readyroom")
+KeybindMapper:LinkBindToConsoleCmd("ToggleThirdPerson", "thirdperson")

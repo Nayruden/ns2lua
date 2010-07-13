@@ -14,6 +14,10 @@
 			this.RingBuffer = Array()
 		}
 		
+		public function GetTotalLineCount(){
+			return this.Count
+		}
+		
 		public function AddNewMessages(Messages:Array){
 			var RingI = this.End			
 			var MessageCount = Messages.length/3
@@ -41,7 +45,13 @@
 			return MessageCount
 		}
 		
-		public function ReverseIndex(index):ChatMessage{
+		public function Get(index):ChatMessage{
+			var i = (this.Start+index)%this.MaxSize
+
+			return this.RingBuffer[i]
+		}
+		
+		public function ReverseGet(index):ChatMessage{
 			var i = (this.End-1)-index
 			
 			if(i < 0){
