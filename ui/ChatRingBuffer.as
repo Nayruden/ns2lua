@@ -37,7 +37,7 @@
 				
 				
 				if(RingI == this.Start){
-					this.Start = (RingI+1)%MaxSize
+					this.Start = (RingI+1)%this.MaxSize
 				}
 			}
 			this.End = RingI
